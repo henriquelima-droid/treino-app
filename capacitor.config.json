@@ -1,0 +1,19 @@
+{
+  "appId": "br.com.treinohg.app",
+  "appName": "Treino HG",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0A0A0A",
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#E10600"
+    },
+    "SystemBars": {
+      "style": "DARK",
+      "insetsHandling": "css"
+    }
+  }
+}

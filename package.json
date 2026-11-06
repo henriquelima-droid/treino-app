@@ -1,0 +1,23 @@
+{
+  "name": "treino-hg",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Treino HG — app de treino (Android, Capacitor)",
+  "scripts": {
+    "sync": "npx cap sync android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.6.0",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.6.0",
+    "@capacitor/filesystem": "8.1.5",
+    "@capacitor/local-notifications": "8.3.1",
+    "@capacitor/share": "8.0.3",
+    "@capacitor/status-bar": "8.0.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.6.0",
+    "@fontsource/inter": "5.3.0",
+    "@fontsource/oswald": "5.3.0"
+  }
+}
