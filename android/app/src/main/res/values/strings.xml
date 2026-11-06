@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Treino HG</string>
-    <string name="title_activity_main">Treino HG</string>
+    <string name="app_name">Grow Up</string>
+    <string name="title_activity_main">Grow Up</string>
     <string name="package_name">br.com.treinohg.app</string>
     <string name="custom_url_scheme">br.com.treinohg.app</string>
 </resources>

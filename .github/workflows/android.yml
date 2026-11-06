@@ -40,18 +40,18 @@ jobs:
           ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk TreinoHG-v1.0.${{ github.run_number }}.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk GrowUp-v1.0.${{ github.run_number }}.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: TreinoHG-apk
-          path: TreinoHG-*.apk
+          name: GrowUp-apk
+          path: GrowUp-*.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: Treino HG v1.0.${{ github.run_number }}
+          name: Grow Up v1.0.${{ github.run_number }}
           body: APK para instalar no Android. Baixe o arquivo .apk abaixo pelo celular e abra para instalar.
-          files: TreinoHG-*.apk
+          files: GrowUp-*.apk
           make_latest: true

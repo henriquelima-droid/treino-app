@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0A0A0A">
-<title>Treino HG</title>
+<title>Grow Up</title>
 <style>
 @font-face{font-family:'Oswald';font-weight:500;font-display:swap;src:url(fonts/oswald-latin-500-normal.woff2) format('woff2')}
 @font-face{font-family:'Oswald';font-weight:600;font-display:swap;src:url(fonts/oswald-latin-600-normal.woff2) format('woff2')}
@@ -449,7 +449,8 @@ function lsSave(){try{localStorage.setItem(LS,JSON.stringify(S));}catch(e){}}
 let DB=null,sync='local',connectP=null;
 const Q={};
 function setSync(s){sync=s;const el=$('#syncl');if(el)el.outerHTML=syncHtml();}
-function syncHtml(){const m={cloud:['ok',L('Salvo na nuvem','Saved to cloud')],connecting:['',L('Conectando…','Connecting…')],slow:['warn',L('Nuvem lenta','Cloud is slow')],error:['warn',L('Erro ao salvar','Save error')],local:['',L('Só neste aparelho','This device only')]}[sync]||['',''];
+function syncHtml(){const m={cloud:['ok',L('Salvo na nuvem','Saved to cloud')],connecting:['',L('Conectando…','Connecting…')],slow:['warn',L('Nuvem lenta','Cloud is slow')],error:['warn',L('Erro ao salvar','Save error')],}[sync];
+  if(!m)return '<span id="syncl"></span>';
   return `<span class="sync" id="syncl"><i class="dot ${m[0]}"></i>${m[1]}</span>`;}
 function dbPut(path,data){if(!DB)return;const e=Q[path]||(Q[path]={});e.data=clone(data);e.del=false;e.dirty=true;clearTimeout(e.t);e.t=setTimeout(()=>flush(path),500);}
 function dbDel(path){if(!DB)return;const e=Q[path]||(Q[path]={});e.data=null;e.del=true;e.dirty=true;clearTimeout(e.t);e.t=setTimeout(()=>flush(path),150);}
@@ -594,7 +595,7 @@ function render(){
 }
 function softRender(){const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'))return;render();}
 function topBar(){const light=S.prefs.theme==='light';
-  return `<div class="top"><div class="brand">TREINO<b>.</b>HG</div><div class="topr">${syncHtml()}<button class="iconbtn themebtn" data-act="theme" aria-label="${L('Alternar tema','Toggle theme')}">${light?IC.moon:IC.sun}</button></div></div>`;}
+  return `<div class="top"><div class="brand">GROW<b>UP</b></div><div class="topr">${syncHtml()}<button class="iconbtn themebtn" data-act="theme" aria-label="${L('Alternar tema','Toggle theme')}">${light?IC.moon:IC.sun}</button></div></div>`;}
 function navBar(){const t=[['home',L('Início','Home'),IC.home],['prog',L('Evolução','Progress'),IC.chart],['photos',L('Fotos','Photos'),IC.cam],['hist',L('Histórico','History'),IC.list],['progs',L('Programas','Programs'),IC.dumb],['set',L('Ajustes','Settings'),IC.gear]];
   return `<nav class="bnav">${t.map(x=>`<button data-act="tab" data-v="${x[0]}" class="${ui.tab===x[0]?'on':''} ${(x[0]==='photos'&&photoPending())||(x[0]==='prog'&&measurePending())?'bdot':''}">${x[2]}${x[1]}</button>`).join('')}</nav>`;}
 function activeBanner(){const a=S.active;const done=a.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0),tot=a.exercises.reduce((n,e)=>n+e.sets.length,0);
@@ -1225,9 +1226,9 @@ async function scheduleReminders(ask){const P=CP();const N=P.LocalNotifications;
     const pend=await N.getPending();if(pend&&pend.notifications&&pend.notifications.length)await N.cancel({notifications:pend.notifications.map(n=>({id:n.id}))});
     const list=[];const pdw=pDay(),mfr=S.prefs.measureFreq||'weekly',mdw=mDay();
     const same=mfr!=='off'&&mdw===pdw;
-    list.push({id:100,title:same?L('Dia de fotos e medidas','Photo & measurement day'):L('Dia de fotos','Photo day'),body:same?L('Registre suas fotos e medidas de hoje no Treino HG.','Log today\'s photos and measurements in Treino HG.'):L('Registre suas fotos de progresso de hoje.','Log today\'s progress photos.'),schedule:{on:{weekday:pdw+1,hour:8,minute:0},allowWhileIdle:true}});
+    list.push({id:100,title:same?L('Dia de fotos e medidas','Photo & measurement day'):L('Dia de fotos','Photo day'),body:same?L('Registre suas fotos e medidas de hoje no Grow Up.','Log today\'s photos and measurements in Grow Up.'):L('Registre suas fotos de progresso de hoje.','Log today\'s progress photos.'),schedule:{on:{weekday:pdw+1,hour:8,minute:0},allowWhileIdle:true}});
     if(mfr!=='off'&&!same)list.push({id:101,title:L('Dia de medidas','Measurement day'),body:L('Registre suas medidas corporais de hoje.','Log today\'s body measurements.'),schedule:{on:{weekday:mdw+1,hour:8,minute:0},allowWhileIdle:true}});
-    if(S.prefs.workoutReminder){(S.profile.days||[]).forEach(d=>list.push({id:110+d,title:L('Hora do treino','Workout time'),body:L('Seu treino de hoje está pronto no Treino HG.','Today\'s workout is ready in Treino HG.'),schedule:{on:{weekday:d+1,hour:S.prefs.workoutHour||6,minute:0},allowWhileIdle:true}}));}
+    if(S.prefs.workoutReminder){(S.profile.days||[]).forEach(d=>list.push({id:110+d,title:L('Hora do treino','Workout time'),body:L('Seu treino de hoje está pronto no Grow Up.','Today\'s workout is ready in Grow Up.'),schedule:{on:{weekday:d+1,hour:S.prefs.workoutHour||6,minute:0},allowWhileIdle:true}}));}
     await N.schedule({notifications:list});}catch(e){}}
 function nativeInit(){if(!IN_APP)return;const P=CP();
   try{P.App&&P.App.addListener('backButton',()=>{if($('#modal-root').innerHTML){closeModal();return;}
@@ -1252,10 +1253,10 @@ function recommendTpl(){const p=S.profile,n=(p.days||[]).length,lv=p.level,t=S.p
 function obStart(){ui.ob={step:0};}
 function obDots(k){return `<div class="obdots">${[0,1,2,3,4].map(i=>`<i class="${i<=k?'on':''}"></i>`).join('')}</div>`;}
 function renderOnboarding(){if(!ui.ob)obStart();const st=ui.ob.step,p=S.profile;let h=`<div class="wrap ob">`;
-  if(st===0){h+=`<div class="obhero"><div class="brand" style="font-size:40px">TREINO<b>.</b>HG</div><p>${L('Seu personal trainer no bolso: treinos sob medida, registro de cargas, evolução, fotos e medidas.','Your pocket personal trainer: tailored programs, load tracking, progress, photos and measurements.')}</p></div>
+  if(st===0){h+=`<div class="obhero"><div class="brand" style="font-size:40px">GROW<b>UP</b></div><p>${L('Seu personal trainer no bolso: treinos sob medida, registro de cargas, evolução, fotos e medidas.','Your pocket personal trainer: tailored programs, load tracking, progress, photos and measurements.')}</p></div>
     <div class="card"><div class="hd" style="font-size:18px">${L('Idioma','Language')}</div><div class="pillset" style="margin-top:10px"><button class="pill ${LANG==='pt'?'on':''}" data-act="lang" data-v="pt">Português</button><button class="pill ${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button></div></div>
     <button class="btn primary block" data-act="obnext">${L('Começar','Get started')}</button>
-    <div class="card" style="margin-top:14px"><div class="hd" style="font-size:16px">${L('Já usa o Treino HG?','Already use Treino HG?')}</div><div class="sub" style="margin:4px 0 8px">${L('Restaure o backup exportado da versão web para trazer treinos, fotos e medidas.','Restore the backup exported from the web version to bring your workouts, photos and measurements.')}</div><input type="file" accept=".json,application/json" data-file="backup"></div>`;}
+    <div class="card" style="margin-top:14px"><div class="hd" style="font-size:16px">${L('Já usa o Grow Up?','Already use Grow Up?')}</div><div class="sub" style="margin:4px 0 8px">${L('Restaure o backup exportado da versão web para trazer treinos, fotos e medidas.','Restore the backup exported from the web version to bring your workouts, photos and measurements.')}</div><input type="file" accept=".json,application/json" data-file="backup"></div>`;}
   else if(st===1){h+=obDots(0)+`<div class="hd" style="font-size:24px;margin:8px 0 4px">${L('Sobre você','About you')}</div><div class="sub" style="margin-bottom:12px">${L('Usamos estes dados para montar seu programa e acompanhar sua evolução.','We use this to build your program and track your progress.')}</div>
     <div class="card"><div class="field"><label>${L('Nome','Name')}</label><input data-ob="name" value="${esc(p.name||'')}"></div>
      <div class="lbl2" style="margin-top:4px">${L('Sexo','Sex')}</div><div class="pillset">${['M','F'].map(s=>`<button class="pill ${p.sex===s?'on':''}" data-act="pfsex" data-v="${s}">${sexName(s)}</button>`).join('')}</div>
@@ -1395,12 +1396,12 @@ function showSummary(s){const st=sessionStats(s);
    [{l:L('Fechar','Close'),fn:closeModal},{l:L('Compartilhar','Share'),c:'primary',fn:()=>{closeModal();shareSession(s);}}]);}
 function shareText(s){const st=sessionStats(s);const L2=[`🏋️ ${woTitle(s)} — ${fmtLong(s.date)}`,`⏱ ${st.dur} min · ${st.sets} ${L('séries','sets')} · ${fmtN(st.vol/1000,1)} t ${L('levantadas','lifted')}`];
   s.exercises.forEach(e=>{const d=e.sets.filter(x=>x.done&&isMain(x));if(!d.length)return;const b=d.reduce((a,x)=>(num(x.kg)||0)>(num(a.kg)||0)?x:a);L2.push(`• ${exName(e)}: ${e.unit==='s'?b.reps+' s':fmtN(num(b.kg))+' kg × '+b.reps}`);});
-  if(st.prs.length)L2.push('🏆 '+st.prs.map(p=>p.name+' '+fmtN(p.v,p.kind==='1rm'?0:1)+' kg').join(' · '));L2.push('TREINO.HG');return L2.join('\n');}
+  if(st.prs.length)L2.push('🏆 '+st.prs.map(p=>p.name+' '+fmtN(p.v,p.kind==='1rm'?0:1)+' kg').join(' · '));L2.push('GROW UP');return L2.join('\n');}
 async function shareImage(s){const st=sessionStats(s);try{await document.fonts.ready;}catch(e){}
   const W=1080,H=1350,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
   x.fillStyle='#0A0A0A';x.fillRect(0,0,W,H);const g=x.createRadialGradient(W-120,120,10,W-120,120,520);g.addColorStop(0,'rgba(225,6,0,.55)');g.addColorStop(1,'rgba(225,6,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
   x.fillStyle='#E10600';x.fillRect(0,0,W,16);const F=(sz,w)=>`${w||700} ${sz}px Oswald, Impact, 'Arial Narrow', sans-serif`;
-  x.fillStyle='#fff';x.font=F(44);x.fillText('TREINO',72,110);x.fillStyle='#E10600';x.fillText('.',72+x.measureText('TREINO').width,110);x.fillStyle='#fff';x.fillText('HG',72+x.measureText('TREINO.').width,110);
+  x.fillStyle='#fff';x.font=F(44);x.fillText('GROW',72,110);x.fillStyle='#E10600';x.fillText('UP',72+x.measureText('GROW').width,110);
   x.fillStyle='#A0A0A0';x.font='500 34px Inter, sans-serif';x.fillText(fmtLong(s.date),72,190);
   {const tt=String(woTitle(s)).toUpperCase();let fs=96;x.font=F(fs);while(x.measureText(tt).width>W-144&&fs>40){fs-=4;x.font=F(fs);}x.fillStyle='#fff';x.fillText(tt,72,300);}
   const box=(bx,v,l)=>{x.fillStyle='#1F1F1F';x.fillRect(bx,350,290,170);x.fillStyle='#fff';x.font=F(74);x.fillText(v,bx+26,450);x.fillStyle='#A0A0A0';x.font='600 26px Inter, sans-serif';x.fillText(l.toUpperCase(),bx+26,495);};
@@ -1411,7 +1412,7 @@ async function shareImage(s){const st=sessionStats(s);try{await document.fonts.r
     x.fillStyle='#fff';x.font=F(40,600);const v=e.unit==='s'?b.reps+' s':fmtN(num(b.kg))+' × '+b.reps;x.fillText(v,W-72-x.measureText(v).width,y);x.fillStyle='#2C2C2C';x.fillRect(72,y+20,W-144,2);});
   if(st.prs.length){y+=90;x.fillStyle='#E10600';x.fillRect(72,y-56,W-144,8+60*Math.min(3,st.prs.length)+30);x.fillStyle='#fff';x.font=F(38);x.fillText('🏆 '+L('NOVOS RECORDES','NEW RECORDS'),96,y);
     st.prs.slice(0,3).forEach((p,k)=>{x.font='600 30px Inter, sans-serif';x.fillText(p.name+' — '+fmtN(p.v,p.kind==='1rm'?0:1)+' kg',96,y+52+k*56);});}
-  x.fillStyle='#6B6B6B';x.font='500 26px Inter, sans-serif';x.fillText(L('Treino registrado no TREINO.HG','Logged with TREINO.HG'),72,H-60);
+  x.fillStyle='#6B6B6B';x.font='500 26px Inter, sans-serif';x.fillText(L('Treino registrado no GROW UP','Logged with GROW UP'),72,H-60);
   return c;}
 async function shareSession(s){modal(L('Compartilhar treino','Share workout'),`<div class="empty">${L('Gerando imagem…','Rendering image…')}</div>`,[]);
   const c=await shareImage(s);const url=c.toDataURL('image/png');

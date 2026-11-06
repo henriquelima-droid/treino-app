@@ -2,7 +2,7 @@
   "name": "treino-hg",
   "version": "1.0.0",
   "private": true,
-  "description": "Treino HG — app de treino (Android, Capacitor)",
+  "description": "Grow Up — app de treino (Android, Capacitor)",
   "scripts": {
     "sync": "npx cap sync android"
   },
