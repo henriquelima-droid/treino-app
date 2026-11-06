@@ -40,7 +40,7 @@ def plate(R, silhouette=False):
     r = 70 * k
     d.ellipse([c - r, c - r, c + r, c + r], fill=CLEAR)
     if not silhouette:
-        text_center(d, "HG", c, c - 250 * k, int(120 * k), WHITE)
+        text_center(d, "20", c, c - 250 * k, int(110 * k), WHITE)
         text_center(d, "20", c, c + 250 * k, int(110 * k), WHITE)
     return im
 
