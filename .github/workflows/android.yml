@@ -52,6 +52,9 @@ jobs:
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: Grow Up v1.0.${{ github.run_number }}
-          body: APK para instalar no Android. Baixe o arquivo .apk abaixo pelo celular e abra para instalar.
+          body: |
+            ${{ github.event.head_commit.message }}
+
+            APK para instalar no Android: baixe o arquivo .apk abaixo pelo celular e abra para instalar.
           files: GrowUp-*.apk
           make_latest: true

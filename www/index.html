@@ -608,6 +608,7 @@ function renderHome(){const p=S.profile,t=today(),dp=dayPlan(t);const cw=curWeig
    <div class="stat"><div class="v">${fmtN(p.metaMin,0)}–${fmtN(p.metaMax,0)}</div><div class="l">${L('Meta (kg)','Goal (kg)')}</div></div>
    <div class="stat"><div class="v" style="color:${delta<=0?'var(--redTx)':'var(--tx)'}">${delta>0?'+':''}${fmtN(delta)}</div><div class="l">${L('Desde o início','Since start')}</div></div></div>
    <div class="row wrapx" style="margin-top:12px;position:relative;z-index:1"><span class="chip">${dp.pre?L('Plano começa ','Plan starts ')+fmtD(S.plan.startDate):L('Semana ','Week ')+dp.week+' · '+esc(phName(dp.phase))}</span><span class="chip">${toGoal>0?L('Faltam ','')+fmtN(toGoal)+L(' kg',' kg to go'):L('Na meta','At goal')}</span>${(()=>{const c=consistency();return c.streak?`<span class="chip red">🔥 ${c.streak} ${L(c.streak>1?'semanas':'semana',c.streak>1?'weeks':'week')}</span>`:'';})()}<span class="grow"></span><button class="btn sm outline" data-act="logw">+ ${L('Peso','Weight')}</button></div></div>`;
+  h+=updBanner();
   {const al=alerts();if(al.list.length||al.deload)h+=`<button class="banner" data-act="tab" data-v="prog" style="background:var(--s2);color:var(--tx);border:1px solid var(--red)">⚠<div class="grow"><b>${al.deload?L('Sugestão de deload','Deload suggested'):al.list.length+' '+L('alerta(s) de progresso','progress alert(s)')}</b><span>${esc([...new Set(al.list.map(x=>x.name))].slice(0,3).join(' · '))}</span></div>${svgSz(IC.r,20)}</button>`;}
   {const lc=levelCheck();if(lc.ready&&!(S.prefs.levelSnooze&&S.prefs.levelSnooze>today()))h+=`<button class="banner" data-act="lvup">⬆<div class="grow"><b>${L('Pronto para o nível ','Ready for ')}${esc(lvName(lc.next))}</b><span>${L('Toque para ver os critérios atingidos','Tap to see the criteria you met')}</span></div>${svgSz(IC.r,20)}</button>`;}
   if(measureLate())h+=`<button class="banner" data-act="msadd" style="background:var(--wine)">📏<div class="grow"><b>${L('Medidas atrasadas','Measurements overdue')}</b><span>${L('Faltam as medidas de ','Missing measurements from ')}${fmtLong(measureDue())}</span></div>${svgSz(IC.r,20)}</button>`;
@@ -988,7 +989,8 @@ function renderSet(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div clas
    <button class="toggle" data-act="pref" data-k="theme"><span>${L('Tema claro','Light theme')}</span><i class="sw ${S.prefs.theme==='light'?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="autoTimer"><span>${L('Iniciar descanso ao concluir série','Start rest when a set is done')}</span><i class="sw ${S.prefs.autoTimer?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button></div>`;
-  h+=`<div class="card"><div class="hd" style="font-size:19px">Backup</div><div class="sub" style="margin:4px 0 10px">${L('Seus dados ficam na nuvem da sua conta e neste aparelho. Exporte um backup de vez em quando (fotos não entram no arquivo).','Your data lives in your account\'s cloud and on this device. Export a backup now and then (photos are not included).')}</div>
+  h+=appCard();
+  h+=`<div class="card"><div class="hd" style="font-size:19px">Backup</div><div class="sub" style="margin:4px 0 10px">${IN_APP?L('Seus dados ficam salvos neste aparelho. Exporte um backup de vez em quando para não perder nada se trocar de celular.','Your data is saved on this device. Export a backup now and then so nothing is lost if you change phones.'):L('Seus dados ficam na nuvem da sua conta e neste aparelho. Exporte um backup de vez em quando (fotos não entram no arquivo).','Your data lives in your account\'s cloud and on this device. Export a backup now and then (photos are not included).')}</div>
    <div class="row"><button class="btn sm grow" data-act="bkdl">${L('Baixar backup','Download backup')}</button><button class="btn sm grow" data-act="bkcopy">${L('Copiar backup','Copy backup')}</button></div>
    <button class="btn sm play block" data-act="bkfull" style="margin-top:8px">${L('Backup completo (com fotos)','Full backup (with photos)')}</button>
    <div class="lbl2">${L('Restaurar backup','Restore backup')}</div><input type="file" accept=".json,application/json" data-file="backup"></div>`;
@@ -1237,8 +1239,38 @@ function nativeInit(){if(!IN_APP)return;const P=CP();
     if(IN_APP&&!S.prefs.onboarded&&ui.ob&&ui.ob.step>0){ui.ob.step--;render();return;}
     P.App.exitApp&&P.App.exitApp();});}catch(e){}
   try{P.LocalNotifications&&P.LocalNotifications.addListener('localNotificationActionPerformed',a=>{const id=a&&a.notification&&a.notification.id;if(id===100){ui.tab='photos';ui.photoDate=today();render();}else if(id===101){ui.tab='prog';render();openMeasureForm();}else{ui.tab='home';ui.date=today();ui.filter='day';render();}});}catch(e){}
+  appVersion().then(()=>{if(ui.tab==='set')render();});autoUpdateCheck();
+  try{P.App&&P.App.addListener('resume',autoUpdateCheck);}catch(e){}
   if(S.prefs.onboarded)scheduleReminders(false);}
 function statusBarTheme(){const P=CP();if(!P.StatusBar)return;const light=S.prefs.theme==='light';try{P.StatusBar.setStyle({style:light?'LIGHT':'DARK'});P.StatusBar.setBackgroundColor({color:light?'#FFFFFF':'#0A0A0A'});}catch(e){}}
+
+/* ---------- app update check (Android, via GitHub Releases) ---------- */
+const UPD_REPO='henriquelima-droid/treino-app';
+let UPD=null,APPV=null;
+async function appVersion(){if(APPV)return APPV;const P=CP();try{if(P.App&&P.App.getInfo){const i=await P.App.getInfo();APPV={version:i.version,build:parseInt(i.build,10)||0};}}catch(e){}return APPV;}
+async function checkUpdate(force){if(!IN_APP)return null;const v=await appVersion();if(!v)return null;
+  const c=S.prefs.updCache;
+  if(!force&&c&&Date.now()-(S.prefs.updChecked||0)<6*3600e3){UPD=c.build>v.build?c:null;return UPD;}
+  const r=await fetch('https://api.github.com/repos/'+UPD_REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(!r.ok)throw new Error('http '+r.status);
+  const j=await r.json();const b=parseInt(String(j.tag_name||'').split('.').pop(),10)||0;
+  const apk=(j.assets||[]).find(a=>/\.apk$/i.test(a.name||''));
+  const notes=String(j.body||'').split('\n').map(x=>x.trim()).filter(x=>x&&!/^(Co-Authored-By|Claude-Session|APK para instalar)/i.test(x)).slice(0,6);
+  const info={tag:j.tag_name,build:b,url:apk?apk.browser_download_url:j.html_url,page:j.html_url,notes};
+  S.prefs.updChecked=Date.now();S.prefs.updCache=info;persist('prefs');UPD=b>v.build?info:null;return UPD;}
+function autoUpdateCheck(){checkUpdate(false).then(u=>{if(u&&ui.tab==='home'&&!$('#modal-root').innerHTML)render();}).catch(()=>{});}
+function updSnoozed(){const z=S.prefs.updSnooze;return !!(UPD&&z&&z.tag===UPD.tag&&z.until>Date.now());}
+function updBanner(){if(!UPD||updSnoozed())return '';
+  return `<button class="banner" data-act="updinfo">⬇<div class="grow"><b>${L('Nova versão disponível','New version available')} · ${esc(UPD.tag)}</b><span>${L('Toque para ver as novidades e instalar','Tap to see what\'s new and install')}</span></div>${svgSz(IC.r,20)}</button>`;}
+function updModal(){if(!UPD)return;const cur=APPV?'v'+APPV.version:'';
+  modal(L('Atualização disponível','Update available'),`<p><b>${esc(cur)}</b> → <b style="color:var(--red)">${esc(UPD.tag)}</b></p>
+   ${UPD.notes.length?`<div class="lbl2">${L('Novidades','What\'s new')}</div><ul style="margin:4px 0 0 18px">${UPD.notes.map(n=>`<li>${esc(n.replace(/^[-*•]\s*/,''))}</li>`).join('')}</ul>`:''}
+   <p class="sub" style="margin-top:10px">${L('O arquivo abre no navegador. Quando terminar o download, toque nele para instalar por cima da versão atual. Seus dados são mantidos.','The file opens in your browser. When the download finishes, tap it to install over the current version. Your data is kept.')}</p>`,
+   [{l:L('Depois','Later'),fn:()=>{S.prefs.updSnooze={tag:UPD.tag,until:Date.now()+24*3600e3};persist('prefs');closeModal();render();}},
+    {l:L('Baixar e instalar','Download & install'),c:'primary',fn:()=>{const u=UPD.url;closeModal();location.href=u;}}]);}
+function appCard(){if(!IN_APP)return '';const v=APPV?'v'+APPV.version:'—';
+  return `<div class="card"><div class="hd" style="font-size:19px">${L('Aplicativo','App')}</div><div class="sub" style="margin:4px 0 10px">${L('Versão instalada','Installed version')}: <b style="color:var(--tx)">${esc(v)}</b>${UPD?` · <span style="color:var(--red)">${esc(UPD.tag)} ${L('disponível','available')}</span>`:''}</div>
+   ${UPD?`<button class="btn primary block" data-act="updinfo">${L('Instalar ','Install ')}${esc(UPD.tag)}</button>`:`<button class="btn block" data-act="updcheck">${L('Verificar atualizações','Check for updates')}</button>`}</div>`;}
 
 /* ---------- full backup (with photos) ---------- */
 async function backupFull(){const o=backupObj();o.media=S.media;o.images={};const ids=S.media.photos.map(p=>p.id).concat(Object.keys(S.media.ex||{}).map(k=>'ex-'+k));
@@ -1549,6 +1581,8 @@ const A={
  otherw:()=>{ui.otherOpen=!ui.otherOpen;render();},
  goprog:()=>{ui.tab='progs';render();window.scrollTo(0,0);},
  lvup:()=>levelUpModal(),
+ updinfo:()=>updModal(),
+ updcheck:async()=>{toast(L('Verificando…','Checking…'));try{const u=await checkUpdate(true);render();if(u)updModal();else toast(L('Você já está na versão mais recente','You are on the latest version'));}catch(e){toast(L('Sem conexão para verificar agora','No connection to check right now'));}},
  obnext:()=>{if(!ui.ob)obStart();if(!obValidate())return;ui.ob.step=Math.min(4,ui.ob.step+1);render();window.scrollTo(0,0);},
  obback:()=>{if(ui.ob&&ui.ob.step>0){ui.ob.step--;render();window.scrollTo(0,0);}},
  obtime:b=>{S.prefs.sessionTime=b.dataset.v;persist('prefs');render();},
