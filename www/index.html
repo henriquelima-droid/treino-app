@@ -356,6 +356,16 @@ body{padding-top:var(--sat)}
 body:not(.wo-mode) .timerbar{bottom:calc(78px + var(--sab))}
 .toast{top:calc(14px + var(--sat))}
 
+.hstats{display:flex;gap:8px;margin-top:12px}
+.hstat{flex:1;min-width:0;background:var(--s2);border-radius:12px;padding:10px 10px 8px}
+.hstat .v{font-family:Oswald,Impact,sans-serif;font-weight:700;font-size:22px;line-height:1.05}
+.hstat .v small{font-size:12px;font-weight:500;color:var(--mut)}
+.hstat .l{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-top:4px}
+.lbl3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.bign{font-family:Oswald,Impact,sans-serif;font-weight:700;font-size:44px;line-height:1.05}
+.hico{width:40px;height:40px;border-radius:10px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;flex:none}
+.hconn{display:flex;align-items:center;gap:12px;margin-top:12px;padding:12px;border-radius:12px;background:var(--s2)}
+
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
 </head>
@@ -415,6 +425,8 @@ const e1rm=(kg,r)=>kg*(1+Math.min(r,12)/30);
 const r25=x=>Math.round(x/2.5)*2.5;
 
 const IC={
+ walk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.4C4 11.5 3 10.5 3 8c0-2.7 1.5-6 4.5-6C9.4 2 10 3.8 10 5.5c0 3.1-2 5.7-2 8.7V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.4c0-2.1 1-3.1 1-5.6 0-2.7-1.5-6-4.5-6C14.6 6 14 7.8 14 9.5c0 3.1 2 5.7 2 8.7V20a2 2 0 1 0 4 0Z"/><path d="M16 17h4M4 13h4"/></svg>',
+ watch:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="3"/><path d="M9 6l1-4h4l1 4M9 18l1 4h4l1-4M12 10v2l1 1"/></svg>',
  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 6-6"/></svg>',
  cam:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
@@ -613,6 +625,7 @@ function renderHome(){const p=S.profile,t=today(),dp=dayPlan(t);const cw=curWeig
   {const lc=levelCheck();if(lc.ready&&!(S.prefs.levelSnooze&&S.prefs.levelSnooze>today()))h+=`<button class="banner" data-act="lvup">⬆<div class="grow"><b>${L('Pronto para o nível ','Ready for ')}${esc(lvName(lc.next))}</b><span>${L('Toque para ver os critérios atingidos','Tap to see the criteria you met')}</span></div>${svgSz(IC.r,20)}</button>`;}
   if(measureLate())h+=`<button class="banner" data-act="msadd" style="background:var(--wine)">📏<div class="grow"><b>${L('Medidas atrasadas','Measurements overdue')}</b><span>${L('Faltam as medidas de ','Missing measurements from ')}${fmtLong(measureDue())}</span></div>${svgSz(IC.r,20)}</button>`;
   if(photoLate())h+=`<button class="banner" data-act="tab" data-v="photos" style="background:var(--wine)">${svgSz(IC.cam,22)}<div class="grow"><b>${L('Fotos atrasadas','Photos overdue')}</b><span>${L('Faltam as fotos de ','Missing photos from ')}${fmtLong(photoDue())}</span></div>${svgSz(IC.r,20)}</button>`;
+  h+=stepsHomeHtml();
   h+=`<div class="seg">${[['day',L('Dia','Day')],['week',L('Semana','Week')],['month',L('Mês','Month')]].map(x=>`<button data-act="filter" data-v="${x[0]}" class="${ui.filter===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>`;
   h+=ui.filter==='day'?renderDay():ui.filter==='week'?renderWeek():renderMonth();
   return h;}
@@ -833,7 +846,7 @@ function renderProg(){const t=today();const bw=[...S.body].sort((a,b)=>a.date.lo
    <div class="legend"><span><i style="background:var(--mut2)"></i>${L('Pesagens','Weigh-ins')}</span><span><i style="background:var(--red)"></i>${L('Média móvel 7 dias','7-day moving average')}</span></div>
    <div class="kv"><div><b>${fmtN(a7)}</b><span>${L('Média 7d','7d avg')}</span></div><div><b>${a7!=null&&p7!=null?(a7-p7>0?'+':'')+fmtN(a7-p7):'—'}</b><span>${L('vs semana ant.','vs last week')}</span></div><div><b>${fmtN(Math.max(0,curWeight()-S.profile.metaMax))}</b><span>${L('kg p/ meta','kg to goal')}</span></div></div>
    <div class="note-box">${L('Avalie pela média semanal, não pelo peso de um dia. Ritmo saudável: ~0,5–1% do peso por semana.','Judge by the weekly average, not a single day. Healthy pace: ~0.5–1% of body weight per week.')}</div></div>`;
-  {const al=alerts();const ah=alertsHtml(true);h=(al.list.length||al.deload?ah:'')+h+renderMeasures()+renderConsistency()+(al.list.length||al.deload?'':'@@ALERTS@@');ui._ah=ah;}
+  {const al=alerts();const ah=alertsHtml(true);h=(al.list.length||al.deload?ah:'')+h+stepsProgHtml()+renderMeasures()+renderConsistency()+(al.list.length||al.deload?'':'@@ALERTS@@');ui._ah=ah;}
   const ws=weekStart(t);const vol={};S.sessions.filter(s=>s.type==='workout'&&s.date>=ws&&s.date<=addD(ws,6)).forEach(s=>s.exercises.forEach(e=>{vol[e.group]=(vol[e.group]||0)+e.sets.filter(x=>x.done&&isMain(x)).length;}));
   const tg=S.plan.weeklyTargets||{};
   h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Volume da semana','Weekly volume')}</div><div class="sub">${L('Séries válidas × meta semanal do programa','Working sets × program weekly target')}</div>
@@ -989,6 +1002,7 @@ function renderSet(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div clas
    <button class="toggle" data-act="pref" data-k="theme"><span>${L('Tema claro','Light theme')}</span><i class="sw ${S.prefs.theme==='light'?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="autoTimer"><span>${L('Iniciar descanso ao concluir série','Start rest when a set is done')}</span><i class="sw ${S.prefs.autoTimer?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button></div>`;
+  h+=healthCard();
   h+=appCard();
   h+=`<div class="card"><div class="hd" style="font-size:19px">Backup</div><div class="sub" style="margin:4px 0 10px">${IN_APP?L('Seus dados ficam salvos neste aparelho. Exporte um backup de vez em quando para não perder nada se trocar de celular.','Your data is saved on this device. Export a backup now and then so nothing is lost if you change phones.'):L('Seus dados ficam na nuvem da sua conta e neste aparelho. Exporte um backup de vez em quando (fotos não entram no arquivo).','Your data lives in your account\'s cloud and on this device. Export a backup now and then (photos are not included).')}</div>
    <div class="row"><button class="btn sm grow" data-act="bkdl">${L('Baixar backup','Download backup')}</button><button class="btn sm grow" data-act="bkcopy">${L('Copiar backup','Copy backup')}</button></div>
@@ -1010,13 +1024,13 @@ function importPlanText(txt){let o;try{o=JSON.parse(txt);}catch(e){toast(L('JSON
   const er=validatePlan(o);if(er.length){modal(L('Plano com problemas','Plan has problems'),`<ul style="padding-left:18px">${er.slice(0,8).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`,[{l:L('Fechar','Close'),fn:closeModal}]);return;}
   modal(L('Importar plano?','Import plan?'),`<p><b>${esc(P(o,'name'))}</b> (v${esc(o.version||1)})</p><p class="sub" style="margin-top:4px">${L('Início','Start')} ${fmtDY(o.startDate)} · ${Object.keys(o.workouts).join(', ')} · ${o.phases.length} ${L('fases','phases')}</p><p style="margin-top:8px">${L('O cronograma passa a seguir este plano. Seu histórico continua salvo.','The schedule will follow this plan. Your history is kept.')}</p>`,
    [{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Importar','Import'),c:'primary',fn:()=>{S.library=S.library.filter(x=>x.id!==o.id);if(!isBuiltin(o.id)){S.library.push(clone(o));persist('library');}S.plan=o;persist('plan');closeModal();ui.tab='home';ui.filter='week';ui.date=today()<o.startDate?o.startDate:today();render();toast(L('Plano importado','Plan imported'));}}]);}
-function backupObj(){return{format:'treino-app/backup@1',exportedAt:new Date().toISOString(),profile:S.profile,plan:S.plan,sessions:S.sessions,body:S.body,prefs:S.prefs,measures:S.measures,library:S.library};}
+function backupObj(){return{format:'treino-app/backup@1',exportedAt:new Date().toISOString(),profile:S.profile,plan:S.plan,sessions:S.sessions,body:S.body,prefs:S.prefs,measures:S.measures,library:S.library,health:IN_APP?H:undefined};}
 function restoreBackup(txt){let o;try{o=JSON.parse(txt);}catch(e){toast(L('Arquivo inválido','Invalid file'));return;}
   if(!o||o.format!=='treino-app/backup@1'){if(o&&o.format==='treino-app/plan@1'){importPlanText(txt);return;}toast(L('Não é um backup deste app','Not a backup from this app'));return;}
   modal(L('Restaurar backup?','Restore backup?'),`<p>${(o.sessions||[]).length} ${L('sessões e','sessions and')} ${(o.body||[]).length} ${L('pesagens de','weigh-ins from')} ${esc((o.exportedAt||'').slice(0,10))}. ${L('Os dados atuais serão substituídos.','Current data will be replaced.')}</p>`,[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Restaurar','Restore'),c:'primary',fn:()=>{
     const keep=new Set((o.sessions||[]).map(s=>s.id));S.sessions.forEach(s=>{if(!keep.has(s.id)){S.tomb[s.id]=Date.now();dbDel('sessions/'+s.id);}});
     S.prefs.onboarded=true;if(o.media){S.media=o.media;persist('media');}if(o.images){Object.keys(o.images).forEach(k=>putImg(k,o.images[k]));}
-    S.profile=o.profile||S.profile;S.plan=o.plan||S.plan;S.body=o.body||[];if(o.measures){S.measures=o.measures;persist('measures');}if(o.library){S.library=o.library;persist('library');}S.prefs=Object.assign(S.prefs,o.prefs||{},{onboarded:true});S.sessions=[];normAll();
+    S.profile=o.profile||S.profile;S.plan=o.plan||S.plan;S.body=o.body||[];if(o.measures){S.measures=o.measures;persist('measures');}if(o.library){S.library=o.library;persist('library');}S.prefs=Object.assign(S.prefs,o.prefs||{},{onboarded:true});if(o.health&&IN_APP){H=Object.assign(H,o.health);hSave();}S.sessions=[];normAll();
     ['profile','plan','body','prefs'].forEach(persist);(o.sessions||[]).forEach(s=>{delete S.tomb[s.id];saveSession(s);});applyTheme();closeModal();render();toast(L('Backup restaurado','Backup restored'));}}]);}
 
 /* ---------- io ---------- */
@@ -1232,15 +1246,15 @@ async function scheduleReminders(ask){const P=CP();const N=P.LocalNotifications;
     if(mfr!=='off'&&!same)list.push({id:101,title:L('Dia de medidas','Measurement day'),body:L('Registre suas medidas corporais de hoje.','Log today\'s body measurements.'),schedule:{on:{weekday:mdw+1,hour:8,minute:0},allowWhileIdle:true}});
     if(S.prefs.workoutReminder){(S.profile.days||[]).forEach(d=>list.push({id:110+d,title:L('Hora do treino','Workout time'),body:L('Seu treino de hoje está pronto no Grow Up.','Today\'s workout is ready in Grow Up.'),schedule:{on:{weekday:d+1,hour:S.prefs.workoutHour||6,minute:0},allowWhileIdle:true}}));}
     await N.schedule({notifications:list});}catch(e){}}
-function nativeInit(){if(!IN_APP)return;const P=CP();
+function nativeInit(){if(!IN_APP)return;const P=CP();hLoad();
   try{P.App&&P.App.addListener('backButton',()=>{if($('#modal-root').innerHTML){closeModal();return;}
     if(ui.tab==='editor'&&ui.ed){A.edclose();return;}if(ui.tab==='workout'){ui.tab='home';render();return;}
     if(!(IN_APP&&!S.prefs.onboarded)&&ui.tab!=='home'){ui.tab='home';render();window.scrollTo(0,0);return;}
     if(IN_APP&&!S.prefs.onboarded&&ui.ob&&ui.ob.step>0){ui.ob.step--;render();return;}
     P.App.exitApp&&P.App.exitApp();});}catch(e){}
   try{P.LocalNotifications&&P.LocalNotifications.addListener('localNotificationActionPerformed',a=>{const id=a&&a.notification&&a.notification.id;if(id===100){ui.tab='photos';ui.photoDate=today();render();}else if(id===101){ui.tab='prog';render();openMeasureForm();}else{ui.tab='home';ui.date=today();ui.filter='day';render();}});}catch(e){}
-  appVersion().then(()=>{if(ui.tab==='set')render();});autoUpdateCheck();
-  try{P.App&&P.App.addListener('resume',autoUpdateCheck);}catch(e){}
+  appVersion().then(()=>{if(ui.tab==='set')render();});autoUpdateCheck();setTimeout(()=>hRefresh(true),400);
+  try{P.App&&P.App.addListener('resume',()=>{autoUpdateCheck();ui.hcSt=null;hRefresh(false);});}catch(e){}
   if(S.prefs.onboarded)scheduleReminders(false);}
 function statusBarTheme(){const P=CP();if(!P.StatusBar)return;const light=S.prefs.theme==='light';try{P.StatusBar.setStyle({style:light?'LIGHT':'DARK'});P.StatusBar.setBackgroundColor({color:light?'#FFFFFF':'#0A0A0A'});}catch(e){}}
 
@@ -1271,6 +1285,161 @@ function updModal(){if(!UPD)return;const cur=APPV?'v'+APPV.version:'';
 function appCard(){if(!IN_APP)return '';const v=APPV?'v'+APPV.version:'—';
   return `<div class="card"><div class="hd" style="font-size:19px">${L('Aplicativo','App')}</div><div class="sub" style="margin:4px 0 10px">${L('Versão instalada','Installed version')}: <b style="color:var(--tx)">${esc(v)}</b>${UPD?` · <span style="color:var(--red)">${esc(UPD.tag)} ${L('disponível','available')}</span>`:''}</div>
    ${UPD?`<button class="btn primary block" data-act="updinfo">${L('Instalar ','Install ')}${esc(UPD.tag)}</button>`:`<button class="btn block" data-act="updcheck">${L('Verificar atualizações','Check for updates')}</button>`}</div>`;}
+
+/* ---------- passos e saúde: Health Connect (relógio + celular) ou sensor do celular ---------- */
+const LSH='treinoapp:health:v1';
+let H={mode:'off',days:{},phone:null,sync:0,src:'',err:'',opts:{sleep:true,hr:true,weight:true}};
+function hLoad(){try{const r=localStorage.getItem(LSH);if(r){const o=JSON.parse(r);H=Object.assign(H,o);H.opts=Object.assign({sleep:true,hr:true,weight:true},o.opts||{});H.days=o.days||{};}}catch(e){}}
+function hSave(){try{localStorage.setItem(LSH,JSON.stringify(H));}catch(e){}}
+const HP=()=>CP().Health,SCP=()=>CP().StepCounter;
+const HC_READ=['steps','distance','calories','sleep','restingHeartRate','weight'];
+const stepGoal=()=>S.prefs.stepGoal||8000;
+const localYmd=t=>ymd(new Date(t));
+function hDay(d){return H.days[d]||(H.days[d]={});}
+function hPrune(){const lim=addD(today(),-120);Object.keys(H.days).forEach(d=>{if(d<lim)delete H.days[d];});}
+function dayData(d){const x=H.days[d]||{};
+  if(H.mode==='phone'){const st=x.psteps;return{steps:st,km:st?st*(S.profile.altura||170)*0.415/100000:null};}
+  return{steps:x.steps,km:x.km,kcal:x.kcal,sleep:x.sleep,rhr:x.rhr};}
+const fmtInt=n=>n==null||!isFinite(n)?'—':Math.round(n).toLocaleString(LANG==='en'?'en-US':'pt-BR');
+const fmtSleep=m=>m==null?'—':Math.floor(m/60)+'h'+String(Math.round(m%60)).padStart(2,'0');
+function agoTxt(ts){if(!ts)return L('nunca','never');const m=Math.round((Date.now()-ts)/60e3);if(m<1)return L('agora','just now');if(m<60)return L('há ','')+m+' min'+L('',' ago');const h=Math.round(m/60);if(h<24)return L('há ','')+h+' h'+L('',' ago');return fmtD(localYmd(ts));}
+function srcLabel(s){const n=String(s.sourceName||s.sourceId||'');
+  const map={'com.sec.android.app.shealth':'Samsung Health','com.google.android.apps.fitness':'Google Fit','com.garmin.android.apps.connectmobile':'Garmin Connect','com.xiaomi.wearable':'Mi Fitness','com.mi.health':'Mi Fitness','com.fitbit.FitbitMobile':'Fitbit','com.huami.watch.hmwatchmanager':'Zepp','com.google.android.apps.healthdata':'Health Connect'};
+  const lb=map[n]||(/^com\.android\.healthconnect\.phone/.test(n)?L('Celular','Phone'):n);
+  const dt={watch:L('relógio','watch'),phone:L('celular','phone'),ring:L('anel','ring'),fitnessBand:L('pulseira','band')}[s.deviceType];
+  return dt&&lb.toLowerCase().indexOf(dt)<0?lb+' · '+dt:lb;}
+
+/* Health Connect */
+async function hcStatus(){const p=HP();if(!p)return{state:'noplugin'};
+  try{const a=await p.isAvailable();if(!a.available)return{state:'install',reason:a.reason||''};}catch(e){return{state:'install'};}
+  try{const c=await p.checkAuthorization({read:HC_READ});return{state:(c.readAuthorized||[]).includes('steps')?'ok':'perm',granted:c.readAuthorized||[]};}catch(e){return{state:'perm',granted:[]};}}
+async function hcConnect(){const p=HP();if(!p)return;
+  try{const r=await p.requestAuthorization({read:HC_READ});H.mode='hc';hSave();ui.hcSt=null;
+    if((r.readAuthorized||[]).includes('steps')){toast(L('Conectado ao Health Connect','Connected to Health Connect'));await hcSync(true);}
+    else toast(L('Permissão de passos não concedida','Steps permission not granted'));}
+  catch(e){toast(L('Não foi possível abrir o Health Connect','Could not open Health Connect'));}
+  render();}
+let hBusy=false;
+async function hcSync(force){const p=HP();if(!p||hBusy)return;if(!force&&Date.now()-(H.sync||0)<10*60e3)return;hBusy=true;
+  try{const now=new Date(),st=new Date();st.setHours(0,0,0,0);st.setDate(st.getDate()-29);
+    const range={startDate:st.toISOString(),endDate:now.toISOString()};
+    const agg=async(dt,ag)=>{try{return (await p.queryAggregated(Object.assign({dataType:dt,bucket:'day',aggregation:ag},range))).samples||[];}catch(e){return null;}};
+    const put=(arr,k,f)=>{if(!arr)return;arr.forEach(s=>{const v=s.value;if(v==null||!isFinite(v))return;hDay(localYmd(s.startDate))[k]=f(v);});};
+    const steps=await agg('steps','sum');if(steps===null)throw new Error(L('sem acesso aos passos','no access to steps'));
+    put(steps,'steps',v=>Math.round(v));
+    put(await agg('distance','sum'),'km',v=>Math.round(v/10)/100);
+    put(await agg('calories','sum'),'kcal',v=>Math.round(v));
+    if(H.opts.hr)put(await agg('restingHeartRate','average'),'rhr',v=>Math.round(v));
+    if(H.opts.sleep){try{const r=await p.readSamples({dataType:'sleep',startDate:new Date(st.getTime()-864e5).toISOString(),endDate:range.endDate,limit:300});const per={};
+      (r.samples||[]).forEach(s=>{let m=s.value||0;if(s.stages&&s.stages.length){const a=s.stages.filter(x=>x.stage!=='awake'&&x.stage!=='inBed').reduce((t,x)=>t+(x.durationMinutes||0),0);if(a>0)m=a;}const d=localYmd(s.endDate);per[d]=(per[d]||0)+m;});
+      Object.keys(per).forEach(d=>{hDay(d).sleep=Math.round(per[d]);});}catch(e){}}
+    if(H.opts.weight){try{const r=await p.readSamples(Object.assign({dataType:'weight',limit:200,ascending:true},range));let ch=false;
+      (r.samples||[]).forEach(s=>{const d=localYmd(s.startDate),kg=Math.round(s.value*10)/10;if(!(kg>20&&kg<400))return;const ex=S.body.find(b=>b.date===d);
+        if(!ex){S.body.push({date:d,kg,src:'hc'});ch=true;}else if(ex.src==='hc'&&ex.kg!==kg){ex.kg=kg;ch=true;}});
+      if(ch){S.body.sort((a,b)=>a.date.localeCompare(b.date));persist('body');}}catch(e){}}
+    try{const t0=new Date();t0.setHours(0,0,0,0);const r=await p.readSamples({dataType:'steps',startDate:t0.toISOString(),endDate:range.endDate,limit:300});const cnt={};
+      (r.samples||[]).forEach(s=>{const n=srcLabel(s);if(n)cnt[n]=(cnt[n]||0)+(s.value||0);});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];if(top)H.src=top[0];}catch(e){}
+    H.sync=Date.now();H.err='';hPrune();hSave();}
+  catch(e){H.err=String(e&&e.message||e);hSave();}
+  finally{hBusy=false;}}
+
+/* Sensor de passos do celular: conta desde o último boot; dividimos cada intervalo entre os dias pelas horas acordadas (6h–24h) */
+function spreadSteps(n,from,to){const parts=[];let tot=0;const d=new Date(from);d.setHours(0,0,0,0);
+  while(d.getTime()<to){const a=new Date(d);a.setHours(6,0,0,0);const b=new Date(d);b.setDate(b.getDate()+1);
+    const w=Math.max(0,Math.min(b.getTime(),to)-Math.max(a.getTime(),from));parts.push([ymd(d),w]);tot+=w;d.setDate(d.getDate()+1);}
+  if(!tot){const k=localYmd(to);hDay(k).psteps=(hDay(k).psteps||0)+n;return;}
+  let left=n,best=0;parts.forEach((x,i)=>{if(x[1]>parts[best][1])best=i;});
+  parts.forEach(x=>{const v=Math.floor(n*x[1]/tot);x[2]=v;left-=v;});parts[best][2]+=left;
+  parts.forEach(x=>{if(x[2]>0)hDay(x[0]).psteps=(hDay(x[0]).psteps||0)+x[2];});}
+async function phoneRead(){const p=SCP();if(!p)return false;let r;
+  try{r=await p.read();}catch(e){const m=String(e&&e.message||e);H.err=m==='timeout'?L('O sensor não respondeu. Ande alguns passos e atualize.','The sensor did not respond. Walk a few steps and refresh.'):m==='permission'?L('Falta a permissão de atividade física.','Physical activity permission is missing.'):m;hSave();return false;}
+  const now=Date.now(),last=H.phone;
+  if(last){const reboot=Math.abs((r.bootTime||0)-(last.boot||0))>5*60e3||r.steps<last.steps;
+    const delta=reboot?r.steps:r.steps-last.steps,from=reboot?Math.max(r.bootTime||last.ts,last.ts):last.ts;
+    if(delta>0&&delta<200000)spreadSteps(Math.round(delta),from,now);}
+  H.phone={ts:now,steps:r.steps,boot:r.bootTime};H.sync=now;H.err='';hPrune();hSave();return true;}
+async function phoneConnect(){const p=SCP();if(!p){toast(L('Disponível só no app Android','Android app only'));return;}
+  try{const a=await p.isAvailable();if(!a.available){toast(L('Este celular não tem sensor de passos','This phone has no step sensor'));return;}
+    const g=await p.requestPermission();if(!g.granted){toast(L('Permissão de atividade física negada','Physical activity permission denied'));return;}
+    H.mode='phone';H.phone=null;hSave();await phoneRead();toast(L('Contador do celular ativado','Phone counter enabled'));}
+  catch(e){toast(L('Não foi possível ativar o contador','Could not enable the counter'));}
+  render();}
+
+let hLast=0;
+async function hRefresh(force){if(!IN_APP||H.mode==='off')return;if(!force&&Date.now()-hLast<60e3)return;hLast=Date.now();
+  if(H.mode==='hc')await hcSync(force);else await phoneRead();
+  if((ui.tab==='home'||ui.tab==='prog'||ui.tab==='set')&&!$('#modal-root').innerHTML)render();}
+
+/* Recuperação (sono e FC de repouso) — entra nos alertas de deload */
+function recovery(){if(!IN_APP||H.mode!=='hc')return null;const t=today();const vals=(k,a,b)=>{const o=[];for(let i=a;i<=b;i++){const v=(H.days[addD(t,-i)]||{})[k];if(v!=null)o.push(v);}return o;};
+  const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const n4=H.opts.sleep?vals('sleep',0,3):[],short=n4.filter(m=>m<360).length;
+  const r3=H.opts.hr?avg(vals('rhr',0,2)):null,rb=H.opts.hr?vals('rhr',4,30):[],base=rb.length>=7?avg(rb):null;
+  const sleepFlag=n4.length>=3&&short>=3,rhrFlag=!!(base&&r3&&r3>=base+5);
+  const s7=avg(H.opts.sleep?vals('sleep',0,6):[]),h7=avg(H.opts.hr?vals('rhr',0,6):[]);
+  return{sleepFlag,rhrFlag,short,r3,base,s7,h7,level:(sleepFlag?1:0)+(rhrFlag?1:0)};}
+
+/* UI */
+function ring(pct,size){const r=42,c=2*Math.PI*r,off=c*(1-Math.min(Math.max(pct,0),1));
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" style="flex:none"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--s2)" stroke-width="10"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--red)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 50 50)"/><text x="50" y="57" text-anchor="middle" font-family="Oswald,Impact,sans-serif" font-weight="700" font-size="22" fill="var(--tx)">${Math.round(pct*100)}%</text></svg>`;}
+const hStat=(v,u,l)=>`<div class="hstat"><div class="v">${v}${u?`<small> ${u}</small>`:''}</div><div class="l">${l}</div></div>`;
+function stepsHomeHtml(){if(!IN_APP)return '';
+  if(H.mode==='off'){if(S.prefs.stepsAsk)return '';
+    return `<div class="card"><div class="row" style="gap:12px;align-items:center"><div class="hico">${svgSz(IC.walk,22)}</div><div class="grow"><b>${L('Acompanhe seus passos','Track your steps')}</b><div class="sub">${L('Conecte seu smartwatch ou use o contador do próprio celular.','Connect your smartwatch or use the phone\'s own counter.')}</div></div></div>
+     <div class="row" style="margin-top:12px;gap:8px"><button class="btn sm grow" data-act="hask" data-v="no">${L('Agora não','Not now')}</button><button class="btn sm primary grow" data-act="hask" data-v="yes">${L('Ativar','Enable')}</button></div></div>`;}
+  const d=dayData(today()),g=stepGoal(),st=d.steps||0,left=Math.max(0,g-st);
+  const stats=[hStat(fmtN(d.km,1),'km',L('Distância','Distance'))];
+  if(H.mode==='hc'){stats.push(hStat(fmtInt(d.kcal),'kcal',L('Ativas','Active')));stats.push(H.opts.sleep?hStat(fmtSleep(d.sleep),'',L('Sono','Sleep')):hStat(fmtInt(d.rhr),'bpm',L('FC repouso','Resting HR')));}
+  else{const y=dayData(addD(today(),-1));stats.push(hStat(fmtInt(y.steps),'',L('Ontem','Yesterday')));stats.push(hStat(fmtInt(g),'',L('Meta','Goal')));}
+  const src=H.mode==='hc'?'Health Connect'+(H.src?' · '+esc(H.src):''):L('Contador do celular','Phone counter');
+  const first=H.mode==='phone'&&H.phone&&!st&&!(H.days[today()]||{}).psteps;
+  return `<div class="card"><div class="row" style="gap:16px;align-items:center">${ring(st/g,96)}
+    <div class="grow"><div class="lbl3">${L('Passos hoje','Steps today')}</div><div class="bign">${fmtInt(st)}</div>
+    <div class="sub">${left?L('Meta ','Goal ')+fmtInt(g)+' · '+L('faltam ','')+`<b style="color:var(--red)">${fmtInt(left)}</b>`+L('',' to go'):`<b style="color:var(--red)">${L('Meta batida','Goal reached')}</b> · ${fmtInt(g)}`}</div></div></div>
+    <div class="hstats">${stats.join('')}</div>
+    ${first?`<div class="sub" style="margin-top:8px">${L('A contagem começa a partir de agora.','Counting starts now.')}</div>`:''}
+    ${H.err?`<div class="sub" style="margin-top:8px;color:var(--red)">${esc(H.err)}</div>`:''}
+    <div class="row" style="margin-top:10px;align-items:center"><div class="sub grow" style="font-size:12px">${svgSz(IC.watch,14)} ${src} · ${agoTxt(H.sync)}</div><button class="btn sm outline" data-act="hsync">${L('Atualizar','Refresh')}</button></div></div>`;}
+function stepsProgHtml(){if(!IN_APP||H.mode==='off')return '';const t=today(),g=stepGoal();
+  const days=[];for(let i=6;i>=0;i--){const d=addD(t,-i);days.push([d,dayData(d).steps||0]);}
+  const prev=[];for(let i=13;i>=7;i--)prev.push(dayData(addD(t,-i)).steps||0);
+  const has=days.filter(x=>x[1]>0),avg=has.length?has.reduce((a,x)=>a+x[1],0)/has.length:null;
+  const ph=prev.filter(v=>v>0),pavg=ph.length?ph.reduce((a,v)=>a+v,0)/ph.length:null;
+  const hit=days.filter(x=>x[1]>=g).length,mx=Math.max(g*1.25,...days.map(x=>x[1])),hh=140,w=40,gap=10,W=7*(w+gap);
+  let bars='';days.forEach((x,i)=>{const bh=Math.max(2,x[1]/mx*hh),X=i*(w+gap)+5,col=i===6?'var(--red)':x[1]>=g?'var(--wine)':'var(--s3)';
+    bars+=`<rect x="${X}" y="${(hh-bh).toFixed(0)}" width="${w}" height="${bh.toFixed(0)}" rx="6" fill="${col}"/><text x="${X+w/2}" y="${hh+18}" text-anchor="middle" font-size="12" fill="var(--mut)">${DOWS[LANG][pd(x[0]).getDay()]}</text>`;});
+  const my=hh-g/mx*hh;
+  bars+=`<line x1="0" x2="${W}" y1="${my.toFixed(0)}" y2="${my.toFixed(0)}" stroke="var(--tx)" stroke-width="1.5" stroke-dasharray="5 5" opacity=".6"/><text x="${W}" y="${(my-6).toFixed(0)}" text-anchor="end" font-size="11" fill="var(--tx)">${L('meta ','goal ')}${fmtInt(g)}</text>`;
+  let h=`<div class="card"><div class="hd" style="font-size:20px">${L('Passos · 7 dias','Steps · 7 days')}</div>
+   <div class="hstats">${hStat(fmtInt(avg),'',L('Média diária','Daily avg'))}${hStat(hit,L('de 7','of 7'),L('Dias na meta','Days at goal'))}${hStat(avg&&pavg?(avg>=pavg?'+':'')+Math.round((avg/pavg-1)*100)+'%':'—','',L('vs semana ant.','vs last week'))}</div>
+   <svg width="100%" viewBox="0 -10 ${W} ${hh+30}" style="margin-top:10px">${bars}</svg></div>`;
+  const rc=recovery();
+  if(rc&&(rc.s7!=null||rc.h7!=null)){const lv=[L('Boa','Good'),L('Atenção','Caution'),L('Baixa','Low')][rc.level];
+    h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Recuperação','Recovery')}</div>
+     <div class="hstats">${hStat(fmtSleep(rc.s7),'',L('Sono médio 7d','Avg sleep 7d'))}${hStat(fmtInt(rc.h7),'bpm',L('FC repouso 7d','Resting HR 7d'))}${hStat(`<span style="color:${rc.level?'var(--red)':'var(--tx)'}">${lv}</span>`,'',L('Prontidão','Readiness'))}</div>
+     <div class="sub" style="margin-top:10px">${L('Entra nos alertas de deload: 3 de 4 noites com menos de 6h de sono, ou FC de repouso 5 bpm acima da sua média, junto com sinais de platô ou fadiga nos exercícios.','Feeds the deload alerts: 3 of 4 nights under 6h of sleep, or resting HR 5 bpm above your average, together with plateau or fatigue signs in your lifts.')}</div></div>`;}
+  return h;}
+function healthCard(){if(!IN_APP)return '';const m=H.mode,st=ui.hcSt;
+  if(m==='hc'&&!st){ui.hcSt={state:'checking'};hcStatus().then(s=>{ui.hcSt=s;if(ui.tab==='set'&&!$('#modal-root').innerHTML)render();});}
+  const tg=(k,t,sub)=>`<button class="toggle" data-act="hopt" data-k="${k}"><span>${t}${sub?`<br><small class="sub" style="font-size:12px">${sub}</small>`:''}</span><i class="sw ${H.opts[k]?'on':''}"></i></button>`;
+  let h=`<div class="card" id="health"><div class="hd" style="font-size:19px">${L('Passos e smartwatch','Steps & smartwatch')}</div><div class="sub" style="margin:4px 0 10px">${L('Escolha de onde vêm seus passos, sono e frequência cardíaca.','Choose where your steps, sleep and heart rate come from.')}</div>
+   <div class="optl"><button class="opt ${m==='hc'?'on':''}" data-act="hmode" data-v="hc"><b>Health Connect</b><span>${L('Relógio (Galaxy Watch, Pixel Watch, Garmin, Xiaomi, Fitbit…) e o próprio celular. Inclui sono, FC de repouso e peso da balança.','Watch (Galaxy, Pixel, Garmin, Xiaomi, Fitbit…) and the phone itself. Includes sleep, resting HR and smart-scale weight.')}</span></button>
+   <button class="opt ${m==='phone'?'on':''}" data-act="hmode" data-v="phone"><b>${L('Só o contador do celular','Phone counter only')}</b><span>${L('Usa o sensor de passos do aparelho, sem outros apps. Só passos.','Uses the phone\'s step sensor, no other apps. Steps only.')}</span></button>
+   <button class="opt ${m==='off'?'on':''}" data-act="hmode" data-v="off"><b>${L('Desligado','Off')}</b><span>${L('Não mostrar passos.','Don\'t show steps.')}</span></button></div>`;
+  if(m==='hc'){const s=(st||{}).state;
+    if(s==='ok')h+=`<div class="hconn"><div class="hico">${svgSz(IC.watch,22)}</div><div class="grow"><b>Health Connect</b><div class="sub" style="font-size:12px">${H.src?L('Fonte: ','Source: ')+esc(H.src)+' · ':''}${L('sincronizado ','synced ')}${agoTxt(H.sync)}</div></div><span class="chip red">${L('Conectado','Connected')}</span></div>
+      <div class="lbl2">${L('Ler também','Also read')}</div>${tg('sleep',L('Sono','Sleep'))}${tg('hr',L('Frequência cardíaca de repouso','Resting heart rate'))}${tg('weight',L('Peso da balança','Smart-scale weight'),L('Preenche o registro de peso nos dias sem pesagem manual','Fills weigh-ins on days without a manual entry'))}
+      <div class="row" style="gap:8px;margin-top:10px"><button class="btn sm grow" data-act="hcperm">${L('Permissões','Permissions')}</button><button class="btn sm primary grow" data-act="hsync">${L('Sincronizar agora','Sync now')}</button></div>`;
+    else if(s==='perm')h+=`<div class="note-box" style="margin-top:10px">${L('Falta autorizar o Grow Up no Health Connect. Na tela que abrir, permita pelo menos Passos.','Grow Up still needs access in Health Connect. On the next screen, allow at least Steps.')}</div><button class="btn primary block" data-act="hcconnect" style="margin-top:8px">${L('Conectar ao Health Connect','Connect to Health Connect')}</button>`;
+    else if(s==='install')h+=`<div class="note-box" style="margin-top:10px">${L('O Health Connect não está instalado ou precisa de atualização neste celular (no Android 14 ou mais novo ele já vem no sistema).','Health Connect is not installed or needs an update on this phone (Android 14+ has it built in).')}</div><button class="btn primary block" data-act="hcinstall" style="margin-top:8px">${L('Instalar ou atualizar Health Connect','Install or update Health Connect')}</button>`;
+    else if(s==='noplugin')h+=`<div class="sub" style="margin-top:10px">${L('Disponível só no app Android.','Android app only.')}</div>`;
+    else h+=`<div class="sub" style="margin-top:10px">${L('Verificando…','Checking…')}</div>`;
+    h+=`<div class="sub" style="margin-top:10px;font-size:12px">${L('No app do relógio (Samsung Health, Garmin Connect, Mi Fitness, Fitbit…), ative o compartilhamento com o Health Connect. No Android 14+, o próprio celular também conta passos no Health Connect.','In your watch app (Samsung Health, Garmin Connect, Mi Fitness, Fitbit…), turn on sharing with Health Connect. On Android 14+, the phone itself also counts steps in Health Connect.')}</div>`;}
+  if(m==='phone')h+=`<div class="hconn"><div class="hico">${svgSz(IC.walk,22)}</div><div class="grow"><b>${L('Contador do celular','Phone counter')}</b><div class="sub" style="font-size:12px">${L('Última leitura ','Last read ')}${agoTxt(H.sync)}</div></div><span class="chip red">${L('Ativo','On')}</span></div>
+    <div class="sub" style="margin-top:8px;font-size:12px">${L('O sensor conta mesmo com o app fechado. Abra o app ao menos uma vez por dia para a divisão entre os dias ficar precisa. Com relógio, prefira o Health Connect.','The sensor counts even with the app closed. Open the app at least once a day so the split between days stays accurate. With a watch, prefer Health Connect.')}</div>
+    <button class="btn sm block" data-act="hsync" style="margin-top:8px">${L('Atualizar agora','Refresh now')}</button>`;
+  if(m!=='off')h+=`<div class="lbl2">${L('Meta diária de passos','Daily step goal')}</div><div class="pillset">${[6000,8000,10000,12000].map(v=>`<button class="pill ${stepGoal()===v?'on':''}" data-act="hgoal" data-v="${v}">${fmtInt(v)}</button>`).join('')}</div>`;
+  return h+'</div>';}
 
 /* ---------- full backup (with photos) ---------- */
 async function backupFull(){const o=backupObj();o.media=S.media;o.images={};const ids=S.media.photos.map(p=>p.id).concat(Object.keys(S.media.ex||{}).map(k=>'ex-'+k));
@@ -1399,13 +1568,14 @@ function exSeries(id){return S.sessions.filter(s=>s.type==='workout'&&s.exercise
 function alerts(){const ids=new Set();Object.values(S.plan.workouts).forEach(w=>w.exercises.forEach(e=>{if(e.unit!=='s')ids.add(e.id);}));const out=[];
   ids.forEach(id=>{const sr=exSeries(id);if(sr.length>=4){const last3=sr.slice(-3),ref=sr[sr.length-4];if(Math.max(...last3.map(x=>x.best))<=ref.best*1.005)out.push({kind:'plateau',id,name:sr[sr.length-1].name,n:3});}
     if(sr.length>=2){const a=sr[sr.length-2],b=sr[sr.length-1];if(a.rpe!=null&&b.rpe!=null&&b.topKg<=a.topKg&&b.rpe-a.rpe>=1)out.push({kind:'fatigue',id,name:b.name,from:a.rpe,to:b.rpe});}});
+  const rc=recovery();if(rc&&rc.level)out.push({kind:'recovery',id:'_rec',name:L('Recuperação','Recovery'),msg:[rc.sleepFlag?L('Sono curto: ','Short sleep: ')+rc.short+L(' das últimas 4 noites abaixo de 6h.',' of the last 4 nights under 6h.'):'',rc.rhrFlag?L('FC de repouso ','Resting HR ')+Math.round(rc.r3)+L(' bpm, acima da sua média (',' bpm, above your average (')+Math.round(rc.base)+' bpm).':''].filter(Boolean).join(' ')+L(' Priorize o sono; se as cargas também travarem, faça o deload.',' Prioritise sleep; if loads also stall, take the deload.')});
   const dp=dayPlan(today());const pl=out.filter(x=>x.kind==='plateau').length,fa=out.filter(x=>x.kind==='fatigue').length;
-  const deload=(pl>=3||fa>=2||(pl>=2&&fa>=1))&&!(dp.phase&&dp.phase.setsFactor);return{list:out,deload,inDeload:!!(dp.phase&&dp.phase.setsFactor)};}
+  const deload=(pl>=3||fa>=2||(pl>=2&&fa>=1)||(rc&&rc.level&&(pl>=1||fa>=1)))&&!(dp.phase&&dp.phase.setsFactor);return{list:out,deload,inDeload:!!(dp.phase&&dp.phase.setsFactor)};}
 const plateauOf=id=>alerts().list.find(x=>x.kind==='plateau'&&x.id===id);
 function alertsHtml(full){const a=alerts();if(!a.list.length&&!a.deload){return full?`<div class="card"><div class="hd" style="font-size:20px">${L('Alertas de progresso','Progress alerts')}</div><div class="empty">${L('Nenhum platô ou sinal de fadiga detectado. Siga o plano.','No plateaus or fatigue signs detected. Stay the course.')}</div><div class="sub">${L('O app analisa o 1RM estimado das últimas 4 sessões de cada exercício e a dificuldade (RPE) da top set.','The app checks the estimated 1RM over the last 4 sessions of each exercise and the top set RPE.')}</div></div>`:'';}
   let h=`<div class="card alertc"><div class="hd" style="font-size:${full?20:17}px">⚠ ${L('Alertas de progresso','Progress alerts')}</div>`;
   if(a.deload)h+=`<div class="note-box" style="color:var(--tx);border-left:4px solid var(--red)"><b>${L('Sugestão: antecipar o deload.','Suggestion: deload early.')}</b> ${L('Vários exercícios estagnaram ou ficaram mais difíceis com a mesma carga. Faça 1 semana com metade das séries e RIR 4, mantendo as cargas, e depois retome.','Several lifts stalled or got harder at the same load. Do 1 week with half the sets at RIR 4, keeping the loads, then resume.')}</div>`;
-  a.list.forEach(x=>{h+=`<div class="alr"><b>${esc(x.name)}</b><span>${x.kind==='plateau'?L('Platô: sem evolução do 1RM estimado nas últimas 3 sessões. Tente +1 repetição antes de subir carga, ou use a substituição por um ciclo.','Plateau: no estimated 1RM progress in the last 3 sessions. Try +1 rep before adding load, or use the substitute for one cycle.'):L('Fadiga: a top set ficou mais difícil com a mesma carga (RPE ','Fatigue: top set got harder at the same load (RPE ')+fmtN(x.from)+' → '+fmtN(x.to)+L('). Cuide do sono e mantenha a carga na próxima.','). Watch your sleep and keep the load next time.')}</span></div>`;});
+  a.list.forEach(x=>{h+=`<div class="alr"><b>${esc(x.name)}</b><span>${x.kind==='recovery'?esc(x.msg):x.kind==='plateau'?L('Platô: sem evolução do 1RM estimado nas últimas 3 sessões. Tente +1 repetição antes de subir carga, ou use a substituição por um ciclo.','Plateau: no estimated 1RM progress in the last 3 sessions. Try +1 rep before adding load, or use the substitute for one cycle.'):L('Fadiga: a top set ficou mais difícil com a mesma carga (RPE ','Fatigue: top set got harder at the same load (RPE ')+fmtN(x.from)+' → '+fmtN(x.to)+L('). Cuide do sono e mantenha a carga na próxima.','). Watch your sleep and keep the load next time.')}</span></div>`;});
   return h+'</div>';}
 
 /* ---------- workout summary, records and sharing ---------- */
@@ -1582,6 +1752,16 @@ const A={
  goprog:()=>{ui.tab='progs';render();window.scrollTo(0,0);},
  lvup:()=>levelUpModal(),
  updinfo:()=>updModal(),
+ hask:b=>{if(b.dataset.v==='yes'){ui.tab='set';render();setTimeout(()=>{const e=$('#health');e&&e.scrollIntoView({behavior:'smooth',block:'start'});},60);}else{S.prefs.stepsAsk=1;persist('prefs');render();}},
+ hmode:async b=>{const v=b.dataset.v;if(v==='off'){H.mode='off';hSave();render();return;}
+   if(v==='phone'){await phoneConnect();return;}
+   H.mode='hc';hSave();ui.hcSt={state:'checking'};render();const st=await hcStatus();ui.hcSt=st;if(st.state==='perm'){await hcConnect();return;}if(st.state==='ok')await hcSync(true);render();},
+ hcconnect:()=>hcConnect(),
+ hcinstall:()=>{location.href='https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata';},
+ hcperm:async()=>{try{await HP().openHealthConnectSettings();}catch(e){toast(L('Não foi possível abrir o Health Connect','Could not open Health Connect'));}},
+ hsync:async()=>{toast(L('Atualizando…','Refreshing…'));ui.hcSt=null;await hRefresh(true);toast(H.err?H.err:L('Atualizado','Updated'));},
+ hopt:b=>{const k=b.dataset.k;H.opts[k]=!H.opts[k];hSave();if(H.opts[k])hcSync(true).then(()=>render());render();},
+ hgoal:b=>{S.prefs.stepGoal=+b.dataset.v;persist('prefs');render();},
  updcheck:async()=>{toast(L('Verificando…','Checking…'));try{const u=await checkUpdate(true);render();if(u)updModal();else toast(L('Você já está na versão mais recente','You are on the latest version'));}catch(e){toast(L('Sem conexão para verificar agora','No connection to check right now'));}},
  obnext:()=>{if(!ui.ob)obStart();if(!obValidate())return;ui.ob.step=Math.min(4,ui.ob.step+1);render();window.scrollTo(0,0);},
  obback:()=>{if(ui.ob&&ui.ob.step>0){ui.ob.step--;render();window.scrollTo(0,0);}},
