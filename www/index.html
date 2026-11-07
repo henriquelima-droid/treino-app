@@ -1655,7 +1655,8 @@ let UPD=null,APPV=null;
 async function appVersion(){if(APPV)return APPV;const P=CP();try{if(P.App&&P.App.getInfo){const i=await P.App.getInfo();APPV={version:i.version,build:parseInt(i.build,10)||0};}}catch(e){}return APPV;}
 async function checkUpdate(force){if(!IN_APP)return null;const v=await appVersion();if(!v)return null;
   const c=S.prefs.updCache;
-  if(!force&&c&&Date.now()-(S.prefs.updChecked||0)<6*3600e3){UPD=c.build>v.build?c:null;return UPD;}
+  if(!force&&c&&c.build>v.build){UPD=c;return UPD;}
+  if(!force&&c&&Date.now()-(S.prefs.updChecked||0)<30*60e3){UPD=null;return null;}
   const r=await fetch('https://api.github.com/repos/'+UPD_REPO+'/releases/latest',{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
   if(!r.ok)throw new Error('http '+r.status);
   const j=await r.json();const b=parseInt(String(j.tag_name||'').split('.').pop(),10)||0;
