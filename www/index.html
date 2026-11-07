@@ -768,8 +768,8 @@ const DEFAULT_PROFILE=IN_APP?{sex:"M",level:"beginner",goal:"hypertrophy",days:[
 let LANG='pt';
 const L=(pt,en)=>LANG==='en'?en:pt;
 const P=(o,k)=>(o&&LANG==='en'&&o.en&&o.en[k]!=null&&o.en[k]!=='')?o.en[k]:(o?o[k]:'');
-const GROUPS={peito:['Peito','Chest'],costas:['Costas','Back'],quadriceps:['Quadríceps','Quads'],posteriores:['Posteriores/glúteos','Hamstrings/glutes'],ombros:['Deltoide lateral','Side delts'],biceps:['Bíceps','Biceps'],triceps:['Tríceps','Triceps'],panturrilha:['Panturrilha','Calves'],abdomen:['Abdômen','Abs']};
-const gName=g=>GROUPS[g]?L(GROUPS[g][0],GROUPS[g][1]):g;
+const GROUPS={peito:['Peito','Chest'],costas:['Costas','Back'],quadriceps:['Quadríceps','Quads'],posteriores:['Posteriores/glúteos','Hamstrings/glutes'],gluteos:['Glúteos','Glutes'],adutores:['Adutores','Adductors'],ombros:['Deltoide lateral','Side delts'],biceps:['Bíceps','Biceps'],triceps:['Tríceps','Triceps'],panturrilha:['Panturrilha','Calves'],abdomen:['Abdômen','Abs']};
+const gName=g=>g==='posteriores'&&S.plan&&S.plan.workouts&&Object.values(S.plan.workouts).some(w=>(w.exercises||[]).some(e=>e.group==='gluteos'))?L('Posteriores de coxa','Hamstrings'):GROUPS[g]?L(GROUPS[g][0],GROUPS[g][1]):g;
 const RPES=[6,7,7.5,8,8.5,9,9.5,10];
 const DOW={pt:['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'],en:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']};
 const DOWS={pt:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat']};
@@ -1229,7 +1229,7 @@ function renderProg(){const t=today();const bw=[...S.body].sort((a,b)=>a.date.lo
   const ws=weekStart(t);const vol={};S.sessions.filter(s=>s.type==='workout'&&s.date>=ws&&s.date<=addD(ws,6)).forEach(s=>s.exercises.forEach(e=>{vol[e.group]=(vol[e.group]||0)+e.sets.filter(x=>x.done&&isMain(x)).length;}));
   const tg=S.plan.weeklyTargets||{};
   h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Volume da semana','Weekly volume')}</div><div class="sub">${L('Séries válidas × meta semanal do programa','Working sets × program weekly target')}</div>
-   ${Object.keys(GROUPS).map(g=>{const v=vol[g]||0,tt=tg[g]||0,pc=tt?Math.min(100,v/tt*100):0;return `<div class="vbar"><span>${gName(g)}</span><div class="tr"><i class="${v>tt&&tt?'over':''}" style="width:${pc}%"></i></div><span class="nn">${v}/${tt}</span></div>`;}).join('')}</div>`;
+   ${Object.keys(GROUPS).filter(g=>(tg[g]||0)>0||(vol[g]||0)>0||!['gluteos','adutores'].includes(g)).map(g=>{const v=vol[g]||0,tt=tg[g]||0,pc=tt?Math.min(100,v/tt*100):0;return `<div class="vbar"><span>${gName(g)}</span><div class="tr"><i class="${v>tt&&tt?'over':''}" style="width:${pc}%"></i></div><span class="nn">${v}/${tt}</span></div>`;}).join('')}</div>`;
   const H=exHistory();const ids=Object.keys(H);
   if(!ui.exSel||!H[ui.exSel])ui.exSel=ids[0]||null;
   h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Progressão de carga','Load progression')}</div>`;
