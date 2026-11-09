@@ -5,7 +5,7 @@ on:
     branches: [ teste ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -49,3 +49,15 @@ jobs:
           name: GrowUp-teste
           path: GrowUp-teste.apk
 
+
+      - name: Publicar APK de teste (pré-lançamento, não vira "versão mais recente")
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: teste
+          name: Grow Up — APK de teste
+          prerelease: true
+          make_latest: false
+          overwrite_files: true
+          body: |
+            Versão de TESTE (não oficial). Não aparece como atualização no app.
+          files: GrowUp-teste.apk
