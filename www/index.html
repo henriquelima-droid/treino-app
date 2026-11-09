@@ -369,6 +369,8 @@ body:not(.wo-mode) .timerbar{bottom:calc(78px + var(--sab))}
 .thw{position:relative}.thw>button{width:100%}
 .thw .sdel{top:4px;right:4px;width:26px;height:26px;font-size:16px;cursor:pointer}
 
+.pr b small{font-family:Inter,system-ui,sans-serif;font-size:12px;color:var(--mut);font-weight:600}
+
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
 </head>
@@ -1194,14 +1196,30 @@ function finishWorkout(){const a=S.active;const done=a.exercises.reduce((n,e)=>n
 let T=null,tickI=null,AC=null,WL=null;
 function unlockAudio(){try{if(!AC){const C=window.AudioContext||window.webkitAudioContext;if(C)AC=new C();}if(AC&&AC.state==='suspended')AC.resume();}catch(e){}}
 function beep(){if(!S.prefs.sound||!AC)return;try{const t0=AC.currentTime;[0,.25,.5].forEach((o,k)=>{const os=AC.createOscillator(),g=AC.createGain();os.type='square';os.frequency.value=k===2?1320:880;g.gain.setValueAtTime(.0001,t0+o);g.gain.exponentialRampToValueAtTime(.25,t0+o+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+o+.18);os.connect(g).connect(AC.destination);os.start(t0+o);os.stop(t0+o+.2);});}catch(e){}}
-function startTimer(sec,label,next){unlockAudio();T={end:Date.now()+sec*1000,total:sec,label,next,fired:false};const tb=$('#timerbar');tb.classList.remove('hidden','done');document.body.classList.add('has-timer');$('#tlb').textContent=label;$('#tls').textContent=next||L('Descanso','Rest');ensureTick();tick();}
-function stopTimer(){T=null;document.body.classList.remove('has-timer');const tb=$('#timerbar');tb.classList.add('hidden');tb.classList.remove('done');}
+function startTimer(sec,label,next){unlockAudio();restPerm();T={end:Date.now()+sec*1000,total:sec,label,next,fired:false};const tb=$('#timerbar');tb.classList.remove('hidden','done');document.body.classList.add('has-timer');$('#tlb').textContent=label;$('#tls').textContent=next||L('Descanso','Rest');ensureTick();tick();}
+function stopTimer(){T=null;restNotifCancel();document.body.classList.remove('has-timer');const tb=$('#timerbar');tb.classList.add('hidden');tb.classList.remove('done');}
 function ensureTick(){if(!tickI)tickI=setInterval(tick,250);}
 function tick(){const ck=$('#clock');if(ck&&S.active){const s=Math.floor((Date.now()-S.active.startedAt)/1000);ck.textContent=(s>=3600?Math.floor(s/3600)+':'+pad(Math.floor(s%3600/60)):Math.floor(s/60))+':'+pad(s%60);}
   if(!T)return;const left=Math.max(0,Math.ceil((T.end-Date.now())/1000));$('#tt').textContent=mmss(left);$('#tp').style.width=(100-left/T.total*100)+'%';
-  if(left===0&&!T.fired){T.fired=true;beep();try{navigator.vibrate&&navigator.vibrate([300,120,300]);}catch(e){}$('#timerbar').classList.add('done');$('#tlb').textContent=L('Bora! Próxima série','Go! Next set');const t0=T;setTimeout(()=>{if(T===t0)stopTimer();},7000);}}
-async function wake(on){try{if(on&&navigator.wakeLock){WL=await navigator.wakeLock.request('screen');}else if(!on&&WL){await WL.release();WL=null;}}catch(e){}}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&S.active&&ui.tab==='workout')wake(true);});
+  if(left===0&&!T.fired){T.fired=true;if(Date.now()-T.end<3000){beep();try{navigator.vibrate&&navigator.vibrate([300,120,300]);}catch(e){}}$('#timerbar').classList.add('done');$('#tlb').textContent=L('Bora! Próxima série','Go! Next set');const t0=T;setTimeout(()=>{if(T===t0)stopTimer();},7000);}}
+const keepAwake=()=>S.prefs.keepAwake!=null?!!S.prefs.keepAwake:!IN_APP;
+async function wake(on){try{if(on&&!keepAwake())on=false;if(on&&navigator.wakeLock){WL=await navigator.wakeLock.request('screen');}else if(!on&&WL){await WL.release();WL=null;}}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){restNotifCancel();if(S.active&&ui.tab==='workout')wake(true);}else restNotifSchedule();});
+
+/* ---------- alarme do descanso com a tela bloqueada (notificação agendada) ---------- */
+const REST_NID=7001;let restSched=false,restAsked=false;
+const LNp=()=>CP().LocalNotifications;
+async function restChan(){if(restChan.ok)return;const ln=LNp();if(!ln||!ln.createChannel)return;
+  try{await ln.createChannel({id:'rest',name:L('Fim do descanso','Rest finished'),description:L('Alarme do cronômetro de descanso','Rest timer alarm'),importance:5,visibility:1,vibration:true,lights:true,lightColor:'#E10600'});restChan.ok=true;}catch(e){}}
+async function restPerm(){const ln=LNp();if(!IN_APP||!ln||restAsked)return;restAsked=true;
+  try{const p=await ln.checkPermissions();if(p.display!=='granted')await ln.requestPermissions();}catch(e){}restChan();}
+async function restNotifSchedule(){if(!IN_APP||!T||T.fired||!S.prefs.sound)return;const ln=LNp();if(!ln)return;if(T.end-Date.now()<1500)return;
+  try{const p=await ln.checkPermissions();if(p.display!=='granted')return;await restChan();
+    await ln.schedule({notifications:[{id:REST_NID,title:L('Descanso terminado','Rest finished'),body:T.next||L('Bora para a próxima série!','Time for your next set!'),
+      schedule:{at:new Date(T.end),allowWhileIdle:true},channelId:'rest',smallIcon:'ic_stat_icon',iconColor:'#E10600',autoCancel:true}]});restSched=true;}catch(e){}}
+async function restNotifCancel(){if(!restSched)return;restSched=false;const ln=LNp();if(!ln)return;
+  try{await ln.cancel({notifications:[{id:REST_NID}]});}catch(e){}
+  try{await ln.removeDeliveredNotifications({notifications:[{id:REST_NID,title:'',body:''}]});}catch(e){}}
 
 /* ---------- progress ---------- */
 function lineChart(series,h){h=h||170;const all=series.flatMap(s=>s.pts);if(!all.length)return `<div class="empty">${L('Sem dados ainda.','No data yet.')}</div>`;
@@ -1237,7 +1255,7 @@ function renderProg(){const t=today();const bw=[...S.body].sort((a,b)=>a.date.lo
   else{const e=H[ui.exSel];h+=`<div class="pillset" style="margin:10px 0">${ids.map(id=>`<button class="pill ${id===ui.exSel?'on':''}" data-act="pex" data-v="${id}">${esc(P(H[id].ex,'name'))}</button>`).join('')}</div>
     ${lineChart([{pts:e.top,color:'var(--mut2)',w:1.5,dash:true,dots:true},{pts:e.pts,color:'var(--red)',w:3,dots:true}])}
     <div class="legend"><span><i style="background:var(--red)"></i>${L('1RM estimado (Epley)','Estimated 1RM (Epley)')}</span><span><i style="background:var(--mut2)"></i>${L('Carga da top set','Top set load')}</span></div>`;}
-  h+=`</div><div class="card"><div class="hd" style="font-size:20px">${L('Recordes pessoais','Personal records')}</div>${ids.length?ids.sort((a,b)=>H[b].best-H[a].best).map(id=>{const e=H[id];return `<div class="pr"><div>${esc(P(e.ex,'name'))}<div class="sub">${L('Maior carga: ','Heaviest: ')}${fmtN(e.heavy.kg)} kg × ${e.heavy.reps} (${fmtD(e.heavy.date)})</div></div><b>${fmtN(e.best,0)} kg</b></div>`;}).join('')+`<div class="sub" style="margin-top:6px">${L('Valor em destaque = 1RM estimado.','Highlighted value = estimated 1RM.')}</div>`:`<div class="empty">${L('Ainda sem recordes.','No records yet.')}</div>`}</div>`;
+  h+=`</div><div class="card"><div class="hd" style="font-size:20px">${L('Recordes pessoais','Personal records')}</div>${ids.length?ids.sort((a,b)=>H[b].heavy.kg-H[a].heavy.kg).map(id=>{const e=H[id];return `<div class="pr"><div>${esc(P(e.ex,'name'))}<div class="sub">${L('1RM estimado: ','Est. 1RM: ')}${fmtN(e.best,0)} kg · ${fmtD(e.heavy.date)}</div></div><b>${fmtN(e.heavy.kg)} kg <small>× ${e.heavy.reps}</small></b></div>`;}).join('')+`<div class="sub" style="margin-top:6px">${L('Em destaque: a maior carga que você levantou e as repetições feitas. Embaixo, o 1RM estimado.','Highlighted: the heaviest load you lifted and the reps. Below, the estimated 1RM.')}</div>`:`<div class="empty">${L('Ainda sem recordes.','No records yet.')}</div>`}</div>`;
   return h.replace('@@ALERTS@@',ui._ah||'');}
 
 /* ---------- photos tab ---------- */
@@ -1392,7 +1410,8 @@ function renderSet(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div clas
    ${IN_APP?`<button class="toggle" data-act="pref" data-k="workoutReminder"><span>${L('Lembrete nos dias de treino (6h)','Reminder on training days (6 am)')}</span><i class="sw ${S.prefs.workoutReminder?'on':''}"></i></button>`:''}
    <button class="toggle" data-act="pref" data-k="theme"><span>${L('Tema claro','Light theme')}</span><i class="sw ${S.prefs.theme==='light'?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="autoTimer"><span>${L('Iniciar descanso ao concluir série','Start rest when a set is done')}</span><i class="sw ${S.prefs.autoTimer?'on':''}"></i></button>
-   <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button></div>`;
+   <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}${IN_APP?`<br><small class="sub" style="font-size:12px">${L('Com a tela bloqueada, o aviso vem como alarme (notificação com som e vibração).','With the screen locked, it rings as an alarm (notification with sound and vibration).')}</small>`:''}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button>
+   <button class="toggle" data-act="pref" data-k="keepAwake"><span>${L('Manter tela acesa durante o treino','Keep screen on during workouts')}${IN_APP?`<br><small class="sub" style="font-size:12px">${L('Desligado economiza bateria; o alarme toca mesmo assim.','Off saves battery; the alarm still rings.')}</small>`:''}</span><i class="sw ${keepAwake()?'on':''}"></i></button></div>`;
   h+=healthCard();
   h+=appCard();
   h+=`<div class="card"><div class="hd" style="font-size:19px">Backup</div><div class="sub" style="margin:4px 0 10px">${IN_APP?L('Seus dados ficam salvos neste aparelho. Exporte um backup de vez em quando para não perder nada se trocar de celular.','Your data is saved on this device. Export a backup now and then so nothing is lost if you change phones.'):L('Seus dados ficam na nuvem da sua conta e neste aparelho. Exporte um backup de vez em quando (fotos não entram no arquivo).','Your data lives in your account\'s cloud and on this device. Export a backup now and then (photos are not included).')}</div>
@@ -1645,7 +1664,7 @@ function nativeInit(){if(!IN_APP)return;const P=CP();hLoad();
     P.App.exitApp&&P.App.exitApp();});}catch(e){}
   try{P.LocalNotifications&&P.LocalNotifications.addListener('localNotificationActionPerformed',a=>{const id=a&&a.notification&&a.notification.id;if(id===100){ui.tab='photos';ui.photoDate=today();render();}else if(id===101){ui.tab='prog';render();openMeasureForm();}else{ui.tab='home';ui.date=today();ui.filter='day';render();}});}catch(e){}
   appVersion().then(()=>{if(ui.tab==='set')render();});autoUpdateCheck();setTimeout(()=>hRefresh(true),400);
-  try{P.App&&P.App.addListener('resume',()=>{autoUpdateCheck();ui.hcSt=null;hRefresh(false);});}catch(e){}
+  try{P.App&&P.App.addListener('resume',()=>{restNotifCancel();autoUpdateCheck();ui.hcSt=null;hRefresh(false);});P.App&&P.App.addListener('pause',()=>{restNotifSchedule();});}catch(e){}
   if(S.prefs.onboarded)scheduleReminders(false);}
 function statusBarTheme(){const P=CP();if(!P.StatusBar)return;const light=S.prefs.theme==='light';try{P.StatusBar.setStyle({style:light?'LIGHT':'DARK'});P.StatusBar.setBackgroundColor({color:light?'#FFFFFF':'#0A0A0A'});}catch(e){}}
 
@@ -2399,7 +2418,7 @@ const A={
  plstart:()=>{const v=$('#pl-start').value.trim();if(!isDate(v)){toast(L('Use AAAA-MM-DD','Use YYYY-MM-DD'));return;}S.plan.startDate=v;persist('plan');render();toast(L('Início atualizado','Start date updated'));},
  plreset:()=>modal(L('Restaurar plano original?','Restore original plan?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Restaurar','Restore'),c:'primary',fn:()=>{S.plan=clone(DEFAULT_PLAN);persist('plan');closeModal();render();}}]),
  saveprof:()=>{const g=id=>$('#'+id).value.trim();Object.assign(S.profile,{name:g('pf-name'),idade:num(g('pf-idade'))||S.profile.idade,altura:num(g('pf-alt'))||S.profile.altura,pesoInicial:num(g('pf-pi'))||S.profile.pesoInicial,metaMin:num(g('pf-mmin'))||S.profile.metaMin,metaMax:num(g('pf-mmax'))||S.profile.metaMax});persist('profile');toast(L('Perfil salvo','Profile saved'));},
- pref:b=>{const k=b.dataset.k;if(k==='theme'){A.theme();return;}S.prefs[k]=!S.prefs[k];persist('prefs');if(IN_APP&&k==='workoutReminder')scheduleReminders(true);b.querySelector('.sw').classList.toggle('on',!!S.prefs[k]);},
+ pref:b=>{const k=b.dataset.k;if(k==='theme'){A.theme();return;}if(k==='keepAwake'){S.prefs.keepAwake=!keepAwake();persist('prefs');wake(!!(S.prefs.keepAwake&&S.active));b.querySelector('.sw').classList.toggle('on',S.prefs.keepAwake);return;}S.prefs[k]=!S.prefs[k];persist('prefs');if(IN_APP&&k==='workoutReminder')scheduleReminders(true);b.querySelector('.sw').classList.toggle('on',!!S.prefs[k]);},
  bkdl:()=>download(`backup-treino-${today()}.json`,JSON.stringify(backupObj(),null,2)),
  bkcopy:()=>copyText(JSON.stringify(backupObj())),
  mbtn:b=>{const a=MA[+b.dataset.i];a&&a.fn();},
