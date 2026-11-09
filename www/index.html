@@ -2969,7 +2969,7 @@ function openViewer(o){closeViewer();const el=document.createElement('div');el.c
 function closeViewer(){const v=$('#viewer');if(v){v.classList.add('out');setTimeout(()=>v.remove(),180);}document.body.classList.remove('noscroll');}
 function hydrateImgs(root){root.querySelectorAll('img[data-img]').forEach(im=>{getImg(im.dataset.img).then(src=>{if(src)im.src=src;});});}
 /* abertura animada (barra recebendo anilhas) */
-function splash(){if(document.getElementById('splash'))return;const el=document.createElement('div');el.id='splash';
+function splash(){if(document.getElementById('splash'))return;const el=document.createElement('div');el.id='splash';vib([55,70,55,70,55]);
   el.innerHTML=`<svg viewBox="0 0 220 80"><rect class="bar" x="10" y="36" width="200" height="8" rx="4" fill="#9a9a9a"/>
    <rect class="pl l1" x="38" y="10" width="14" height="60" rx="3" fill="#B8E04A"/><rect class="pl r1" x="168" y="10" width="14" height="60" rx="3" fill="#B8E04A"/>
    <rect class="pl l2" x="54" y="18" width="10" height="44" rx="3" fill="#ffffff"/><rect class="pl r2" x="156" y="18" width="10" height="44" rx="3" fill="#ffffff"/></svg>
