@@ -9,7 +9,7 @@
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_icon",
-      "iconColor": "#E10600"
+      "iconColor": "#C8FF1A"
     },
     "SystemBars": {
       "style": "DARK",
