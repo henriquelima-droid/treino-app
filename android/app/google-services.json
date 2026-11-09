@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "209647298910",
+    "project_id": "grow-up-ded86",
+    "storage_bucket": "grow-up-ded86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209647298910:android:23db17e2e551bf63e147cf",
+        "android_client_info": {
+          "package_name": "br.com.treinohg.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "209647298910-fehh2a9fbc6467n32o2fol3pcfbjtlq7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBT8IMAgpmwPX1CBkbY8qQmPvndp7mhmmc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "209647298910-fehh2a9fbc6467n32o2fol3pcfbjtlq7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
