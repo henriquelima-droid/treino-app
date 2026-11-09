@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "209647298910-uba92rohnkc4pphe44e2n04lfadebdfi.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "br.com.treinohg.app",
+            "certificate_hash": "5915c0794725afbe3d003f0d42670d2507636732"
+          }
+        },
+        {
           "client_id": "209647298910-fehh2a9fbc6467n32o2fol3pcfbjtlq7.apps.googleusercontent.com",
           "client_type": 3
         }
