@@ -9,11 +9,17 @@
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_icon",
-      "iconColor": "#E10600"
+      "iconColor": "#B8E04A"
     },
     "SystemBars": {
       "style": "DARK",
       "insetsHandling": "css"
+    },
+    "FirebaseAuthentication": {
+      "skipNativeAuth": true,
+      "providers": [
+        "google.com"
+      ]
     }
   }
 }
