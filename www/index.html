@@ -679,7 +679,10 @@ html.webapp .chathd{top:env(safe-area-inset-top)}
 html.webapp .cropfx{padding-top:calc(10px + env(safe-area-inset-top))}
 .xvid{border-radius:18px;overflow:hidden;background:#111;aspect-ratio:16/9;margin-bottom:10px}
 .xvid video{width:100%;height:100%;object-fit:cover;display:block}
-.vthumb{object-fit:cover;object-position:62% center}
+.vthumb{object-fit:cover;object-position:center}.vthumb.vr{object-position:62% center}
+.xvid{position:relative}
+.vmute{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,10,10,.68);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.vmute svg{width:20px;height:20px}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1446,7 +1449,7 @@ function setBlock(e,i,j,lp,letter){const s=e.sets[j],t=stype(s),key=i+'-'+j,open
 function ytLink(e){const q=LANG==='en'?P(e,'name')+' proper form':LANG==='es'?P(e,'name')+' técnica correcta':e.name+' execução correta';return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q);}
 function exInfo(e0,i){const e=Object.assign({},e0,{id:vidOf(e0)});const has=S.media.ex&&S.media.ex[e.id];const bi=EXIMG.has(e.id);const xl=XL[e.id];
   const hv=hasVid(e.id);if(hv)setTimeout(hydrateVids,0);
-  return `<div class="xinfo">${hv?`<div class="xvid"><video data-vid="${esc(e.id)}" muted loop playsinline autoplay preload="auto" poster="img/vid/${esc(e.id)}.jpg"></video></div>`:!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
+  return `<div class="xinfo">${hv?`<div class="xvid"><video data-vid="${esc(e.id)}" loop playsinline autoplay preload="auto" poster="img/vid/${esc(e.id)}.jpg"></video><button class="vmute" data-act="vmute">${vMuted()?IC.volx:IC.vol}</button></div>`:!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
      <div class="row" style="margin-top:6px;gap:6px"><span class="sub grow" style="font-size:11px">${L('Imagem: Free Exercise DB (domínio público)','Image: Free Exercise DB (public domain)')}</span><span class="btn sm filewrap">${L('Usar minha imagem','Use my image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div>`:has?`<img class="ximg" data-img="ex-${esc(e.id)}" alt="${esc(exName(e))}">
      <div class="row" style="margin-top:6px;justify-content:flex-end;gap:6px"><span class="btn sm filewrap">${L('Trocar imagem','Replace image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span><button class="btn sm" data-act="exirm" data-id="${esc(e.id)}">${bi?L('Voltar à padrão','Use default'):L('Remover','Remove')}</button></div>`
     :`<div class="ximg-ph"><b>${L('Sem figura ainda','No picture yet')}</b>${L('Adicione uma imagem de referência da execução (print, foto ou ilustração). Ela fica salva para os próximos treinos.','Add a reference image of the movement (screenshot, photo or illustration). It is saved for future workouts.')}<div style="margin-top:10px"><span class="btn sm play filewrap">+ ${L('Adicionar imagem','Add image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div></div>`}
@@ -2918,15 +2921,21 @@ function libIdByName(n){if(!n)return null;const t=String(n).toLowerCase().normal
 const hasImg=id=>EXIMG.has(id);
 /* miniatura da execução (ou do mapa muscular, se não houver foto) */
 /* vídeos próprios dos exercícios (hospedados junto da versão web e guardados no aparelho após o 1º uso) */
-const VIDS=new Set(["cadeira-extensora"]);
-const hasVid=id=>VIDS.has(id);
-const VID_BASE=NATIVE?'https://henriquelima-droid.github.io/treino-app/videos/':'videos/';
+const VIDS={"cadeira-extensora": "09c7ca6e", "desenvolvimento-halteres": "281362fb", "leg-press": "0354c8b0"};
+const hasVid=id=>!!VIDS[id];
+const VID_BASE=(NATIVE||/github\.io$/.test(location.hostname))?'https://henriquelima-droid.github.io/treino-app/videos/':'videos/';
 const VIDC={};
-async function loadVid(id){if(VIDC[id])return VIDC[id];let b=null;try{b=await idbGet('vid:'+id);}catch(e){}
-  if(!b){try{const r=await fetch(VID_BASE+id+'.mp4');if(r.ok){b=await r.blob();idbPut('vid:'+id,b);}}catch(e){}}
-  VIDC[id]=b?URL.createObjectURL(b):VID_BASE+id+'.mp4';return VIDC[id];}
-function hydrateVids(){document.querySelectorAll('video[data-vid]').forEach(async v=>{if(v.dataset.ok)return;v.dataset.ok='1';const u=await loadVid(v.dataset.vid);v.src=u;v.muted=true;try{await v.play();}catch(e){}});}
-function exThumb(id,size){size=size||44;if(hasVid(id))return `<img class="exthumb vthumb" src="img/vid/${id}.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;if(hasImg(id))return `<img class="exthumb" src="img/ex/${id}-0.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;
+async function loadVid(id){if(VIDC[id])return VIDC[id];const k='vid:'+id+':'+VIDS[id],url=VID_BASE+id+'.mp4?v='+VIDS[id];let b=null;try{b=await idbGet(k);}catch(e){}
+  if(!b){try{const r=await fetch(url);if(r.ok){b=await r.blob();idbPut(k,b);idbDel('vid:'+id);}}catch(e){}}
+  VIDC[id]=b?URL.createObjectURL(b):url;return VIDC[id];}
+const vMuted=()=>S.prefs.vidMute===true;
+function vIcons(){document.querySelectorAll('.vmute').forEach(b=>{const v=b.parentElement.querySelector('video');const m=v?v.muted:vMuted();b.innerHTML=m?IC.volx:IC.vol;b.setAttribute('aria-label',m?L('Ativar som','Unmute','Activar sonido'):L('Silenciar','Mute','Silenciar'));});}
+function hydrateVids(){document.querySelectorAll('video[data-vid]').forEach(async v=>{if(v.dataset.ok)return;v.dataset.ok='1';
+  v.addEventListener('play',()=>{document.querySelectorAll('video[data-vid]').forEach(o=>{if(o!==v&&!o.paused)o.pause();});});
+  const u=await loadVid(v.dataset.vid);v.src=u;v.muted=vMuted();
+  try{await v.play();}catch(e){v.muted=true;try{await v.play();}catch(e2){}}vIcons();});}
+Object.assign(A,{vmute:b=>{const v=b.parentElement.querySelector('video');const m=v?!v.muted:!vMuted();S.prefs.vidMute=m;persist('prefs');document.querySelectorAll('video[data-vid]').forEach(x=>{x.muted=m;});if(v&&v.paused)v.play().catch(()=>{});vIcons();}});
+function exThumb(id,size){size=size||44;if(hasVid(id))return `<img class="exthumb vthumb ${id==='cadeira-extensora'?'vr':''}" src="img/vid/${id}.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;if(hasImg(id))return `<img class="exthumb" src="img/ex/${id}-0.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;
   const x=XL[id];return `<span class="exthumb mm" style="width:${size}px;height:${size}px">${x?avatarSVG({mini:1,hi:{p:x.mp,s:x.ms},view:muscleView(x.mp)}):svgSz(IC.dumb,size*0.55)}</span>`;}
 
 /* ---------- avatar 2D (provador) e mapa muscular ---------- */
@@ -3013,6 +3022,8 @@ function avAdjFromMeasures(){const pf=S.profile,F=pf.sex==='F';const ms=[...(S.m
 /* ---------- ícones de musculação ---------- */
 (function(){const sv=(d,f)=>`<svg viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="${f?'none':'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 Object.assign(IC,{
+ vol:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M15.5 8.8a4.5 4.5 0 0 1 0 6.4M18.3 6a8.5 8.5 0 0 1 0 12"/></svg>',
+ volx:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>',
  globe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3z"/></svg>',
  shoe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5V9.8c0-.6.6-1 1.1-.7l1.4.8c.9.5 2 .3 2.6-.5l1-1.4c.3-.4.9-.5 1.3-.1l1.6 1.4c.5.4 1.2.6 1.8.5l1.2-.2c.5-.1 1 .2 1.2.6l.7 1.4c.3.6.9 1 1.6 1.2l1.4.4c.7.2 1.2.9 1.2 1.6v1h-18z"/><path d="M3 15.5v2.2c0 .4.3.8.8.8h16.4c.4 0 .8-.4.8-.8v-2.2M9.3 9.6l1.2 1.1M11.4 11.3l1.2 1"/></svg>',
  arm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 20.5c-.9-3.6-.6-7.4 1.2-10.6L8 5.6c.4-.8 1.3-1.3 2.2-1.1l2 .4c.8.2 1.2 1 .8 1.7l-.7 1.2c-.3.5-.9.8-1.5.7l-1.3-.2-1.1 3.6c1.7-1.5 4.3-2 6.4-1.1 2.1.9 3.6 3 3.7 5.3l.1 1.4c.1 1.6-1.1 3-2.7 3.1z"/><path d="M10.5 15.3c1.1-.9 2.7-1 3.9-.2"/></svg>',
@@ -3485,6 +3496,7 @@ async function loginGoogle(){if(!cloudOn())return;CL.busy=true;softRender();
       catch(e1){if(isCancel(e1))throw e1;/* seletor de contas clássico do Google como alternativa */r=await FA.signInWithGoogle({skipNativeAuth:true,useCredentialManager:false});}
       const tk=r&&r.credential;if(!tk||!tk.idToken)throw {code:'auth/no-id-token'};
       await FB.signInWithCredential(fbAuth,FB.GoogleAuthProvider.credential(tk.idToken,tk.accessToken));}
+    else if(WEBAPP){googleRedirect();return;}
     else await FB.signInWithPopup(fbAuth,new FB.GoogleAuthProvider());
     closeModal();toast(L('Conectado','Signed in','Conectado'));}
   catch(e){if(!isCancel(e)){const m=String((e&&(e.code||e.message))||e);
@@ -3633,7 +3645,21 @@ Object.assign(A,{
 /* backup automático: marca como pendente a cada alteração salva */
 {const _p=persist;persist=function(k){_p(k);if(k!=='prefs')cloudDirty();};const _s=saveSession;saveSession=function(s){_s(s);cloudDirty();if(s&&s.endedAt&&logged())setTimeout(pushStats,1500);};}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&CL.dirty&&logged())cloudBackup(false);});
-function cloudBoot(){if(cloudOn()&&owner()!=='local')setTimeout(()=>cloudInit().catch(()=>{}),900);}
+/* Google na versão web (iPhone): login por redirecionamento direto no Google, sem janela pop-up
+   (pop-ups e cookies de terceiros falham no app instalado do iPhone) */
+const GOOGLE_WEB_CLIENT='209647298910-fehh2a9fbc6467n32o2fol3pcfbjtlq7.apps.googleusercontent.com';
+function googleRedirect(){const n=Array.from(crypto.getRandomValues(new Uint8Array(16)),b=>b.toString(16).padStart(2,'0')).join('');try{localStorage.setItem('gu:nonce',n);}catch(e){}
+  const red=location.origin+location.pathname;
+  location.href='https://accounts.google.com/o/oauth2/v2/auth?'+new URLSearchParams({client_id:GOOGLE_WEB_CLIENT,redirect_uri:red,response_type:'id_token',scope:'openid email profile',nonce:n,prompt:'select_account'}).toString();}
+async function googleReturn(){const h=location.hash||'';if(!/id_token=|error=/.test(h))return;const p=new URLSearchParams(h.slice(1));history.replaceState(null,'',location.pathname+location.search);
+  if(p.get('error')){if(p.get('error')!=='access_denied')toast(L('Login com Google não concluído: ','Google sign-in not completed: ','Inicio con Google no completado: ')+p.get('error'));return;}
+  const tk=p.get('id_token');if(!tk)return;
+  try{const pl=JSON.parse(atob(tk.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));const n=localStorage.getItem('gu:nonce');if(n&&pl.nonce&&pl.nonce!==n){toast(L('Login inválido, tente de novo','Invalid sign-in, try again','Inicio no válido, inténtalo de nuevo'));return;}}catch(e){}
+  try{localStorage.removeItem('gu:nonce');}catch(e){}
+  try{CL.busy=true;await cloudInit();await FB.signInWithCredential(fbAuth,FB.GoogleAuthProvider.credential(tk));toast(L('Conectado','Signed in','Conectado'));}
+  catch(e){modal(L('Não foi possível entrar com Google','Could not sign in with Google','No se pudo entrar con Google'),`<p>${L('Tente de novo ou entre com e-mail.','Try again or sign in with email.','Inténtalo de nuevo o entra con correo.')}</p><p class="sub mono" style="word-break:break-all">${esc(String((e&&(e.code||e.message))||e).slice(0,240))}</p>`,[{l:L('Fechar','Close','Cerrar'),fn:closeModal}]);}
+  CL.busy=false;softRender();}
+function cloudBoot(){if(cloudOn()&&/id_token=|error=/.test(location.hash||'')){setTimeout(googleReturn,300);return;}if(cloudOn()&&owner()!=='local')setTimeout(()=>cloudInit().catch(()=>{}),900);}
 
 /* ---------- rede social fitness: feed, parceiros, direct e desafios ---------- */
 const SOC={on:false,uid:null,fr:[],friends:[],users:{},posts:[],msgs:[],ch:[],un:[],uu:{},img:{},imgP:{}};
