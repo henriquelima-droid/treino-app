@@ -677,6 +677,9 @@ html[data-theme=light] .sav.ini{background:linear-gradient(140deg,#E4F0C2,#F4F4F
 html.webapp body{padding-top:env(safe-area-inset-top)}
 html.webapp .chathd{top:env(safe-area-inset-top)}
 html.webapp .cropfx{padding-top:calc(10px + env(safe-area-inset-top))}
+.xvid{border-radius:18px;overflow:hidden;background:#111;aspect-ratio:16/9;margin-bottom:10px}
+.xvid video{width:100%;height:100%;object-fit:cover;display:block}
+.vthumb{object-fit:cover;object-position:62% center}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1442,11 +1445,12 @@ function setBlock(e,i,j,lp,letter){const s=e.sets[j],t=stype(s),key=i+'-'+j,open
   </div>`;}
 function ytLink(e){const q=LANG==='en'?P(e,'name')+' proper form':LANG==='es'?P(e,'name')+' técnica correcta':e.name+' execução correta';return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q);}
 function exInfo(e0,i){const e=Object.assign({},e0,{id:vidOf(e0)});const has=S.media.ex&&S.media.ex[e.id];const bi=EXIMG.has(e.id);const xl=XL[e.id];
-  return `<div class="xinfo">${!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
+  const hv=hasVid(e.id);if(hv)setTimeout(hydrateVids,0);
+  return `<div class="xinfo">${hv?`<div class="xvid"><video data-vid="${esc(e.id)}" muted loop playsinline autoplay preload="auto" poster="img/vid/${esc(e.id)}.jpg"></video></div>`:!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
      <div class="row" style="margin-top:6px;gap:6px"><span class="sub grow" style="font-size:11px">${L('Imagem: Free Exercise DB (domínio público)','Image: Free Exercise DB (public domain)')}</span><span class="btn sm filewrap">${L('Usar minha imagem','Use my image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div>`:has?`<img class="ximg" data-img="ex-${esc(e.id)}" alt="${esc(exName(e))}">
      <div class="row" style="margin-top:6px;justify-content:flex-end;gap:6px"><span class="btn sm filewrap">${L('Trocar imagem','Replace image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span><button class="btn sm" data-act="exirm" data-id="${esc(e.id)}">${bi?L('Voltar à padrão','Use default'):L('Remover','Remove')}</button></div>`
     :`<div class="ximg-ph"><b>${L('Sem figura ainda','No picture yet')}</b>${L('Adicione uma imagem de referência da execução (print, foto ou ilustração). Ela fica salva para os próximos treinos.','Add a reference image of the movement (screenshot, photo or illustration). It is saved for future workouts.')}<div style="margin-top:10px"><span class="btn sm play filewrap">+ ${L('Adicionar imagem','Add image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div></div>`}
-   ${xl?muscleMap(xl.mp,xl.ms):`<p><b>${L('Músculo-alvo:','Target muscle:')}</b> ${esc(gName(e.group))}</p>`}
+   ${hv?(xl?`<p><b>${L('Músculos:','Muscles:','Músculos:')}</b> ${xl.mp.concat(xl.ms).map(musName).map(esc).join(' · ')}</p>`:''):xl?muscleMap(xl.mp,xl.ms):`<p><b>${L('Músculo-alvo:','Target muscle:')}</b> ${esc(gName(e.group))}</p>`}
    ${xl&&xl.eq.length?`<p class="sub">${svgSz(IC.dumb,14)} ${xl.eq.map(eqName).join(' · ')}</p>`:''}
    ${P(e,'note')?`<p><b>${L('Técnica:','Technique:')}</b> ${esc(P(e,'note'))}</p>`:''}
    <p><b>${L('Séries:','Sets:')}</b> ${esc(setBreakdown(e.sets))}. ${L('Toque no ? de cada série para saber o que fazer.','Tap the ? on each set to see what to do.')}</p>
@@ -2913,7 +2917,16 @@ function libIdByName(n){if(!n)return null;const t=String(n).toLowerCase().normal
     if(u===t){best=x.id;bs=99;return;}const tw=t.split(/\s+/),uw=u.split(/\s+/);const c=tw.filter(w=>w.length>2&&uw.includes(w)).length/Math.max(tw.length,uw.length);if(c>bs&&c>=0.6){bs=c;best=x.id;}});});return best;}
 const hasImg=id=>EXIMG.has(id);
 /* miniatura da execução (ou do mapa muscular, se não houver foto) */
-function exThumb(id,size){size=size||44;if(hasImg(id))return `<img class="exthumb" src="img/ex/${id}-0.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;
+/* vídeos próprios dos exercícios (hospedados junto da versão web e guardados no aparelho após o 1º uso) */
+const VIDS=new Set(["cadeira-extensora"]);
+const hasVid=id=>VIDS.has(id);
+const VID_BASE=NATIVE?'https://henriquelima-droid.github.io/treino-app/videos/':'videos/';
+const VIDC={};
+async function loadVid(id){if(VIDC[id])return VIDC[id];let b=null;try{b=await idbGet('vid:'+id);}catch(e){}
+  if(!b){try{const r=await fetch(VID_BASE+id+'.mp4');if(r.ok){b=await r.blob();idbPut('vid:'+id,b);}}catch(e){}}
+  VIDC[id]=b?URL.createObjectURL(b):VID_BASE+id+'.mp4';return VIDC[id];}
+function hydrateVids(){document.querySelectorAll('video[data-vid]').forEach(async v=>{if(v.dataset.ok)return;v.dataset.ok='1';const u=await loadVid(v.dataset.vid);v.src=u;v.muted=true;try{await v.play();}catch(e){}});}
+function exThumb(id,size){size=size||44;if(hasVid(id))return `<img class="exthumb vthumb" src="img/vid/${id}.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;if(hasImg(id))return `<img class="exthumb" src="img/ex/${id}-0.jpg" alt="" style="width:${size}px;height:${size}px" loading="lazy">`;
   const x=XL[id];return `<span class="exthumb mm" style="width:${size}px;height:${size}px">${x?avatarSVG({mini:1,hi:{p:x.mp,s:x.ms},view:muscleView(x.mp)}):svgSz(IC.dumb,size*0.55)}</span>`;}
 
 /* ---------- avatar 2D (provador) e mapa muscular ---------- */
