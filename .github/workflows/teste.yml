@@ -38,8 +38,8 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
         env:
-          APP_BUILD: "12"
-          APP_VERSION_NAME: "1.0.13-teste"
+          APP_BUILD: "13"
+          APP_VERSION_NAME: "1.0.14-teste"
 
       - name: Rename APK
         run: cp android/app/build/outputs/apk/debug/app-debug.apk GrowUp-teste.apk
