@@ -641,11 +641,9 @@ html[data-theme=light] .nvb{box-shadow:0 8px 20px rgba(120,160,0,.25),0 0 0 5px 
 .sav.ini{background:linear-gradient(140deg,#2f3a12,#141414);color:var(--red2)}
 html[data-theme=light] .sav.ini{background:linear-gradient(140deg,#E4F0C2,#F4F4F2);color:#3d5410}
 /* ajustes v1.0.14 */
-body.nonav .bnav{display:none}
-body.nonav{padding-bottom:0}
-body.nonav .chatin{bottom:0;padding-bottom:calc(10px + env(safe-area-inset-bottom));border-top:1px solid var(--s2)}
-body.nonav .quick{bottom:calc(66px + env(safe-area-inset-bottom))}
-body.nonav .chat{padding-bottom:140px}
+.chatin{bottom:calc(var(--navh,80px) + 30px);border-top:0;background:linear-gradient(to top,var(--bg) 70%,transparent)}
+.quick{bottom:calc(var(--navh,80px) + 92px)}
+.chat{padding-bottom:210px}
 .wem{margin-right:8px;font-size:.8em}
 .startbtn{display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;padding:16px}.startbtn span{font-size:20px}
 .dayacc{width:100%;display:flex;align-items:center;background:none;border:0;border-top:1px solid var(--s2);margin-top:14px;padding:12px 0 0;color:var(--mut);font:600 14px Inter,sans-serif;cursor:pointer;text-align:left}
@@ -654,6 +652,11 @@ body.nonav .chat{padding-bottom:140px}
 .chsum{display:flex;align-items:center;gap:12px}.chsum b{font:800 20px Sora,Inter,sans-serif}
 .chlist{display:flex;flex-direction:column;gap:10px}.chlist .chmini{width:100%}
 .ighd:first-child{padding-top:4px}
+.startbtn{position:relative;overflow:visible}
+.flagpin{position:absolute;top:-20px;right:16px;font-size:34px!important;line-height:1;transform:rotate(14deg);transform-origin:bottom left;filter:drop-shadow(0 4px 6px rgba(0,0,0,.35));animation:flagwave 2.4s ease-in-out infinite}
+@keyframes flagwave{0%,100%{transform:rotate(14deg)}50%{transform:rotate(6deg)}}
+.agi{color:var(--redTx);vertical-align:-3px;flex:none}
+.mc .c .agi{vertical-align:middle}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1302,16 +1305,16 @@ function renderDay(){const d=ui.date,dp=dayPlan(d),isT=d===today();const ss=sess
   let h=dnav(fmtLong(d),isT?L('Hoje','Today'):`<button class="btn sm ghost" data-act="dnav" data-v="0" style="padding:2px 6px;color:var(--redTx)">${L('Voltar para hoje','Back to today')}</button>`);
   const doneW=ss.filter(s=>s.type==='workout'),doneC=ss.filter(s=>s.type==='cardio');
   if(dp.type==='workout'){const code=dp.code,w=S.plan.workouts[code],T=targets(code,dp);
-    h+=`<div class="card"><div class="row"><div class="grow"><div class="sub">${esc(P(w,'focus'))}</div><div class="wk"><span class="wem">💪🏻</span>${L('Treino','Workout','Entreno')} <span>${esc(wLabel(code))}</span></div></div>${doneW.length?`<span class="chip solid">${L('Concluído ✓','Done ✓')}</span>`:''}</div>
+    h+=`<div class="card"><div class="row"><div class="grow"><div class="sub">${esc(P(w,'focus'))}</div><div class="wk">${L('Treino','Workout','Entreno')} <span>${esc(wLabel(code))}</span></div></div>${doneW.length?`<span class="chip solid">${L('Concluído ✓','Done ✓')}</span>`:''}</div>
       <div class="chips"><span class="chip red">${L('Semana','Week')} ${dp.week} · ${esc(phName(dp.phase))}</span>${dp.phase.rirOverride?`<span class="chip">RIR ${esc(dp.phase.rirOverride)}</span>`:''}<span class="chip">~${estMin(T)} min</span></div>
       ${doneW.map(sessionMini).join('')}
-      <div style="margin-top:12px">${S.active?`<button class="btn primary block startbtn" data-act="resume"><span>🏁</span>${L('Continuar treino','Resume workout','Continuar entreno')}</button>`:`<button class="btn primary block startbtn" data-act="start" data-code="${code}" data-date="${d}"><span>🏁</span>${doneW.length?L('Treinar de novo','Train again','Entrenar de nuevo'):L('Iniciar treino ','Start workout ','Iniciar entreno ')+esc(wLabel(code))}</button>`}</div>
+      <div style="margin-top:12px">${S.active?`<button class="btn primary block startbtn" data-act="resume"><span class="flagpin">🏁</span>${L('Continuar treino','Resume workout','Continuar entreno')}</button>`:`<button class="btn primary block startbtn" data-act="start" data-code="${code}" data-date="${d}"><span class="flagpin">🏁</span>${doneW.length?L('Treinar de novo','Train again','Entrenar de nuevo'):L('Iniciar treino ','Start workout ','Iniciar entreno ')+esc(wLabel(code))}</button>`}</div>
       <button class="acc-h dayacc" data-act="dayex"><span class="grow">${ui.dayEx?L('Ocultar exercícios','Hide exercises','Ocultar ejercicios'):L('Ver exercícios','See exercises','Ver ejercicios')} <small>(${T.length})</small></span><span class="acc-ch" style="${ui.dayEx?'transform:rotate(90deg)':''}">${IC.r}</span></button>
       ${ui.dayEx?`${P(dp.phase,'note')?`<div class="note-box">${esc(P(dp.phase,'note'))}</div>`:''}<div class="exl">${dayList(T)}</div>
-      <div class="exi"><div><div class="n">👟 ${L('Cardio pós-treino','Post-workout cardio','Cardio post-entreno')}</div><div class="m">${esc(P(S.plan.cardio.training,'text'))}</div></div><div class="r">${S.plan.cardio.training.min}–${S.plan.cardio.training.max}<small>min</small></div></div>
+      <div class="exi"><div><div class="n">${L('Cardio pós-treino','Post-workout cardio','Cardio post-entreno')}</div><div class="m">${esc(P(S.plan.cardio.training,'text'))}</div></div><div class="r">${S.plan.cardio.training.min}–${S.plan.cardio.training.max}<small>min</small></div></div>
       ${!S.active&&d<=today()?`<button class="btn block outline" data-act="logwo" data-code="${code}" data-date="${d}" style="margin-top:10px">${L('Registrar treino já feito','Log a workout already done','Registrar entreno ya hecho')}</button>`:''}`:''}</div>`+otherWorkouts(d,code);}
   else if(dp.type==='pre'){h+=`<div class="card"><div class="wk">${L('Pré-','Pre-')}<span>${L('plano','plan')}</span></div><div class="sub" style="margin-top:6px">${L('Seu plano começa em ','Your plan starts on ')}${fmtLong(S.plan.startDate)}. ${L('Se quiser adiantar, escolha um treino abaixo.','To start early, pick a workout below.')}</div>${ss.map(sessionMini).join('')}</div>`+otherWorkouts(d,null);}
-  else if(dp.type==='cardio'){h+=`<div class="card"><div class="row"><div class="grow"><div class="sub">${L('Dia sem musculação','No lifting today')}</div><div class="wk"><span class="wem">👟</span>Car<span>dio</span></div></div>${doneC.length?`<span class="chip solid">${L('Feito ✓','Done ✓')}</span>`:''}</div>
+  else if(dp.type==='cardio'){h+=`<div class="card"><div class="row"><div class="grow"><div class="sub">${L('Dia sem musculação','No lifting today')}</div><div class="wk">Car<span>dio</span></div></div>${doneC.length?`<span class="chip solid">${L('Feito ✓','Done ✓')}</span>`:''}</div>
       <div class="chips"><span class="chip red">${L('Semana','Week')} ${dp.week} · ${esc(phName(dp.phase))}</span><span class="chip">${S.plan.cardio.off.min}–${S.plan.cardio.off.max} min</span></div>
       <div class="note-box">${esc(P(S.plan.cardio.off,'text'))}</div>${doneC.map(sessionMini).join('')}${cardioForm(d)}</div>`+otherWorkouts(d,null);}
   else h+=`<div class="card"><div class="wk">${L('Descan','Re')}<span>${L('so','st')}</span></div><div class="sub" style="margin-top:6px">${L('Recuperação também é treino. Foque em sono, proteína e passos leves.','Recovery is training too. Focus on sleep, protein and easy walking.')}</div>${ss.map(sessionMini).join('')}</div>`+otherWorkouts(d,null);
@@ -1325,6 +1328,8 @@ function cardioForm(d){return `<div class="lbl2">${L('Registrar cardio','Log car
   <div class="field"><label>${L('Observações','Notes')}</label><input id="cd-notes" placeholder="${L('Inclinação, velocidade, sensação…','Incline, speed, how it felt…')}"></div><button class="btn primary block" data-act="savecd" data-date="${d}">${L('Salvar cardio','Save cardio')}</button>`;}
 function sessionMini(s){if(s.type==='cardio')return `<div class="note-box"><b>${L('Cardio registrado:','Cardio logged:')}</b> ${esc(devName(s.cardio.device))} · ${esc(s.cardio.min)} min${s.cardio.fc?' · '+L('FC','HR')+' '+esc(s.cardio.fc):''}${s.notes?' — '+esc(s.notes):''}</div>`;
   const n=s.exercises.reduce((a,e)=>a+e.sets.filter(x=>x.done&&isWork(x)).length,0);return `<div class="note-box"><b>${esc(woTitle(s))} ${L('feito:','done:')}</b> ${n} ${L('séries','sets')} · ${s.durationMin||'?'} min${s.notes?' — '+esc(s.notes):''}</div>`;}
+/* agenda: tênis no lugar de "Cardio" e braço no lugar de "Treino" */
+function agendaLabel(t){const e=esc(t);return e.replace(/^(Cardio)\b\s*/i,'').replace(/^(Treino|Workout|Entreno)\s+/i,()=>svgSz(IC.arm,18,'class="agi"')+' ');}
 function dayTag(d){const dp=dayPlan(d),ss=sessionsOn(d);const w=ss.find(s=>s.type==='workout'),c=ss.find(s=>s.type==='cardio');
   if(w)return{cls:'done',txt:sLabel(w),label:woTitle(w)+' ✓'};
   if(dp.type==='workout')return{cls:'wo',txt:wLabel(dp.code),label:P(S.plan.workouts[dp.code],'name')+' · '+P(S.plan.workouts[dp.code],'focus')};
@@ -1335,7 +1340,7 @@ function dayTag(d){const dp=dayPlan(d),ss=sessionsOn(d);const w=ss.find(s=>s.typ
 function renderWeek(){const ws=weekStart(ui.date),we=addD(ws,6),dp=dayPlan(ws<S.plan.startDate?S.plan.startDate:ws);const dows=DOWS[LANG];
   let h=dnav(fmtD(ws)+' – '+fmtD(we),dp.pre?L('Antes do plano','Before the plan'):L('Semana ','Week ')+dp.week+' · '+phName(dp.phase));
   h+='<div class="weekl">';for(let i=0;i<7;i++){const d=addD(ws,i),t=dayTag(d);
-    h+=`<button class="wd ${d===today()?'today':''}" data-act="goday" data-date="${d}"><div class="dn"><span>${dows[i]}</span><b>${pd(d).getDate()}</b></div><div class="tag ${t.cls}">${t.txt}</div><div class="tx"><b>${esc(t.label)}</b>${d===today()?`<span>${L('Hoje','Today')}</span>`:''}${S.media.photos.some(p=>p.date===d)?`<span> · ${L('fotos','photos')} ✓</span>`:''}</div>${svgSz(IC.r,18,'style="color:var(--mut2)"')}</button>`;}
+    h+=`<button class="wd ${d===today()?'today':''}" data-act="goday" data-date="${d}"><div class="dn"><span>${dows[i]}</span><b>${pd(d).getDate()}</b></div><div class="tag ${t.cls}">${t.txt==='CRD'?svgSz(IC.shoe,22,'class="agi"'):t.txt}</div><div class="tx"><b>${agendaLabel(t.label)}</b>${d===today()?`<span>${L('Hoje','Today')}</span>`:''}${S.media.photos.some(p=>p.date===d)?`<span> · ${L('fotos','photos')} ✓</span>`:''}</div>${svgSz(IC.r,18,'style="color:var(--mut2)"')}</button>`;}
   h+='</div>';
   const days=[...Array(7)].map((_,i)=>addD(ws,i));
   const planned=days.map(dayPlan).filter(x=>x.type==='workout').length;
@@ -1348,7 +1353,7 @@ function renderMonth(){const d=pd(ui.date),y=d.getFullYear(),m=d.getMonth();cons
   for(let i=0;i<first.getDay();i++)h+='<div class="mc blank"></div>';
   const t=today();for(let i=1;i<=days;i++){const ds=ymd(new Date(y,m,i)),tg=dayTag(ds);const isC=tg.cls.indexOf('cd')>=0;
     const cls=(tg.cls==='done'?'done':tg.cls==='cd done'?'cdone':'')+(ds===t?' today':'')+(ds<t?' past':'');
-    h+=`<button class="mc ${cls}" data-act="goday" data-date="${ds}"><span>${i}</span><span class="c ${isC?'cd':''}">${isC?'cardio':(tg.txt==='—'||tg.txt==='–')?'':tg.txt}</span></button>`;}
+    h+=`<button class="mc ${cls}" data-act="goday" data-date="${ds}"><span>${i}</span><span class="c ${isC?'cd':''}">${isC?svgSz(IC.shoe,16,'class="agi"'):(tg.txt==='—'||tg.txt==='–')?'':tg.txt}</span></button>`;}
   h+=`</div><div class="legend"><span><i style="background:var(--red)"></i>${L('Musculação feita','Lifting done')}</span><span><i style="background:var(--wine)"></i>${L('Cardio feito','Cardio done')}</span><span><i style="border:2px solid var(--red)"></i>${L('Hoje','Today')}</span></div>`;
   return h;}
 
@@ -2534,7 +2539,7 @@ function saveEditor(){const ed=ui.ed,p=ed.p;edPhasesSync();
 /* ---------- events ---------- */
 const A={
  dayex:()=>{ui.dayEx=!ui.dayEx;render();},
- tab:b=>{document.body.classList.remove('nonav');if(b.dataset.v==='social'&&ui.tab==='social')ui.sv={v:'feed'};ui.tab=b.dataset.v;if(ui.tab!=='set')ui.report=null;render();window.scrollTo(0,0);},
+ tab:b=>{if(b.dataset.v==='social'&&ui.tab==='social')ui.sv={v:'feed'};ui.tab=b.dataset.v;if(ui.tab!=='set')ui.report=null;render();window.scrollTo(0,0);},
  theme:()=>{S.prefs.theme=S.prefs.theme==='light'?'dark':'light';applyTheme();persist('prefs');render();},
  lang:b=>{S.prefs.lang=b.dataset.v;LANG=langOf(S.prefs.lang);applyTheme();persist('prefs');ui.report=null;render();},
  filter:b=>{ui.filter=b.dataset.v;render();},
@@ -2968,6 +2973,8 @@ function avAdjFromMeasures(){const pf=S.profile,F=pf.sex==='F';const ms=[...(S.m
 /* ---------- ícones de musculação ---------- */
 (function(){const sv=(d,f)=>`<svg viewBox="0 0 24 24" fill="${f?'currentColor':'none'}" stroke="${f?'none':'currentColor'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 Object.assign(IC,{
+ shoe:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 15.5V9.8c0-.6.6-1 1.1-.7l1.4.8c.9.5 2 .3 2.6-.5l1-1.4c.3-.4.9-.5 1.3-.1l1.6 1.4c.5.4 1.2.6 1.8.5l1.2-.2c.5-.1 1 .2 1.2.6l.7 1.4c.3.6.9 1 1.6 1.2l1.4.4c.7.2 1.2.9 1.2 1.6v1h-18z"/><path d="M3 15.5v2.2c0 .4.3.8.8.8h16.4c.4 0 .8-.4.8-.8v-2.2M9.3 9.6l1.2 1.1M11.4 11.3l1.2 1"/></svg>',
+ arm:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 20.5c-.9-3.6-.6-7.4 1.2-10.6L8 5.6c.4-.8 1.3-1.3 2.2-1.1l2 .4c.8.2 1.2 1 .8 1.7l-.7 1.2c-.3.5-.9.8-1.5.7l-1.3-.2-1.1 3.6c1.7-1.5 4.3-2 6.4-1.1 2.1.9 3.6 3 3.7 5.3l.1 1.4c.1 1.6-1.1 3-2.7 3.1z"/><path d="M10.5 15.3c1.1-.9 2.7-1 3.9-.2"/></svg>',
  podium:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 20.5h19M9 20.5V9.5h6v11M3 20.5v-6h6M15 20.5v-8h6v8"/><path d="M12 2.8l.9 1.8 2 .3-1.4 1.4.3 2-1.8-.9-1.8.9.3-2-1.4-1.4 2-.3z"/></svg>',
  clip:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="3"/><path d="M9 4V3h6v1M9 10h6M9 14h6M9 18h3"/></svg>',
  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>',
@@ -3588,7 +3595,7 @@ async function postImg(pid){if(SOC.img[pid])return SOC.img[pid];if(SOC.imgP[pid]
 function socHydrate(){document.querySelectorAll('[data-pimg]').forEach(async el=>{if(el.dataset.ok)return;const d=await postImg(el.dataset.pimg);if(d){el.style.backgroundImage=`url("${d}")`;el.dataset.ok='1';el.classList.add('ld');}});}
 
 /* ---------- página ---------- */
-function renderSocial(){document.body.classList.remove('nonav');const head=t=>`<div class="ighd"><div class="hd grow">${t}</div>`;
+function renderSocial(){const head=t=>`<div class="ighd"><div class="hd grow">${t}</div>`;
   if(!cloudOn())return head(L('Social','Social','Social'))+'</div>'+socHero()+`<div class="note-box">${L('A aba Social será liberada assim que o login estiver ativo.','The Social tab unlocks once sign-in is active.','La pestaña Social se activará cuando el inicio de sesión esté disponible.')}</div>`;
   if(!logged()){if(owner()!=='local'&&!CL.ready){cloudInit().catch(()=>{});return `<div class="empty">${L('Conectando…','Connecting…','Conectando…')}</div>`;}return head(L('Social','Social','Social'))+'</div>'+socHero()+loginBlock(true);}
   if(!SOC.on)socStart();setTimeout(socHydrate,0);
@@ -3695,7 +3702,7 @@ function socDirect(){const me=SOC.uid,th=threads();const ids=Object.keys(th).sor
     return `<button class="frow dmrow ${un?'un':''}" data-act="socgo" data-v="chat" data-id="${esc(o)}">${uPhoto(uPh(o),uName(o)||l.fromName,54,trainedToday(o)?'on':'')}<span class="grow"><b>${esc(uName(o)||l.fromName||'')}</b><small>${l.from===me?L('Você: ','You: ','Tú: '):''}${esc(msgPreview(l).slice(0,60))} · ${agoMs(l.at)}</small></span>${un?'<i class="udot"></i>':''}</button>`;}).join(''):'')+
    (extra.length?`<div class="lbl2">${L('Parceiros','Partners','Compañeros')}</div>`+extra.map(o=>`<button class="frow dmrow" data-act="socgo" data-v="chat" data-id="${esc(o)}">${uPhoto(uPh(o),uName(o),54)}<span class="grow"><b>${esc(uName(o))}</b><small>${L('Toque para conversar','Tap to chat','Toca para chatear')}</small></span></button>`).join(''):'')+
    (!ids.length&&!extra.length?`<div class="empty">${L('Adicione parceiros para conversar.','Add partners to chat.','Añade compañeros para chatear.')}</div>`:'');}
-function socChat(o){document.body.classList.add('nonav');const me=SOC.uid,list=(threads()[o]||[]);setTimeout(()=>{chatScroll();list.filter(x=>x.to===me&&!x.read).forEach(x=>FB.updateDoc(FB.doc(fbDb,'msgs',x.id),{read:true}).catch(()=>{}));},60);
+function socChat(o){setTimeout(navH,0);const me=SOC.uid,list=(threads()[o]||[]);setTimeout(()=>{chatScroll();list.filter(x=>x.to===me&&!x.read).forEach(x=>FB.updateDoc(FB.doc(fbDb,'msgs',x.id),{read:true}).catch(()=>{}));},60);
   let lastDay='';
   return `<div class="ighd chathd">${bk('direct')}<button class="phu grow" data-act="socgo" data-v="prof" data-id="${esc(o)}">${uPhoto(uPh(o),uName(o),36,trainedToday(o)?'on sm':'')}<span><b>${esc(uName(o))}</b><small>${esc(lastTxt(((SOC.users[o]||{}).stats||{}).last))}</small></span></button><button class="iconbtn" data-act="socgo" data-v="chnew" data-id="${esc(o)}" aria-label="challenge">${IC.podium}</button></div>
    <div class="chat" id="chat">${list.length?list.map(x=>{const d=localYmd(x.at);const sep=d!==lastDay?`<div class="cday">${esc(fmtLong(d))}</div>`:'';lastDay=d;return sep+bubble(x);}).join(''):`<div class="empty">${L('Diga oi 👋 ou mande um desafio.','Say hi 👋 or send a challenge.','Saluda 👋 o envía un reto.')}</div>`}</div>
@@ -3838,6 +3845,9 @@ Object.assign(A,{
    const title=r==='win'?(c.type==='team'?L('Desafio em dupla vencido!','Duo challenge won!','¡Reto en dúo ganado!'):L('Venci o desafio de ','I won the ','Gané el reto de ')+chTypeName(c.type)+L('!',' challenge!','!')):L('Desafio de ','','Reto de ')+chTypeName(c.type)+L(' encerrado',' challenge finished',' terminado');
    if(await socPublish('challenge',title,[`${myName().split(' ')[0]} ${chFmt(c,chV(c,me))} × ${chFmt(c,chV(c,o))} ${(uName(o)||'').split(' ')[0]}`,`${c.days} ${L('dias','days','días')}${c.prize?' · 🏆 '+c.prize:''}`]))socGo('feed');}});
 document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&ev.target&&ev.target.id==='dm-in'){const b=document.querySelector('[data-act=dmsend]');if(b)b.click();}});
+
+function navH(){const n=$('.bnav');if(n)document.documentElement.style.setProperty('--navh',n.offsetHeight+'px');}
+window.addEventListener('resize',()=>setTimeout(navH,50));
 
 /* ---------- boot ---------- */
 if(typeof acctBoot==='function')acctBoot();lsLoad();applyTheme();if(IN_APP)splash();nativeInit();if(typeof cloudBoot==='function')cloudBoot();if(S.active)ui.tab='workout';render();ensureTick();connectP=connect();connectP.then(()=>{connectP=null;hydrate();if(!(ui.tab==='workout'&&S.active))photoReminder();});
