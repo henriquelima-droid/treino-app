@@ -683,6 +683,7 @@ html.webapp .cropfx{padding-top:calc(10px + env(safe-area-inset-top))}
 .xvid{position:relative}
 .vmute{position:absolute;right:10px;bottom:10px;width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,10,10,.68);backdrop-filter:blur(6px);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .vmute svg{width:20px;height:20px}
+.pubinv{border:1px solid color-mix(in srgb,var(--red) 45%,transparent);margin-bottom:14px}.pubinv svg{color:var(--red);flex:none;margin-top:2px}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1260,7 +1261,7 @@ function setSpecs(e){const out=[];(e.feeders||[]).forEach(f=>out.push({type:'fee
 let BK={feeder:[['aproximação','aproximações'],['feeder set','feeder sets']],top:[['top set','top sets'],['top set','top sets']],backoff:[['back-off','back-offs'],['back-off set','back-off sets']],working:[['válida','válidas'],['working set','working sets']],final:[['final','finais'],['final set','final sets']]};
 function setBreakdown(sets){const c={};sets.forEach(s=>{const t=stype(s);c[t]=(c[t]||0)+1;});
   return ['feeder','top','backoff','working','final','drop','rp','cl','myo','lp'].filter(t=>c[t]).map(t=>c[t]+' '+(LANG==='en'?BK[t][1]:BK[t][0]).map(x=>LANG==='es'&&ES[x]?ES[x]:x)[c[t]>1?1:0]).join(' + ');}
-function estMin(T){let s=5*60;T.forEach(e=>{s+=e.sets*(40+(e.superset?e.rest/2:e.rest))+(e.feeders?e.feeders.length*75:0);});return Math.round(s/60+(S.plan.cardio?S.plan.cardio.training.min:0));}
+function estMin(T){let s=5*60;T.forEach(e=>{s+=e.sets*(40+(e.superset?rS(e)/2:rS(e)))+(e.feeders?e.feeders.length*75:0);});return Math.round(s/60+(S.plan.cardio?S.plan.cardio.training.min:0));}
 function sessionsOn(date){return S.sessions.filter(s=>s.date===date);}
 function lastPerf(exId,before,excludeId){const list=S.sessions.filter(s=>s.type==='workout'&&s.date<=before&&s.exercises&&s.id!==excludeId).sort((a,b)=>(b.date.localeCompare(a.date))||((b.endedAt||0)-(a.endedAt||0)));
   for(const s of list){const e=s.exercises.find(x=>x.id===exId);if(e){const done=e.sets.filter(x=>x.done&&num(x.kg)!=null&&isMain(x));if(done.length)return{date:s.date,sets:done,ex:e};}}return null;}
@@ -1329,7 +1330,7 @@ function renderHome(){const p=S.profile,t=today(),dp=dayPlan(t);const cw=curWeig
   h+=ui.filter==='day'?renderDay():ui.filter==='week'?renderWeek():renderMonth();
   return h;}
 function dnav(label,small){return `<div class="navd"><button class="iconbtn" data-act="dnav" data-v="-1" aria-label="${L('Anterior','Previous')}">${IC.l}</button><div class="lbl">${label}${small?`<small>${small}</small>`:''}</div><button class="iconbtn" data-act="dnav" data-v="1" aria-label="${L('Próximo','Next')}">${IC.r}</button></div>`;}
-function dayList(T){let h='';const row=(e,lt)=>`<div class="exi"><div><div class="n">${lt?`<span class="lt sm">${lt}</span>`:''}${esc(P(e,'name'))}</div><div class="m">${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${L('descanso','rest')} ${mmss(e.rest)}</div></div><div class="r">${setSpecs(e).length}<small>${L('séries','sets')}</small></div></div>`;
+function dayList(T){let h='';const row=(e,lt)=>`<div class="exi"><div><div class="n">${lt?`<span class="lt sm">${lt}</span>`:''}${esc(P(e,'name'))}</div><div class="m">${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${L('descanso','rest')} ${mmss(rS(e))}</div></div><div class="r">${setSpecs(e).length}<small>${L('séries','sets')}</small></div></div>`;
   for(let i=0;i<T.length;i++){const e=T[i],n=T[i+1];if(e.superset&&n&&n.superset===e.superset){h+=`<div class="bisd"><div class="bisdh"><span class="bistag sm">BI-SET</span> ${L('alterne A e B sem descanso','alternate A and B with no rest')}</div>${row(e,'A')}${row(n,'B')}</div>`;i++;}else h+=row(e,'');}
   return h;}
 function renderDay(){const d=ui.date,dp=dayPlan(d),isT=d===today();const ss=sessionsOn(d);
@@ -1410,7 +1411,7 @@ function renderWorkout(){const a=S.active;if(!a.open)a.open={warm:true,u0:false}
    <button class="btn ghost block" data-act="cancelwo" style="margin-top:8px;color:var(--mut)">${a.editing?L('Descartar alterações','Discard changes'):L('Descartar treino','Discard workout')}</button>
   </div>`;}
 function woPct(){const a=S.active;if(!a)return 0;const tot=a.exercises.reduce((n,e)=>n+e.sets.length,0),done=a.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);return tot?Math.round(done/tot*100):0;}
-function setRest(e,s,nx){const nt=nx&&stype(nx);if(nt==='drop'||nt==='lp')return 0;if(nt==='rp')return 15;if(nt==='cl')return 20;if(nt==='myo')return 10;return stype(s)==='feeder'?60:e.rest;}
+function setRest(e,s,nx){const nt=nx&&stype(nx);if(nt==='drop'||nt==='lp')return 0;if(nt==='rp')return 15;if(nt==='cl')return 20;if(nt==='myo')return 10;return stype(s)==='feeder'?60:rS(e);}
 function refKg(e,lp){const tp=e.sets.find(s=>stype(s)==='top'&&num(s.kg)!=null);if(tp)return num(tp.kg);
   const w=e.sets.find(s=>isWork(s)&&num(s.kg)!=null);if(w)return num(w.kg);
   if(lp){const t=lp.sets.find(s=>stype(s)==='top')||lp.sets[0];if(t)return num(t.kg);}return null;}
@@ -1461,15 +1462,15 @@ function exInfo(e0,i){const e=Object.assign({},e0,{id:vidOf(e0)});const has=S.me
    <p><a href="${ytLink(e)}" target="_blank" rel="noopener">▶ ${L('Ver vídeos de execução no YouTube','Watch form videos on YouTube')}</a></p></div>`;}
 function exHead(e,i,lp,letter){const sg=suggestion(lp,e);const n=e.sets.length;const doneN=e.sets.filter(s=>s.done).length;const topS=lp&&lp.sets.find(s=>stype(s)==='top');const xo=ui.xinfo[i];
   const ib=`<button class="ib th ${xo?'on':''}" data-act="xinfo" data-e="${i}" aria-label="${L('Sobre o exercício','About the exercise')}" aria-expanded="${xo?'true':'false'}">${exThumb(vidOf(e),42)}</button>`;
-  const line=`<div class="line"><b>${n} ${L('séries','sets')}</b> · ${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${mmss(e.rest)}${!letter&&e.swapped?`<br><span style="color:var(--orange);font-weight:600">${L('Substituto de: ','Replacing: ')}${esc(P(e,'name'))}</span>`:''}</div>`;
+  const line=`<div class="line"><b>${n} ${L('séries','sets')}</b> · ${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${mmss(rS(e))}${!letter&&e.swapped?`<br><span style="color:var(--orange);font-weight:600">${L('Substituto de: ','Replacing: ')}${esc(P(e,'name'))}</span>`:''}</div>`;
   return (letter?`<div class="eh"><div class="exname"><span class="lt">${letter}</span><div>${esc(exName(e))}${e.swapped?`<small>${L('Substituto de: ','Replacing: ')}${esc(P(e,'name'))}</small>`:''}</div></div>${ib}</div><div class="xh">${line}</div>`
      :`<div class="xh">${line}${ib}</div>`)+`${(()=>{const pl=plateauOf(e.id);return pl?`<div class="note-box" style="border-left:4px solid var(--orange);margin-top:8px"><b style="color:var(--orange)">${L('Platô','Plateau')}:</b> ${L('3 sessões sem evolução. Tente +1 repetição antes de subir carga.','3 sessions without progress. Try +1 rep before adding load.')}</div>`:'';})()}${xo?exInfo(e,i):''}
    <div class="dots" aria-label="${doneN}/${n}">${e.sets.map(s=>`<i class="d-${stype(s)} ${s.done?'on':''}"></i>`).join('')}<span>${doneN}/${n}</span></div>
    ${lp?`<div class="lastp">${L('Última vez','Last time')} (${fmtD(lp.date)}): <b>${lp.sets.map(s=>fmtN(num(s.kg))+'×'+esc(s.reps)).join(' · ')}</b>${topS&&topS.rpe?` · top RPE ${fmtN(topS.rpe)}`:''}${sg?`<br><span class="sug ${sg.c}">${sg.t}</span>`:''}</div>`:''}
-   <div class="exa"><button class="btn sm play" data-act="rest" data-e="${i}">▶ ${L('Descanso','Rest')} ${mmss(e.rest)}</button><button class="btn sm" data-act="swap" data-e="${i}">⇄ ${e.swapped?L('Original','Original'):L('Substituir','Swap')}</button><button class="btn sm" data-act="addset" data-e="${i}">+ ${L('Série','Set')}</button><button class="btn sm" data-act="delset" data-e="${i}">− ${L('Série','Set')}</button></div>`;}
+   <div class="exa"><button class="btn sm play" data-act="rest" data-e="${i}">▶ ${L('Descanso','Rest')} ${mmss(rS(e))}</button><button class="btn sm" data-act="swap" data-e="${i}">⇄ ${e.swapped?L('Original','Original'):L('Substituir','Swap')}</button><button class="btn sm" data-act="addset" data-e="${i}">+ ${L('Série','Set')}</button><button class="btn sm" data-act="delset" data-e="${i}">− ${L('Série','Set')}</button></div>`;}
 function unitHtml(i,n){const a=S.active,e=a.exercises[i],k='u'+i,open=isOpen(k),done=unitDone(i);
   if(n===undefined)n=units().findIndex(u=>u[0]===i);
-  if(isPairStart(i)){const e2=a.exercises[i+1];const rounds=Math.max(e.sets.length,e2.sets.length);const dn=e.sets.filter(s=>s.done).length+e2.sets.filter(s=>s.done).length,tot=e.sets.length+e2.sets.length;const rest=Math.max(e.rest,e2.rest);
+  if(isPairStart(i)){const e2=a.exercises[i+1];const rounds=Math.max(e.sets.length,e2.sets.length);const dn=e.sets.filter(s=>s.done).length+e2.sets.filter(s=>s.done).length,tot=e.sets.length+e2.sets.length;const rest=Math.max(rS(e),rS(e2));
     let h=`<div class="acc bisacc ${open?'open':''} ${done?'complete':''}" id="u-${i}"><button class="acc-h" data-act="acc" data-k="${k}"><span class="acc-ic">${done?IC.chk:n+1}</span><div class="acc-t"><b><span class="bistag sm">BI-SET</span> ${esc(exName(e))} + ${esc(exName(e2))}</b><span>${rounds} ${L('rodadas','rounds')} · ${dn}/${tot} ${L('séries feitas','sets done')}</span></div><span class="acc-ch">${IC.r}</span></button>`;
     if(open){const lp1=lastPerf(e.id,a.date),lp2=lastPerf(e2.id,a.date);
       h+=`<div class="acc-b"><div class="bisinfo"><b>${L('Como fazer:','How to:')}</b> ${L('1 série de','1 set of')} <b>A</b> → <b>${L('sem descanso','no rest')}</b> → ${L('1 série de','1 set of')} <b>B</b> → ${L('descanse','rest')} <b>${mmss(rest)}</b> → ${L('próxima rodada.','next round.')}</div>
@@ -1536,14 +1537,30 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState===
 /* ---------- alarme do descanso com a tela bloqueada (notificação agendada) ---------- */
 const REST_NID=7001;let restSched=false,restAsked=false;
 const LNp=()=>CP().LocalNotifications;
+/* canais: som+vibração / só som / só vibração (som mudo). O som do canal é fixo no Android, por isso um canal por combinação */
+const REST_CH={sv:['rest_alarm','rest_alarm.wav',true],s:['rest_snd','rest_alarm.wav',false],v:['rest_vib','rest_silent.wav',true]};
 async function restChan(){if(restChan.ok)return;const ln=LNp();if(!ln||!ln.createChannel)return;
-  try{await ln.createChannel({id:'rest',name:L('Fim do descanso','Rest finished'),description:L('Alarme do cronômetro de descanso','Rest timer alarm'),importance:5,visibility:1,vibration:true,lights:true,lightColor:'#B8E04A'});restChan.ok=true;}catch(e){}}
+  try{try{await ln.deleteChannel({id:'rest'});}catch(e){}
+    for(const k in REST_CH){const c=REST_CH[k];await ln.createChannel({id:c[0],name:L('Fim do descanso','Rest finished')+(k==='v'?' · '+L('vibração','vibration'):k==='s'?' · '+L('som','sound'):''),description:L('Alarme do cronômetro de descanso','Rest timer alarm'),importance:5,visibility:1,sound:c[1],vibration:c[2],lights:true,lightColor:'#B8E04A'});}
+    restChan.ok=true;}catch(e){}}
 async function restPerm(){const ln=LNp();if(!NATIVE||!ln||restAsked)return;restAsked=true;
   try{const p=await ln.checkPermissions();if(p.display!=='granted')await ln.requestPermissions();}catch(e){}restChan();}
-async function restNotifSchedule(){if(!NATIVE||!T||T.fired||!S.prefs.sound)return;const ln=LNp();if(!ln)return;if(T.end-Date.now()<1500)return;
-  try{const p=await ln.checkPermissions();if(p.display!=='granted')return;await restChan();
-    await ln.schedule({notifications:[{id:REST_NID,title:L('Descanso terminado','Rest finished'),body:T.next||L('Bora para a próxima série!','Time for your next set!'),
-      schedule:{at:new Date(T.end),allowWhileIdle:true},channelId:'rest',smallIcon:'ic_stat_icon',iconColor:'#B8E04A',autoCancel:true}]});restSched=true;}catch(e){}}
+function restMode(){const s=!!S.prefs.sound,v=S.prefs.vibrate!==false;return s&&v?'sv':s?'s':v?'v':null;}
+async function restExact(){const ln=LNp();try{if(ln.checkExactNotificationSetting){const r=await ln.checkExactNotificationSetting();return r.exact_alarm==='granted';}}catch(e){}return true;}
+async function restNotifAt(at,body){const ln=LNp();const m=restMode();if(!ln||!m)return false;
+  const p=await ln.checkPermissions();if(p.display!=='granted')return false;await restChan();const ex=await restExact();
+  await ln.schedule({notifications:[{id:REST_NID,title:L('Descanso terminado','Rest finished'),body,
+    schedule:{at,allowWhileIdle:true},isExactNotification:ex,channelId:REST_CH[m][0],sound:REST_CH[m][1],smallIcon:'ic_stat_icon',iconColor:'#B8E04A',autoCancel:true}]});return true;}
+async function restNotifSchedule(){if(!NATIVE||!T||T.fired)return;if(T.end-Date.now()<1500)return;
+  try{if(await restNotifAt(new Date(T.end),T.next||L('Bora para a próxima série!','Time for your next set!')))restSched=true;}catch(e){}}
+/* teste: agenda o alarme para daqui a 10 s, para o usuário bloquear a tela e conferir */
+async function testAlarm(){if(!NATIVE)return;const ln=LNp();if(!ln)return;
+  if(!restMode()){toast(L('Ative o som ou a vibração primeiro','Turn on sound or vibration first'));return;}
+  try{let p=await ln.checkPermissions();if(p.display!=='granted')p=await ln.requestPermissions();
+    if(p.display!=='granted'){modal(L('Notificações bloqueadas','Notifications blocked'),`<p>${L('Sem permissão de notificação o alarme não toca com o app em segundo plano. Abra Configurações › Apps › Grow Up › Notificações e permita.','Without notification permission the alarm cannot ring in the background. Open Settings › Apps › Grow Up › Notifications and allow them.')}</p>`);return;}
+    if(!(await restExact())&&ln.changeExactNotificationSetting){await ln.changeExactNotificationSetting();}
+    const ok=await restNotifAt(new Date(Date.now()+10000),L('Teste: o alarme do descanso está funcionando.','Test: the rest alarm works.'));restSched=ok;
+    if(ok)modal(L('Teste em 10 segundos','Test in 10 seconds'),`<p>${L('Bloqueie a tela ou saia do app agora. Em 10 s o alarme deve tocar e vibrar.','Lock the screen or leave the app now. In 10 s the alarm should ring and vibrate.')}</p><p class="sub">${L('Se não tocar: em Configurações › Apps › Grow Up › Bateria, escolha “Sem restrições”, e confira se o canal “Fim do descanso” está com som.','If it does not ring: in Settings › Apps › Grow Up › Battery choose “Unrestricted”, and check that the “Rest finished” channel has sound on.')}</p>`);}catch(e){toast(L('Não foi possível agendar o teste','Could not schedule the test'));}}
 async function restNotifCancel(){if(!restSched)return;restSched=false;const ln=LNp();if(!ln)return;
   try{await ln.cancel({notifications:[{id:REST_NID}]});}catch(e){}
   try{await ln.removeDeliveredNotifications({notifications:[{id:REST_NID,title:'',body:''}]});}catch(e){}}
@@ -1696,7 +1713,7 @@ function renderPrograms(){const pf=S.profile;const lv=ui.progLevel||pf.level;con
    <div class="chips"><span class="chip">${sexName(pf.sex)}</span><span class="chip red">${esc(goalName(pf.goal))}</span><span class="chip">${esc(lvName(pf.level))}</span><span class="chip">${pf.days.length} ${L('dias','days')}: ${pf.days.slice().sort().map(d=>dn[d]).join(' ')}</span></div></div>
    <button class="btn sm outline" data-act="tab" data-v="pedit">${L('Ajustar','Edit')}</button></div></div>`;
   h+=`<div class="lbl2">${L('Programa atual','Current program')}</div>`+progCard(S.plan);
-  if(S.plan.gen){const t=TPL.find(x=>x[1]===S.plan.gen);if(t){const np=genProgram(t);if(np.id!==S.plan.id)h+=`<div class="note-box">${L('Seu perfil mudou desde que este programa foi gerado.','Your profile changed since this program was generated.')} <button class="btn sm outline" data-act="regen" style="margin-top:6px">${L('Atualizar para o meu perfil','Update to my profile')}</button></div>`;}}
+  if(S.plan.gen){const t=tplById(S.plan.gen);if(t){const np=genProgram(t);if(np.id!==S.plan.id)h+=`<div class="note-box">${L('Seu perfil mudou desde que este programa foi gerado.','Your profile changed since this program was generated.')} <button class="btn sm outline" data-act="regen" style="margin-top:6px">${L('Atualizar para o meu perfil','Update to my profile')}</button></div>`;}}
   h+=`<div class="lbl2">${L('Programas por nível','Programs by level')}</div><div class="pillset" style="margin-bottom:4px">${LEVELS.map(l=>`<button class="pill ${lv===l[0]?'on':''}" data-act="proglv" data-v="${l[0]}">${L(l[1],l[2])}${pf.level===l[0]?' ★':''}</button>`).join('')}</div>`;
   if(lv===pf.level){const rk=rankPrograms();
     h+=`<div class="sub" style="margin:-2px 0 8px">${L('Ordem de recomendação para o seu perfil, aparelhos e grupo prioritário.','Ordered by how well they fit your profile, equipment and priority muscles.','Ordenados por recomendación según tu perfil, aparatos y grupo prioritario.')}</div>`;
@@ -1706,7 +1723,7 @@ function renderPrograms(){const pf=S.profile;const lv=ui.progLevel||pf.level;con
   if(mine.length)h+=`<div class="lbl2">${L('Meus programas','My programs')}</div>`+mine.map(progCard).join('');
   h+=`<button class="btn block outline" data-act="edneW" style="margin-top:12px">+ ${L('Criar programa do zero','Create a program from scratch')}</button>`;
   return h;}
-function useProgram(p,start){if(p.gen){const t=TPL.find(x=>x[1]===p.gen);if(t)p=genProgram(t,S.profile,start);}if(!isBuiltin(S.plan.id)&&!S.library.some(x=>x.id===S.plan.id)){S.library.push(clone(S.plan));persist('library');}
+function useProgram(p,start){if(p.gen){const t=tplById(p.gen);if(t)p=genProgram(t,S.profile,start);}if(!isBuiltin(S.plan.id)&&!S.library.some(x=>x.id===S.plan.id)){S.library.push(clone(S.plan));persist('library');}
   S.plan=clone(p);S.plan.startDate=start;persist('plan');ui.tab='home';ui.filter='week';ui.date=start>today()?start:today();render();window.scrollTo(0,0);toast(L('Programa ativado','Program activated'));}
 function cardLang(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div class="field"><label>${l}</label><input id="${id}" value="${esc(v)}" ${im?`inputmode="${im}"`:''}></div>`;
   let h='';h+=`<div class="card"><div class="hd" style="font-size:19px">${L('Idioma','Language')}</div><div class="pillset" style="margin-top:10px"><button class="pill ${LANG==='pt'?'on':''}" data-act="lang" data-v="pt">Português</button><button class="pill ${LANG==='en'?'on':''}" data-act="lang" data-v="en">English</button><button class="pill ${LANG==='es'?'on':''}" data-act="lang" data-v="es">Español</button></div></div>`;
@@ -1750,8 +1767,11 @@ function cardPrefs(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div clas
    ${NATIVE?`<button class="toggle" data-act="pref" data-k="workoutReminder"><span>${L('Lembrete nos dias de treino (6h)','Reminder on training days (6 am)')}</span><i class="sw ${S.prefs.workoutReminder?'on':''}"></i></button>`:''}
    <button class="toggle" data-act="pref" data-k="theme"><span>${L('Tema claro','Light theme')}</span><i class="sw ${S.prefs.theme==='light'?'on':''}"></i></button>
    <button class="toggle" data-act="pref" data-k="vibrate"><span>${L('Vibração','Vibration','Vibración')}<small class="sub" style="display:block">${L('Fim do descanso, início do treino, séries e conquistas','Rest end, workout start, sets and achievements','Fin del descanso, inicio del entreno, series y logros')}</small></span><i class="sw ${S.prefs.vibrate!==false?'on':''}"></i></button>
+   <div class="lbl2">${L('Descanso entre séries','Rest between sets','Descanso entre series')}</div><div class="pillset">${[['short',L('Mais curto','Shorter','Más corto')],['std',L('Padrão','Default','Estándar')],['long',L('Mais longo','Longer','Más largo')]].map(o=>`<button class="pill ${(S.prefs.restAdj||'std')===o[0]?'on':''}" data-act="restadj" data-v="${o[0]}">${o[1]}</button>`).join('')}</div>
+   <div class="sub" style="font-size:12px;margin:6px 0 4px">${{short:L('−25% em todos os descansos (mínimo 30 s). Bom para treinos com pouco tempo; nos compostos pesados a carga pode cair um pouco.','−25% on every rest (30 s minimum). Good when short on time; heavy compound loads may drop a little.','−25 % en todos los descansos (mínimo 30 s). Útil con poco tiempo; en los compuestos pesados la carga puede bajar un poco.'),std:L('Descansos do programa: mais longos nos compostos pesados, mais curtos nos isoladores.','Program rests: longer on heavy compounds, shorter on isolation work.','Descansos del programa: más largos en los compuestos pesados y más cortos en los aislados.'),long:L('+25% em todos os descansos. Útil em fases de força ou quando o fôlego limita as séries.','+25% on every rest. Useful in strength phases or when breathing limits your sets.','+25 % en todos los descansos. Útil en fases de fuerza o cuando el aliento limita las series.')}[S.prefs.restAdj||'std']}</div>
    <button class="toggle" data-act="pref" data-k="autoTimer"><span>${L('Iniciar descanso ao concluir série','Start rest when a set is done')}</span><i class="sw ${S.prefs.autoTimer?'on':''}"></i></button>
-   <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}${NATIVE?`<br><small class="sub" style="font-size:12px">${L('Com a tela bloqueada, o aviso vem como alarme (notificação com som e vibração).','With the screen locked, it rings as an alarm (notification with sound and vibration).')}</small>`:''}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button>
+   <button class="toggle" data-act="pref" data-k="sound"><span>${L('Som no fim do descanso','Sound when rest ends')}${NATIVE?`<br><small class="sub" style="font-size:12px">${L('Com o app em segundo plano ou a tela bloqueada, o fim do descanso toca como alarme, com som e vibração.','With the app in the background or the screen locked, the end of rest rings as an alarm, with sound and vibration.')}</small>`:WEBAPP?`<br><small class="sub" style="font-size:12px">${L('No iPhone, o som e a vibração só funcionam com o app aberto na tela. Ative “Manter tela acesa”.','On iPhone, sound and vibration only work with the app open on screen. Turn on “Keep screen on”.')}</small>`:''}</span><i class="sw ${S.prefs.sound?'on':''}"></i></button>
+   ${NATIVE?`<button class="btn sm outline block" data-act="testalarm" style="margin:2px 0 8px">${L('Testar alarme em segundo plano','Test background alarm','Probar alarma en segundo plano')}</button>`:''}
    <button class="toggle" data-act="pref" data-k="keepAwake"><span>${L('Manter tela acesa durante o treino','Keep screen on during workouts')}${IN_APP?`<br><small class="sub" style="font-size:12px">${L('Desligado economiza bateria; o alarme toca mesmo assim.','Off saves battery; the alarm still rings.')}</small>`:''}</span><i class="sw ${keepAwake()?'on':''}"></i></button></div>`;
   return h;}
 function cardBackup(){const p=S.profile,pl=S.plan;const f=(id,l,v,im)=>`<div class="field"><label>${l}</label><input id="${id}" value="${esc(v)}" ${im?`inputmode="${im}"`:''}></div>`;
@@ -1901,11 +1921,15 @@ const TPL=[
 ];
 const GF3=[{pct:50,reps:8},{pct:70,reps:4},{pct:85,reps:2}],GF2=[{pct:50,reps:10},{pct:75,reps:5}];
 const REPS={hypertrophy:{H:[6,10],C:[8,12],I:[12,15]},recomp:{H:[6,10],C:[8,12],I:[12,15]},fatloss:{H:[6,10],C:[8,12],I:[12,15]},strength:{H:[3,6],C:[5,8],I:[8,12]},health:{H:[8,12],C:[10,15],I:[12,20]},glutes:{H:[6,10],C:[8,12],I:[12,20]},upper:{H:[6,10],C:[8,12],I:[12,20]}};
-const REST={H:150,C:110,I:70};
+const REST={beginner:{H:120,C:90,I:60},returning:{H:135,C:105,I:60},intermediate:{H:150,C:110,I:70},advanced:{H:165,C:120,I:75}};
+/* ajuste pessoal do descanso (Ajustes): curto −25%, padrão, longo +25% */
+const REST_ADJ={short:.75,std:1,long:1.25};
+function adjRest(sec){sec=+sec||0;const f=REST_ADJ[S.prefs.restAdj||'std']||1;if(f===1||sec<=0)return sec;return Math.max(Math.min(sec,30),Math.round(sec*f/5)*5);}
+const rS=e=>adjRest(e&&e.rest);
 const CARDIO={hypertrophy:[10,12,30,40],recomp:[10,12,40,60],fatloss:[15,20,45,60],strength:[5,10,20,30],health:[15,20,30,45],glutes:[10,12,30,45],upper:[10,12,30,45]};
 function pickDays(avail,n){const a=[...avail].sort((x,y)=>x-y);if(n>=a.length)return a;const out=[];for(let i=0;i<n;i++)out.push(a[Math.min(a.length-1,Math.round(i*a.length/n))]);return out;}
 function tplDays(t,avail){const opts=[...t[3]].sort((a,b)=>b-a);const n=avail.length;const fit=opts.find(d=>d<=n);return fit||Math.max(1,Math.min(n,opts[opts.length-1]));}
-function genProgram(t,prof,start){prof=prof||S.profile;const sex=prof.sex==='F'?'F':'M',goal=prof.goal||'hypertrophy',lvl=t[0];const avail=(prof.days&&prof.days.length?prof.days:[0,1,2,3,4,5]);
+function genProgram(t,prof,start){prof=prof||S.profile;const sex=prof.sex==='F'?'F':'M',goal=prof.goal||'hypertrophy',lvl=t[0],tid=String(t[1]).split('@')[0];const avail=(prof.days&&prof.days.length?prof.days:[0,1,2,3,4,5]);
   const keys=sex==='F'?t[5]:t[4];const quick=!!t[6];const n=tplDays(t,avail);const BX=baseEx();
   const R=REPS[goal]||REPS.hypertrophy;const workouts={};const codes=[];
   const LET='ABCDEFGH';
@@ -1916,17 +1940,17 @@ function genProgram(t,prof,start){prof=prof||S.profile;const sex=prof.sex==='F'?
       if(quick)sets=3;
       if(goal==='glutes'&&opt.g)sets++;if(goal==='upper'&&opt.up)sets++;
       if(Array.isArray(prof.priority)&&prof.priority.includes(b.group)&&role!=='H')sets++;
-      if(t[1]==='a-spec'&&((sex==='M'&&opt.up)||(sex==='F'&&opt.g)))sets++;
+      if(tid==='a-spec'&&((sex==='M'&&opt.up)||(sex==='F'&&opt.g)))sets++;
       const rr=opt.u==='s'?[30,60]:R[role];
       let rir={beginner:{H:'2–3',C:'2',I:'1–2'},returning:{H:'2',C:'1–2',I:'1'},intermediate:{H:'1–2',C:'1–2',I:'0–1'},advanced:{H:'1–2',C:'1',I:'0–1'}}[lvl][role];
       if(goal==='strength'&&role==='H')rir='1–2';
-      let rest=REST[role];if(goal==='strength')rest+=role==='H'?45:role==='C'?30:0;if(goal==='fatloss'||goal==='health')rest-=15;if(sex==='F')rest-=10;if(quick)rest=Math.min(rest,role==='I'?45:75);rest=Math.max(40,Math.round(rest/15)*15);
+      let rest=(REST[lvl]||REST.intermediate)[role];if(goal==='strength')rest+=role==='H'?45:role==='C'?30:0;if(goal==='fatloss'||goal==='health')rest-=15;if(sex==='F')rest-=10;if(quick)rest=Math.min(rest,role==='I'?45:75);rest=Math.max(40,Math.round(rest/15)*15);
       const e={id,name:b.name,en:clone(b.en||{}),group:b.group,compound:!!b.compound,note:b.note||'',sub:b.sub||'',sets,repMin:rr[0],repMax:rr[1],reps:rr[0]+'–'+rr[1],rir,rest,scheme:'straight'};
       if(opt.u==='s')e.unit='s';
       if(role==='H'&&!quick&&lvl!=='beginner'){e.feeders=goal==='strength'||id==='agachamento'||id==='stiff'?GF3:GF2;e.scheme='topBackoff';}
       else if(role==='H'&&!quick&&lvl==='beginner'&&ei===0){e.feeders=GF2;}
       if(opt.ss)e.superset=code+opt.ss;
-      if(opt.t&&lvl==='advanced'&&!techOn&&(!quick||t[1]==='a-quick')){e.tech=(t[1]==='a-quick'||wi%2)?'restpause':'drop';techOn=1;}
+      if(opt.t&&lvl==='advanced'&&!techOn&&(!quick||tid==='a-quick')){e.tech=(tid==='a-quick'||wi%2)?'restpause':'drop';techOn=1;}
       return e;});
     workouts[code]={label:code,name:wd.n[0],focus:wd.f[0],en:{name:wd.n[1],focus:wd.f[1]},exercises:exs};});
   const seq=keys.map(k=>LET[keys.indexOf(k)]);const days=pickDays(avail,n);const weeks=Math.max(1,Math.min(12,+prof.progWeeks||6));const phases=[];
@@ -1941,14 +1965,14 @@ function genProgram(t,prof,start){prof=prof||S.profile;const sex=prof.sex==='F'?
   const tg={};days.forEach((d,i)=>{const c=seq[i%seq.length];workouts[c].exercises.forEach(e=>{if(e.unit==='s')return;tg[e.group]=(tg[e.group]||0)+e.sets;});});
   const cd=CARDIO[goal]||CARDIO.hypertrophy;const desc=(sex==='F'&&t[8])?t[8]:t[7];
   const id='gen-'+t[1]+'-'+sex+'-'+goal+'-'+avail.join('')+'-'+weeks+(Array.isArray(prof.priority)&&prof.priority.length?'-'+prof.priority.join('.'):'')+(prof.cardio===false?'-nc':'');
-  const FN={'i-ppl':['Inferior/Superior/Inferior','Lower/Upper/Lower'],'a-ppl':['Inferior/Superior/Inferior 6x','Lower/Upper/Lower 6x']};const nm=(sex==='F'&&FN[t[1]])?FN[t[1]]:t[2];
+  const FN={'i-ppl':['Inferior/Superior/Inferior','Lower/Upper/Lower'],'a-ppl':['Inferior/Superior/Inferior 6x','Lower/Upper/Lower 6x']};const nm=(sex==='F'&&FN[tid])?FN[tid]:t[2];
   return{format:'treino-app/plan@1',id,gen:t[1],name:nm[0],version:1,author:'Personal trainer (Claude)',createdAt:today(),startDate:today(),repeatFromWeek:1,
     warmup:clone(DEFAULT_PLAN.warmup),cardio:{training:{min:cd[0],max:cd[1],text:'Depois dos pesos: escada, bike ou esteira inclinada, leve a moderado.',en:{text:'After lifting: stairs, bike or incline treadmill, easy to moderate.'}},off:{min:cd[2],max:cd[3],text:goal==='fatloss'?'Zona 2 (conversa com frases curtas). Some passos ao longo do dia.':'Zona 2 (conversa com frases curtas). Opcional se o objetivo não for perda de gordura.',en:{text:goal==='fatloss'?'Zone 2 (you can talk in short sentences). Add steps through the day.':'Zone 2 (you can talk in short sentences). Optional unless fat loss is the goal.'}}},
     weeklyTargets:tg,notes:desc[0],progression:DEFAULT_PLAN.progression,
     meta:{split:[...new Set(seq)].join(''),days:n,minutes:quick?'30–40':lvl==='beginner'?'45–55':'55–65',weeks,level:[LEVELS.find(l=>l[0]===lvl)[1],LEVELS.find(l=>l[0]===lvl)[2]],desc:[desc[0],desc[1]],quick},
     en:{name:nm[1],notes:desc[1],progression:DEFAULT_PLAN.en.progression,warmup:clone(DEFAULT_PLAN.en.warmup)},
     workouts,phases:merged};}
-function genFor(level){return TPL.filter(t=>t[0]===level).map(t=>genProgram(t));}
+function genFor(level){return tplList(level).map(t=>genProgram(t));}
 
 /* ---------- level progression suggestions ---------- */
 const LIFTS=['agachamento','supino-reto','supino-inclinado-halteres','stiff','remada-curvada','leg-press'];
@@ -2605,7 +2629,7 @@ const A={
      const first=isPairStart(i),partner=first?a.exercises[i+1]:null;
      if(partner&&partner.sets[j]&&!partner.sets[j].done){saveActive();rerenderUnit(i);if(a.mode!=='log')toast(L('Agora o B: ','Now B: ')+exName(partner)+L(' — sem descanso',' — no rest'));setTimeout(()=>{const el=document.getElementById('sb-'+(i+1)+'-'+j);el&&el.scrollIntoView({behavior:'smooth',block:'center'});},80);return;}
      const st=unitStart(i);let rest=setRest(e,s,e.sets[j+1]),nl;const tOK=S.prefs.autoTimer&&a.mode!=='log';
-     if(e.superset){const A1=a.exercises[st],B1=a.exercises[st+1],k=j+1;const nA=A1.sets[k];rest=(nA&&(stype(nA)==='drop'||stype(nA)==='rp'))?setRest(A1,A1.sets[j]||s,nA):Math.max(A1.rest,B1?B1.rest:0);
+     if(e.superset){const A1=a.exercises[st],B1=a.exercises[st+1],k=j+1;const nA=A1.sets[k];rest=(nA&&(stype(nA)==='drop'||stype(nA)==='rp'))?setRest(A1,A1.sets[j]||s,nA):Math.max(rS(A1),B1?rS(B1):0);
        nl=(A1.sets[k]&&!A1.sets[k].done)?L('Próxima: rodada ','Next: round ')+(k+1)+' — A · '+exName(A1):(B1&&B1.sets[k]&&!B1.sets[k].done)?L('Próxima: rodada ','Next: round ')+(k+1)+' — B · '+exName(B1):nextLabel(st+1,1e3);}
      else nl=nextLabel(i,j);
      saveActive();
@@ -2614,7 +2638,7 @@ const A={
      if(tOK&&rest>0)startTimer(rest,e.superset?L('Bi-set — descanso','Superset — rest'):exName(e),nl);}
    else s.done=false;saveActive();rerenderUnit(i);
    if(s.done&&stype(s)==='top'&&s.rpe==null)setTimeout(()=>{const el=document.querySelector(`#sb-${i}-${j} .rpe`);el&&el.scrollIntoView({behavior:'smooth',block:'nearest'});},60);},
- rest:b=>{const e=S.active.exercises[+b.dataset.e];startTimer(e.rest,exName(e),L('Descanso manual','Manual rest'));},
+ rest:b=>{const e=S.active.exercises[+b.dataset.e];startTimer(rS(e),exName(e),L('Descanso manual','Manual rest'));},
  swap:b=>{const i=+b.dataset.e,e=S.active.exercises[i];const plan=libIdByName(e.sub);const base=XL[e.id]?e.id:(plan||e.id);
    let ids=[];if(plan&&plan!==e.id)ids.push(plan);equivalents(base,8).forEach(x=>{if(!ids.includes(x)&&x!==e.id)ids.push(x);});
    const row=(id,lab,cur)=>`<button class="swr ${cur?'on':''}" data-act="swpick" data-e="${i}" data-id="${id}">${exThumb(id,48)}<span class="grow"><b>${esc(lab)}</b><small>${XL[id]?XL[id].eq.map(eqName).map(esc).join(' · ')||L('Peso corporal','Bodyweight','Peso corporal'):''}</small></span>${cur?svgSz(IC.chk,18):''}</button>`;
@@ -2659,7 +2683,7 @@ const A={
   obback:()=>{if(ui.ob&&ui.ob.step>0){ui.ob.step--;render();window.scrollTo(0,0);}},
  obtime:b=>{S.prefs.sessionTime=b.dataset.v;persist('prefs');render();},
  obpday:b=>{S.prefs.photoDay=+b.dataset.v;S.prefs.measureDay=+b.dataset.v;persist('prefs');render();},
- obuse:b=>{const t=TPL.find(x=>x[1]===b.dataset.gen);if(!t)return;obFinish();useProgram(genProgram(t),today());modal(L('Tudo pronto!','All set!'),`<p>${L('Seu programa está ativo. Na tela inicial você vê o treino do dia; toque em Iniciar treino quando chegar na academia.','Your program is active. The home screen shows today\'s workout; tap Start workout when you get to the gym.')}</p>`,[{l:L('Vamos lá','Let\'s go'),c:'primary',fn:()=>{closeModal();ui.filter='day';render();}}]);},
+ obuse:b=>{const t=tplById(b.dataset.gen);if(!t)return;obFinish();useProgram(genProgram(t),today());modal(L('Tudo pronto!','All set!'),`<p>${L('Seu programa está ativo. Na tela inicial você vê o treino do dia; toque em Iniciar treino quando chegar na academia.','Your program is active. The home screen shows today\'s workout; tap Start workout when you get to the gym.')}</p>`,[{l:L('Vamos lá','Let\'s go'),c:'primary',fn:()=>{closeModal();ui.filter='day';render();}}]);},
  oball:()=>{obFinish();ui.tab='progs';render();window.scrollTo(0,0);},
  obcreate:()=>{obFinish();openEditor(newProgram(),true);},
  bkfull:async()=>{toast(L('Preparando backup…','Preparing backup…'));const o=await backupFull();download(`backup-completo-treino-${today()}.json`,JSON.stringify(o));},
@@ -2668,7 +2692,7 @@ const A={
  pfgoal:b=>{S.profile.goal=b.dataset.v;persist('profile');render();},
  pfday:b=>{const d=+b.dataset.v,a=S.profile.days;const i=a.indexOf(d);if(i>=0){if(a.length<=1){toast(L('Escolha ao menos 1 dia','Pick at least 1 day'));return;}a.splice(i,1);}else a.push(d);a.sort();persist('profile');render();},
  proglv:b=>{ui.progLevel=b.dataset.v;render();},
- regen:()=>{const t=TPL.find(x=>x[1]===S.plan.gen);if(!t)return;const np=genProgram(t);np.startDate=S.plan.startDate;S.plan=np;persist('plan');render();toast(L('Programa atualizado','Program updated'));},
+ regen:()=>{const t=tplById(S.plan.gen);if(!t)return;const np=genProgram(t);np.startDate=S.plan.startDate;S.plan=np;persist('plan');render();toast(L('Programa atualizado','Program updated'));},
  logwo:b=>{if(S.active){toast(L('Finalize o treino em andamento antes','Finish the current workout first'));return;}closeModal();startWorkout(b.dataset.code,b.dataset.date,{log:true});},
  logpick:()=>{const ks=Object.keys(S.plan.workouts);modal(L('Registrar treino já feito','Log a past workout'),`<div class="field"><label>${L('Data','Date')}</label><input id="lp-d" value="${today()}"></div><div class="pillset">${ks.map(k=>`<button class="pill" data-act="logpick2" data-code="${k}">${esc(P(S.plan.workouts[k],'name'))}</button>`).join('')}</div>`,[{l:L('Cancelar','Cancel'),fn:closeModal}]);},
  logpick2:b=>{const d=$('#lp-d').value.trim();if(!isDate(d)||d>today()){toast(L('Data inválida','Invalid date'));return;}if(S.active){toast(L('Finalize o treino em andamento antes','Finish the current workout first'));return;}closeModal();startWorkout(b.dataset.code,d,{log:true});},
@@ -2738,6 +2762,8 @@ const A={
  plstart:()=>{const v=$('#pl-start').value.trim();if(!isDate(v)){toast(L('Use AAAA-MM-DD','Use YYYY-MM-DD'));return;}S.plan.startDate=v;persist('plan');render();toast(L('Início atualizado','Start date updated'));},
  plreset:()=>modal(L('Restaurar plano original?','Restore original plan?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Restaurar','Restore'),c:'primary',fn:()=>{S.plan=clone(DEFAULT_PLAN);persist('plan');closeModal();render();}}]),
  saveprof:()=>{const g=id=>$('#'+id).value.trim();Object.assign(S.profile,{name:g('pf-name'),idade:num(g('pf-idade'))||S.profile.idade,altura:num(g('pf-alt'))||S.profile.altura,pesoInicial:num(g('pf-pi'))||S.profile.pesoInicial,metaMin:num(g('pf-mmin'))||S.profile.metaMin,metaMax:num(g('pf-mmax'))||S.profile.metaMax});persist('profile');toast(L('Perfil salvo','Profile saved'));},
+ restadj:b=>{S.prefs.restAdj=b.dataset.v;persist('prefs');render();},
+ testalarm:()=>testAlarm(),
  pref:b=>{const k=b.dataset.k;if(k==='theme'){A.theme();return;}if(k==='vibrate'){S.prefs.vibrate=S.prefs.vibrate===false;persist('prefs');b.querySelector('.sw').classList.toggle('on',S.prefs.vibrate);if(S.prefs.vibrate)vib('rest');return;}if(k==='keepAwake'){S.prefs.keepAwake=!keepAwake();persist('prefs');wake(!!(S.prefs.keepAwake&&S.active));b.querySelector('.sw').classList.toggle('on',S.prefs.keepAwake);return;}S.prefs[k]=!S.prefs[k];persist('prefs');if(IN_APP&&k==='workoutReminder')scheduleReminders(true);b.querySelector('.sw').classList.toggle('on',!!S.prefs[k]);},
  bkdl:()=>download(`backup-treino-${today()}.json`,JSON.stringify(backupObj(),null,2)),
  bkcopy:()=>copyText(JSON.stringify(backupObj())),
@@ -3356,10 +3382,10 @@ function renderOnboarding(){if(!ui.ob)obStart();const st=ui.ob.step,p=S.profile;
     ${m==='rec'?`<div class="card"><div class="hd" style="font-size:17px">${L('Duração do programa','Program length','Duración del programa')}</div><div class="weekpick">${Array.from({length:12},(_,i)=>i+1).map(w=>`<button class="${(+p.progWeeks||6)===w?'on':''}" data-act="obweeks" data-v="${w}">${w}</button>`).join('')}</div><div class="sub" style="margin-top:6px">${(+p.progWeeks||6)} ${L('semanas','weeks','semanas')}${(+p.progWeeks||6)>=4?' · '+L('a última é de deload','the last one is a deload','la última es de descarga'):''}</div></div>
      <div class="card"><div class="hd" style="font-size:17px">${svgSz(IC.target,18)} ${L('Grupo muscular prioritário','Priority muscle group','Grupo muscular prioritario')}</div>${prioMap()}</div>`:''}
     <div class="row" style="gap:8px;margin-top:6px"><button class="btn grow" data-act="obback">← ${L('Voltar','Back')}</button>${m==='rec'?`<button class="btn primary grow" data-act="obnext">${L('Ver programas','See programs','Ver programas')}</button>`:''}</div>`;}
-  else if(st===7){const rk=rankPrograms();const rec=rk[0],alts=rk.slice(1,4);
+  else if(st===7){const rk=rankPrograms();const rec=rk[0],more=!!ui.obMore,alts=rk.slice(1,more?rk.length:5);
     h+=obH(L('Seu programa','Your program'),`${L('Montado para ','Built for ')}${esc(lvName(p.level))} · ${esc(goalName(p.goal))} · ${p.days.length} ${L('dias','days')} · ${+p.progWeeks||6} ${L('semanas','weeks','semanas')}`,6)+`
     <div class="lbl2">${svgSz(IC.star,14)} ${L('Recomendado para você','Recommended for you')}</div>${obProg(rec.p,true,rec.why)}
-    <div class="lbl2">${L('Outras opções, em ordem de recomendação','Other options, ranked','Otras opciones, por orden de recomendación')}</div>${alts.map(x=>obProg(x.p,false,x.why)).join('')}
+    <div class="lbl2">${L('Outras opções, em ordem de recomendação','Other options, ranked','Otras opciones, por orden de recomendación')}</div>${alts.map(x=>obProg(x.p,false,x.why)).join('')}${!more&&rk.length>5?`<button class="btn block outline" data-act="obmore" style="margin-top:4px">${L(`Ver mais ${rk.length-5} opções`,`See ${rk.length-5} more options`,`Ver ${rk.length-5} opciones más`)}</button>`:''}
     <div class="row" style="margin-top:12px;gap:8px"><button class="btn grow" data-act="oball">${L('Ver todos os programas','See all programs')}</button><button class="btn grow" data-act="obcreate">${L('Criar o meu','Create my own')}</button></div>
     <button class="btn ghost block" data-act="obback" style="margin-top:8px;color:var(--mut)">← ${L('Voltar','Back')}</button>`;}
   return h+'</div>';}
@@ -3381,6 +3407,7 @@ function obFinish(){S.prefs.onboarded=true;persist('prefs');const p=S.profile;
   ui.ob=null;scheduleReminders(true);if(!S.prefs.tourDone)setTimeout(tourWhenFree,900);}
 function tourWhenFree(){const m=$('#modal-root');if(m&&m.innerHTML.trim())return setTimeout(tourWhenFree,500);if(!S.prefs.tourDone)startTour();}
 Object.assign(A,{
+ obmore:()=>{ui.obMore=1;render();},
  obnext:()=>{if(!ui.ob)obStart();if(!obValidate())return;ui.ob.step=Math.min(OB_LAST,ui.ob.step+1);render();window.scrollTo(0,0);},
  obgym:b=>{S.profile.gym=b.dataset.v;const g=GYMS.find(x=>x[0]===b.dataset.v);S.profile.equip=[...g[4]];persist('profile');render();},
  obeq:b=>{const k=b.dataset.v;const eq=S.profile.equip||(S.profile.equip=[...EQ_ALL]);const i=eq.indexOf(k);if(i>=0)eq.splice(i,1);else eq.push(k);persist('profile');render();},
@@ -3431,17 +3458,27 @@ Object.assign(ES,{'Em casa · corpo inteiro':'En casa · cuerpo completo','Retor
  'Três full bodies diferentes por semana: cada grupo 3x, sessões equilibradas.':'Tres full body distintos por semana: cada grupo 3x, sesiones equilibradas.','Dois dias de força nos básicos e dois de hipertrofia. Para quem quer ficar mais forte sem perder volume.':'Dos días de fuerza en los básicos y dos de hipertrofia. Para ser más fuerte sin perder volumen.','Glúteos e adutores em 3 dos 4 treinos, com superiores em manutenção.':'Glúteos y aductores en 3 de los 4 entrenos, con el tren superior en mantenimiento.',
  'Peito, ombros e costas com volume extra; pernas em manutenção.':'Pecho, hombros y espalda con volumen extra; piernas en mantenimiento.','Alta frequência com técnicas nas últimas séries: cada grupo 2–3x por semana.':'Alta frecuencia con técnicas en las últimas series: cada grupo 2–3x por semana.','Volume alto para glúteos e adutores com técnicas avançadas, superiores em manutenção.':'Volumen alto para glúteos y aductores con técnicas avanzadas, tren superior en mantenimiento.','Força nos básicos com top sets pesadas e dias de volume para hipertrofia.':'Fuerza en los básicos con top sets pesadas y días de volumen para hipertrofia.',
  'Casa A':'Casa A','Casa B':'Casa B','Casa C':'Casa C','Corpo inteiro · pernas e empurrar':'Cuerpo completo · piernas y empuje','Corpo inteiro · quadril e puxar':'Cuerpo completo · cadera y tirón','Corpo inteiro · unilateral e core':'Cuerpo completo · unilateral y core','Força A':'Fuerza A','Força B':'Fuerza B','Agachamento e supino pesados':'Sentadilla y press de banca pesados','Terra e desenvolvimento pesados':'Peso muerto y press militar pesados','Glúteos B':'Glúteos B','Abdução, adução e unilateral':'Abducción, aducción y unilateral','Peito e ombros':'Pecho y hombros','Volume extra para o V':'Volumen extra para la V','Mais recomendado':'Más recomendado'});
+/* catálogo por nível: programas próprios + estruturas de outros níveis reajustadas (séries, RIR, descanso e fases do nível do usuário) */
+const ADAPT={
+ beginner:[['i-fb-abc'],['r-fb-abcd',['Full Body ABCD','Full Body ABCD'],['Quatro full bodies diferentes: alta frequência e sessões equilibradas.','Four different full-body sessions: high frequency and balanced workouts.']],['i-glute'],['i-vtaper'],['i-power'],['i-ppl']],
+ returning:[['b-fb-2x'],['i-glute'],['i-vtaper'],['i-power'],['i-ppl'],['i-ulppl']],
+ intermediate:[['b-fb-2x'],['r-fb-ab',['Full Body AB','Full Body AB'],['Dois full bodies alternados: pouco tempo na academia, cada grupo 2–3x por semana.','Two alternating full-body sessions: little gym time, each muscle 2–3x a week.']],['a-spec'],['a-glute',['Especialização em glúteos 5x','Glute specialization 5x'],['Cinco treinos com glúteos e adutores em três deles e superiores nos outros dois.','Five sessions: glutes and adductors in three, upper body in the other two.']]],
+ advanced:[['i-fb-abc'],['i-glute'],['i-vtaper'],['r-fb-ab',['Full Body AB','Full Body AB'],['Dois full bodies alternados: pouco tempo na academia, cada grupo 2–3x por semana.','Two alternating full-body sessions: little gym time, each muscle 2–3x a week.']],['i-home',['Em casa · corpo inteiro','Home · full body'],['Halteres, elásticos e peso corporal. Três treinos alternados para treinar em casa ou no condomínio.','Dumbbells, bands and bodyweight. Three alternating sessions for home or a building gym.']],['b-fb-2x']]};
+function tplAdapt(lv,a){const src=TPL.find(x=>x[1]===a[0]);if(!src)return null;const t=src.slice();t[0]=lv;t[1]=a[0]+'@'+lv;if(a[1])t[2]=a[1];if(a[2]){t[7]=a[2];t[8]=null;}return t;}
+function tplList(lv){return [...TPL.filter(t=>t[0]===lv),...(ADAPT[lv]||[]).map(a=>tplAdapt(lv,a)).filter(Boolean)];}
+function tplById(id){id=String(id||'');if(id.includes('@')){const [b,lv]=id.split('@');const a=(ADAPT[lv]||[]).find(x=>x[0]===b);return a?tplAdapt(lv,a):null;}return TPL.find(x=>x[1]===id)||null;}
+Object.assign(ES,{'Quatro full bodies diferentes: alta frequência e sessões equilibradas.':'Cuatro full body distintos: alta frecuencia y sesiones equilibradas.','Dois full bodies alternados: pouco tempo na academia, cada grupo 2–3x por semana.':'Dos full body alternos: poco tiempo en el gimnasio, cada grupo 2–3x por semana.','Especialização em glúteos 5x':'Especialización en glúteos 5x','Cinco treinos com glúteos e adutores em três deles e superiores nos outros dois.':'Cinco entrenos: glúteos y aductores en tres, tren superior en los otros dos.'});
 /* nota de recomendação: nível, dias, tempo, objetivo, grupo prioritário e aparelhos */
 function rankPrograms(){const pf=S.profile,n=(pf.days||[]).length,short=(S.prefs.sessionTime||'mid')==='short',eq=userEq(),home=!eq.includes('barbell')&&!eq.includes('chestm')&&!eq.includes('backm');
   const pri=Array.isArray(pf.priority)?pf.priority:[];const sex=pf.sex==='F'?'F':'M';
-  const out=TPL.filter(t=>t[0]===pf.level).map(t=>{const why=[];let sc=0;const p=genProgram(t);const d=tplDays(t,pf.days||[]);
+  const out=tplList(pf.level).map(t=>{const why=[];let sc=0;const p=genProgram(t);const d=tplDays(t,pf.days||[]);
     const fitD=t[3].includes(n)?2:t[3].some(x=>x<=n)?1:0;sc+=fitD*6;if(fitD===2)why.push(L(`Usa os seus ${n} dias`,`Uses your ${n} days`,`Usa tus ${n} días`));
     if(short){if(t[6]){sc+=12;why.push(L('Cabe em 30–40 min','Fits in 30–40 min','Cabe en 30–40 min'));}else sc-=4;}else if(t[6])sc-=5;
     const fl=t[9];if(fl==='home'){if(home){sc+=12;why.push(L('Feito para o seu equipamento','Built for your equipment','Hecho para tu material'));}else sc-=8;}
     if(fl==='glutes'){if(pf.goal==='glutes'||pri.includes('gluteos')||pri.includes('adutores')){sc+=10;why.push(L('Prioriza glúteos','Prioritizes glutes','Prioriza glúteos'));}else sc-=sex==='F'?1:4;}
     if(fl==='upper'){if(pf.goal==='upper'||pri.some(g=>['peito','ombros','costas'].includes(g))){sc+=10;why.push(L('Prioriza peito, ombros e costas','Prioritizes chest, shoulders and back','Prioriza pecho, hombros y espalda'));}else sc-=3;}
     if(fl==='strength'){if(pf.goal==='strength'){sc+=10;why.push(L('Foco em força','Strength focus','Enfoque en fuerza'));}else sc-=2;}
-    if(t[1]===recommendTpl())sc+=4;
+    if(t[1]===recommendTpl())sc+=4;if(sex==='M'&&(t[4]||[]).includes('PUSH')&&n<6&&!(t[4]||[]).includes('UPA'))sc-=3;if(t[1].includes('@'))sc-=1.5;
     /* volume no grupo prioritário */
     if(pri.length){let v=0;Object.values(p.workouts).forEach(w=>w.exercises.forEach(e=>{if(pri.includes(e.group))v+=e.sets;}));sc+=Math.min(8,v/3);if(v>=10)why.push(L('Bom volume no seu grupo prioritário','Good volume for your priority muscles','Buen volumen en tu grupo prioritario'));}
     /* aparelhos: quantos exercícios originais precisaram de troca */
@@ -3724,7 +3761,7 @@ function socFeed(){const me=SOC.uid,du=dmUnread(),au=SOC.fr.filter(f=>f.status==
   const ids=[me].concat(SOC.friends.slice().sort((a,b)=>trainedToday(b)-trainedToday(a)));
   h+=`<div class="stories">${ids.map(u=>`<button class="story" data-act="socgo" data-v="${u===me?'new':'prof'}" data-id="${esc(u)}">${uPhoto(uPh(u),uName(u),62,trainedToday(u)?'on':'off')}${u===me?`<i class="splus">${svgSz(IC.plus,12)}</i>`:''}<span>${esc(u===me?L('Seu post','Your post','Tu post'):(uName(u)||'').split(' ')[0])}</span></button>`).join('')}
     <button class="story" data-act="socgo" data-v="sug"><span class="sadd">${svgSz(IC.plus,24)}</span><span>${L('Parceiro','Partner','Compañero')}</span></button></div>`;
-  if(SOC.friends.length<3)h+=sugStrip();
+  h+=pubInvite();if(SOC.friends.length<3)h+=sugStrip();
   const act=SOC.ch.filter(c=>c.status==='active'||(c.status==='pending'));
   if(act.length)h+=`<button class="lbl2 lblbtn" data-act="socgo" data-v="chall" style="margin-top:4px">${svgSz(IC.podium,14)} ${L('Desafios','Challenges','Retos')} <span>${L('ver todos','see all','ver todos')} ›</span></button><div class="chstrip">${act.map(chMini).join('')}</div>`;
   if(!SOC.posts.length)return h+`<div class="empty igempty">${svgSz(IC.cam,40)}<b>${L('Seu feed está vazio','Your feed is empty','Tu feed está vacío')}</b><span>${SOC.friends.length?L('Publique a primeira foto do treino!','Post your first workout photo!','¡Publica la primera foto del entreno!'):L('Adicione parceiros de treino para ver as publicações deles.','Add training partners to see their posts.','Añade compañeros de entreno para ver sus publicaciones.')}</span>
@@ -3973,7 +4010,16 @@ const SUG={list:null,at:0,busy:false,pp:{},ppPosts:{}};
 async function loadSug(force){if(SUG.busy||(!force&&SUG.list&&Date.now()-SUG.at<120000))return;SUG.busy=true;
   try{const sn=await FB.getDocs(FB.query(FB.collection(fbDb,'pubprofiles'),FB.limit(60)));SUG.list=sn.docs.map(d=>Object.assign({uid:d.id},d.data()));SUG.at=Date.now();}catch(e){SUG.list=SUG.list||[];}
   SUG.busy=false;if(ui.tab==='social')softRender();}
-function sugCands(){const me=SOC.uid,rel=new Set(SOC.fr.flatMap(f=>f.members));return (SUG.list||[]).filter(u=>u.uid!==me&&!rel.has(u.uid)).sort((a,b)=>(b.last||'').localeCompare(a.last||''));}
+/* ordem: quem treinou nos últimos 7 dias, nível de jogo parecido e constância */
+function sugScore(u,my){const t=today();let s=0;if(u.last&&u.last>=addD(t,-7))s+=4;else if(u.last&&u.last>=addD(t,-30))s+=1.5;
+  s+=Math.max(0,2-Math.abs((u.lv||0)-my)/4);s+=Math.min(2,(u.w30||0)/6);if(u.photo)s+=.5;if(u.bio)s+=.3;return s;}
+function sugCands(){const me=SOC.uid,rel=new Set(SOC.fr.flatMap(f=>f.members));let my=0;try{my=gameStats().lv||0;}catch(e){}
+  return (SUG.list||[]).filter(u=>u.uid!==me&&!rel.has(u.uid)).map(u=>[sugScore(u,my),u]).sort((a,b)=>b[0]-a[0]).map(x=>x[1]);}
+/* convite único para entrar nas sugestões: perfis são privados por padrão */
+function pubInvite(){if(isPub()||S.prefs.pubAsked)return '';
+  return `<div class="card pubinv"><div class="row" style="gap:10px;align-items:flex-start">${svgSz(IC.users,22)}<div class="grow"><b>${L('Quer encontrar parceiros de treino?','Looking for training partners?','¿Buscas compañeros de entreno?')}</b>
+   <div class="sub" style="margin-top:4px">${L('Com o perfil público você aparece nas sugestões de outros usuários. Peso, medidas e fotos de progresso continuam privados, e mensagens só depois que você aceitar o parceiro.','With a public profile you show up in other users\' suggestions. Weight, measurements and progress photos stay private, and messages only after you accept a partner.','Con el perfil público apareces en las sugerencias de otros usuarios. Peso, medidas y fotos de progreso siguen privados, y los mensajes solo después de aceptar al compañero.')}</div></div></div>
+   <div class="row" style="gap:8px;margin-top:10px"><button class="btn sm grow" data-act="pubinv" data-v="0">${L('Agora não','Not now','Ahora no')}</button><button class="btn sm primary grow" data-act="pubinv" data-v="1">${L('Tornar público','Make public','Hacer público')}</button></div></div>`;}
 function sugStrip(){loadSug();const c=sugCands().slice(0,10);if(!c.length)return '';
   return `<button class="lbl2 lblbtn" data-act="socgo" data-v="sug">${svgSz(IC.users,14)} ${L('Sugestões para você','Suggested for you','Sugerencias para ti')} <span>${L('ver todas','see all','ver todas')} ›</span></button>
    <div class="sugstrip">${c.map(u=>`<div class="sugc"><button class="phu col" data-act="socgo" data-v="prof" data-id="${esc(u.uid)}">${uPhoto(u.photo,u.name,64,u.last===today()?'on':'off')}<b>${esc((u.name||'').split(' ')[0])}</b><small>${esc(lvTitle(u.lv||0))}</small></button><button class="btn sm primary block" data-act="socreq" data-id="${esc(u.uid)}">${L('Adicionar','Add','Añadir')}</button></div>`).join('')}</div>`;}
@@ -4004,6 +4050,7 @@ async function reqPartner(uid){const me=SOC.uid,id=pairId(me,uid);if(SOC.fr.some
   try{await FB.setDoc(FB.doc(fbDb,'friendships',id),{members:[me,uid].sort(),from:me,to:uid,status:'pending',at:Date.now(),fromName:myName(),fromPhoto:myThumb(),toName:u.name||'',toPhoto:u.photo||null});toast(L('Convite enviado','Invite sent','Invitación enviada'));vib('tap');}catch(e){toast(cErr(e));}}
 Object.assign(A,{
  socreq:b=>reqPartner(b.dataset.id),
+ pubinv:b=>{S.prefs.pubAsked=1;persist('prefs');if(b.dataset.v==='1')setPublic(true);else{render();toast(L('Dá para mudar quando quiser no seu perfil do Social.','You can change it anytime on your Social profile.','Puedes cambiarlo cuando quieras en tu perfil de Social.'));}},
  socpriv:()=>{const on=!isPub();modal(on?L('Tornar perfil público?','Make profile public?','¿Hacer público el perfil?'):L('Tornar perfil privado?','Make profile private?','¿Hacer privado el perfil?'),
    `<p>${on?L('Você vai aparecer nas sugestões de parceiros e qualquer usuário do Grow Up poderá ver seu nome, foto, bio, nível, constância e publicações. Peso, medidas e fotos de progresso continuam privados.','You will appear in partner suggestions and any Grow Up user can see your name, photo, bio, level, consistency and posts. Weight, measurements and progress photos stay private.','Aparecerás en las sugerencias y cualquier usuario de Grow Up podrá ver tu nombre, foto, bio, nivel, constancia y publicaciones. Peso, medidas y fotos de progreso siguen privados.'):L('Você sai das sugestões e só seus parceiros verão suas publicações.','You leave suggestions and only your partners will see your posts.','Sales de las sugerencias y solo tus compañeros verán tus publicaciones.')}</p>`,
    [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:on?L('Tornar público','Make public','Hacer público'):L('Tornar privado','Make private','Hacer privado'),c:'primary',fn:()=>{closeModal();setPublic(on);}}]);}});
