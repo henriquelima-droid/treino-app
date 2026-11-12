@@ -726,6 +726,20 @@ body:has(#reelv) .modal-bg{z-index:300}
 #simbar{position:fixed;left:0;right:0;top:0;z-index:400;background:var(--red);color:#0A0A0A;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:calc(6px + var(--safe-area-inset-top,0px)) 12px 6px;font:700 12.5px Inter,sans-serif}#simbar span{display:flex;gap:6px;align-items:center}#simbar button{background:#0A0A0A;color:#fff;border:0;border-radius:99px;padding:6px 14px;font:700 12px Inter,sans-serif}
 body.simmode #app{padding-top:34px}
 .admform select,#ann-k{width:100%;padding:10px 12px;background:var(--s2);color:var(--tx);border:1px solid var(--s3);border-radius:12px;font:600 14px Inter,sans-serif;-webkit-appearance:none;appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--mut) 50%),linear-gradient(135deg,var(--mut) 50%,transparent 50%);background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;background-size:5px 5px;background-repeat:no-repeat}
+/* ---- publicação com várias fotos ---- */
+.npprev{position:relative;width:100%;max-height:60vh;border-radius:20px;overflow:hidden;background:var(--s2);margin-bottom:10px;cursor:pointer}.npprev img{width:100%;height:100%;object-fit:cover;display:block}
+.npedit{position:absolute;left:10px;bottom:10px;background:rgba(10,10,10,.72);color:#fff;font:700 12.5px Inter,sans-serif;padding:7px 12px;border-radius:99px;display:flex;gap:6px;align-items:center}
+.carn{position:absolute;right:10px;top:10px;background:rgba(10,10,10,.7);color:#fff;font:700 12px Inter,sans-serif;padding:3px 9px;border-radius:99px;pointer-events:none}
+.nparrow{display:flex;gap:6px;align-items:center;margin-bottom:8px}.pill.sm{padding:6px 12px;font-size:12.5px}
+.npstrip{display:flex;gap:8px;overflow-x:auto;padding:8px 2px 6px;margin-bottom:2px}.npth{position:relative;flex:none;width:64px}.npth button{width:64px;padding:0;border:2px solid transparent;border-radius:12px;overflow:hidden;background:var(--s2);display:block}.npth.on button{border-color:var(--red)}.npth img{width:100%;height:100%;object-fit:cover;display:block}
+.npth i{position:absolute;top:-6px;right:-6px;width:22px;height:22px;border-radius:50%;background:#0A0A0A;color:#fff;border:1px solid var(--s3);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:15px;cursor:pointer}.npth i.mv{right:auto;left:-6px;top:auto;bottom:-6px;font-size:16px}
+.npadd{flex:none;width:64px;border:2px dashed var(--s3);border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer}
+.npvp{aspect-ratio:4/5;border-radius:12px;width:min(92vw,400px);max-height:62vh}.npgrid{position:absolute;inset:0;pointer-events:none;background:linear-gradient(to right,transparent 33.2%,rgba(255,255,255,.25) 33.3%,rgba(255,255,255,.25) 33.5%,transparent 33.6%,transparent 66.5%,rgba(255,255,255,.25) 66.6%,rgba(255,255,255,.25) 66.8%,transparent 66.9%),linear-gradient(to bottom,transparent 33.2%,rgba(255,255,255,.25) 33.3%,rgba(255,255,255,.25) 33.5%,transparent 33.6%,transparent 66.5%,rgba(255,255,255,.25) 66.6%,rgba(255,255,255,.25) 66.8%,transparent 66.9%);outline:2px solid var(--red);outline-offset:-2px;border-radius:inherit}
+#npedfx .cropctl .pill{color:#fff}#npedfx .cropctl .pill.on{color:#0A0A0A}
+.pcar{position:relative}.car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}.car::-webkit-scrollbar{display:none}.car .pimg{flex:0 0 100%;scroll-snap-align:center}
+.cdots{position:absolute;left:0;right:0;bottom:-14px;display:flex;justify-content:center;gap:4px;pointer-events:none}.cdots i{width:6px;height:6px;border-radius:50%;background:var(--s3)}.cdots i.on{background:var(--red)}
+.pcar+.pact{margin-top:10px}
+.igcell{position:relative}.cicon{position:absolute;right:6px;top:6px;z-index:1;color:#fff;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7));display:flex}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -3166,6 +3180,8 @@ Object.assign(IC,{
  reel:sv('<rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/><path d="M10 8.6v6.8l5.4-3.4z"/>'),
  play:sv('<path d="M8 5.5v13l10.5-6.5z"/>',1),
  shield:sv('<path d="M12 3l7.5 3v5.5c0 4.6-3.2 8.3-7.5 9.5-4.3-1.2-7.5-4.9-7.5-9.5V6z"/><path d="M9 12l2 2 4-4"/>'),
+ crop:sv('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'),
+ rot:sv('<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>'),
  more:sv('<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',1),
  zoom:sv('<circle cx="11" cy="11" r="7"/><path d="m21 21-5-5M11 8v6M8 11h6"/>'),
  logout:sv('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>'),
@@ -3686,7 +3702,7 @@ async function ensureUserDoc(u){const ref=FB.doc(fbDb,'users',u.uid);let d=null;
   let code=d&&d.code;
   if(!code){for(let i=0;i<5&&!code;i++){const c=newCode();try{const ex=await FB.getDoc(FB.doc(fbDb,'codes',c));if(!ex.exists()){await FB.setDoc(FB.doc(fbDb,'codes',c),{uid:u.uid,name,photo});code=c;}}catch(e){}}}
   else{try{await FB.setDoc(FB.doc(fbDb,'codes',code),{uid:u.uid,name,photo});}catch(e){}}
-  CL.code=code;await FB.setDoc(ref,{name,photo,code:code||null,lang:LANG,stats:pubStats(),updatedAt:FB.serverTimestamp()},{merge:true});}
+  CL.code=code;await FB.setDoc(ref,Object.assign({name,photo,code:code||null,lang:LANG,stats:pubStats(),updatedAt:FB.serverTimestamp()},d?{}:{created:Date.now()}),{merge:true});}
 /* dados públicos (apenas para amigos aceitos): constância, nunca peso/medidas */
 function pubStats(){const c=consistency(),g=gameStats(),t=today();const ws=S.sessions.filter(s=>s.type==='workout');
   const d7=[];for(let k=6;k>=0;k--){const d=addD(t,-k);d7.push(ws.some(s=>s.date===d)?1:0);}
@@ -3807,7 +3823,7 @@ function socUnread(){if(!SOC.on)return 0;const me=SOC.uid;return SOC.msgs.filter
 const dmUnread=()=>SOC.on?SOC.msgs.filter(m=>m.to===SOC.uid&&!m.read).length:0;
 const actUnread=()=>SOC.on?SOC.fr.filter(f=>f.status==='pending'&&f.to===SOC.uid&&!isBlk(f.from)).length+SOC.ch.filter(c=>c.status==='pending'&&c.to===SOC.uid).length:0;
 async function socWipe(){if(!SOC.on)return;const me=SOC.uid;const del=(n,id)=>FB.deleteDoc(FB.doc(fbDb,n,id)).catch(()=>{});
-  await Promise.all(Object.keys(SOC.blk||{}).map(u=>del('blocks',me+'_'+u)));  await Promise.all(SOC.fr.map(f=>del('friendships',f.id)));await Promise.all(SOC.posts.filter(p=>p.uid===me).map(p=>Promise.all([del('posts',p.id),del('pimg',p.id),delVid(p)])));
+  await Promise.all(Object.keys(SOC.blk||{}).map(u=>del('blocks',me+'_'+u)));  await Promise.all(SOC.fr.map(f=>del('friendships',f.id)));await Promise.all(SOC.posts.filter(p=>p.uid===me).map(p=>Promise.all([del('posts',p.id),del('pimg',p.id),delExtraImgs(p),delVid(p)])));
   await Promise.all(SOC.msgs.map(m=>del('msgs',m.id)));await Promise.all(SOC.ch.map(c=>del('challenges',c.id)));socStop();}
 const myName=()=>S.profile.name||(CL.user&&(CL.user.name||(CL.user.email||'').split('@')[0]))||'Atleta';
 const myPhoto=()=>S.profile.photoSoc||(CL.user&&CL.user.photo)||S.profile.photoURL||null;
@@ -3858,6 +3874,7 @@ function socFeed(){const me=SOC.uid,du=dmUnread(),au=SOC.fr.filter(f=>f.status==
   return h+SOC.posts.filter(p=>!isBlk(p.uid)).map(postCard).join('');}
 function woTile(wo,big){if(!wo)return '';return `<div class="wotile ${big?'big':''}"><div class="wt-t">${svgSz(IC.dumb,big?28:16)} ${esc(wo.title||'')}</div><div class="wt-s"><div><b>${wo.dur||0}</b><span>min</span></div><div><b>${wo.sets||0}</b><span>${L('séries','sets','series')}</span></div><div><b>${fmtN((wo.vol||0)/1000,1)}</b><span>t</span></div>${wo.prs?`<div><b>${wo.prs}</b><span>${L('recordes','PRs','récords')}</span></div>`:''}</div></div>`;}
 function postMedia(p){if(p.type==='reel')return `<div class="pmedia preel" data-act="soclike2" data-id="${esc(p.id)}"><div class="rvw" style="${p.thumb?`background-image:url('${p.thumb}')`:''}"><video data-reel="${esc(p.id)}" muted loop playsinline preload="none"></video></div><span class="rbadge">${svgSz(IC.reel,18)}</span><button class="vmute rmute" data-act="reelmute" aria-label="som">${RV.muted?IC.volx:IC.vol}</button><button class="rfull" data-act="reelopen" data-id="${esc(p.id)}" aria-label="${L('Tela cheia','Full screen','Pantalla completa')}">${svgSz(IC.zoom,16)}</button><i class="bigheart">${IC.heartf}</i></div>`;
+  if(p.hasImg&&(p.n||1)>1){const n=p.n;return `<div class="pmedia pcar" data-act="soclike2" data-id="${esc(p.id)}"><div class="car">${Array.from({length:n},(_,i)=>`<div class="pimg" data-pimg="${esc(i?p.id+'_'+i:p.id)}" style="aspect-ratio:${p.ar||'4/5'}"></div>`).join('')}</div><span class="carn">1/${n}</span><div class="cdots">${Array.from({length:n},(_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>${p.wo?`<div class="pwo">${wo2chips(p.wo)}</div>`:''}<i class="bigheart">${IC.heartf}</i></div>`;}
   if(p.hasImg)return `<div class="pmedia" data-act="soclike2" data-id="${esc(p.id)}"><div class="pimg" data-pimg="${esc(p.id)}" style="aspect-ratio:${p.ar||'4/5'}"></div>${p.wo?`<div class="pwo">${wo2chips(p.wo)}</div>`:''}<i class="bigheart">${IC.heartf}</i></div>`;
   if(p.type==='workout')return `<div class="pmedia" data-act="soclike2" data-id="${esc(p.id)}">${woTile(p.wo,true)}<i class="bigheart">${IC.heartf}</i></div>`;
   if(p.type==='progress'||p.type==='challenge')return `<div class="pmedia" data-act="soclike2" data-id="${esc(p.id)}"><div class="prgtile ${p.type}">${svgSz(p.type==='challenge'?IC.trophy:IC.flex,34)}<b>${esc(p.title||'')}</b>${(p.lines||[]).map(l=>`<span>${esc(l)}</span>`).join('')}</div><i class="bigheart">${IC.heartf}</i></div>`;
@@ -3875,33 +3892,82 @@ function socPostPage(pid){const p=SOC.posts.find(x=>x.id===pid)||(SOC.extra||{})
 
 /* ---------- nova publicação ---------- */
 function socNew(){const d=ui.np||(ui.np={tag:'gym',cap:'',img:null,ar:'4/5',wo:true});const wt=todayWo();const isR=d.kind==='reel';
-  const can=isR?!!d.vfile:(d.img||(wt&&d.wo));
+  const can=isR?!!d.vfile:((d.imgs&&d.imgs.length)||(wt&&d.wo));
   return `<div class="ighd">${bk()}<div class="hd grow">${L('Nova publicação','New post','Nueva publicación')}</div><button class="btn sm primary" data-act="socpub" ${can?'':'disabled'}>${L('Publicar','Share','Publicar')}</button></div>
    <div class="npkind"><button class="${isR?'':'on'}" data-act="socnpkind" data-v="photo">${svgSz(IC.grid,16)} ${L('Foto','Photo','Foto')}</button><button class="${isR?'on':''}" data-act="socnpkind" data-v="reel">${svgSz(IC.reel,16)} Reel</button></div>
-   ${isR?reelPick(d):`<label class="npick ${d.img?'has':''}">${d.img?`<img src="${d.img}" alt="">`:`${svgSz(IC.cam,40)}<b>${L('Escolher foto','Choose photo','Elegir foto')}</b><span>${L('Da galeria ou da câmera','From gallery or camera','De la galería o la cámara')}</span>`}<input type="file" accept="image/*" data-sfile="post" hidden></label>
-   ${d.img?`<button class="btn ghost sm" data-act="socnpclr" style="margin:-4px 0 8px">${L('Remover foto','Remove photo','Quitar foto')}</button>`:''}`}
+   ${isR?reelPick(d):photoPick(d)}
    <div class="lbl2">${L('Onde foi?','Where?','¿Dónde fue?')}</div><div class="pillset">${TAGS().map(t=>`<button class="pill ${d.tag===t[0]?'on':''}" data-act="socnptag" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
    <textarea id="np-cap" rows="3" maxlength="400" placeholder="${L('Escreva uma legenda…','Write a caption…','Escribe un pie de foto…')}" style="margin-top:12px">${esc(d.cap)}</textarea>
  ${wt&&!isR?`<button class="toggle" data-act="socnpwo" style="margin-top:8px"><span>${L('Mostrar o treino de hoje','Show today\'s workout','Mostrar el entreno de hoy')}<small class="sub" style="display:block">${esc(wt.title)} · ${wt.dur} min · ${fmtN(wt.vol/1000,1)} t</small></span><i class="sw ${d.wo?'on':''}"></i></button>`:''}
-   ${!isR&&!d.img&&!wt?`<div class="note-box">${L('Escolha uma foto para publicar. Depois de concluir um treino, você também pode publicar só o resumo dele.','Choose a photo to post. After finishing a workout you can also post just its summary.','Elige una foto para publicar. Tras completar un entreno, también puedes publicar solo su resumen.')}</div>`:''}`;}
+   ${!isR&&!(d.imgs&&d.imgs.length)&&!wt?`<div class="note-box">${L('Escolha uma foto para publicar. Depois de concluir um treino, você também pode publicar só o resumo dele.','Choose a photo to post. After finishing a workout you can also post just its summary.','Elige una foto para publicar. Tras completar un entreno, también puedes publicar solo su resumen.')}</div>`:''}`;}
 function todayWo(){const s=S.sessions.filter(x=>x.type==='workout'&&x.date===today()).sort((a,b)=>(b.endedAt||0)-(a.endedAt||0))[0];if(!s)return null;const st=sessionStats(s);return {title:woTitle(s),dur:st.dur,sets:st.sets,vol:Math.round(st.vol),prs:st.prs.length};}
 async function socPublishPost(){const d=ui.np;const cap=(($('#np-cap')||{}).value||d.cap||'').trim().slice(0,400);if(d.kind==='reel')return publishReel(d,cap);
-  const wt=d.wo?todayWo():null;if(!d.img&&!wt)return;if(SOC.posting)return;SOC.posting=true;
-  const me=SOC.uid,aud=[me].concat(SOC.friends).slice(0,200);toast(L('Publicando…','Posting…','Publicando…'));
-  try{const ref=FB.doc(FB.collection(fbDb,'posts'));let img=d.img;
-    if(img&&img.length>740000){img=await shrinkData(img,740000);}
-    /* a imagem vai primeiro: se falhar, não fica publicação sem foto */
-    if(img){await FB.setDoc(FB.doc(fbDb,'pimg',ref.id),{uid:me,aud,pub:false,d:img});SOC.img[ref.id]=img;putImg('pi-'+ref.id,img,{}).catch(()=>{});}
-    await FB.setDoc(ref,{uid:me,name:myName(),photo:myThumb(),type:img?'photo':'workout',pub:false,tag:d.tag,cap,wo:wt||null,hasImg:!!img,ar:d.ar,at:Date.now(),aud,rx:{},nc:0});
-    ui.np=null;vib('set');pushStats();socGo('feed');toast(L('Publicado','Posted','Publicado'));}
-  catch(e){(typeof logErr==='function'?logErr:()=>{})('post-photo',e,{n:(d.img||'').length});toast(cErr(e)+(e&&e.code?'':' ('+String(e&&e.message||e).slice(0,60)+')'));}
+  const imgs=d.imgs||[],wt=d.wo?todayWo():null;if(!imgs.length&&!wt)return;if(SOC.posting)return;SOC.posting=true;
+  const me=SOC.uid,aud=[me].concat(SOC.friends).slice(0,200),ar=d.ar||'4/5';
+  try{const ref=FB.doc(FB.collection(fbDb,'posts'));let first=null;
+    for(let i=0;i<imgs.length;i++){if(imgs.length>1)reelProg(L(`Enviando foto ${i+1} de ${imgs.length}…`,`Uploading photo ${i+1} of ${imgs.length}…`,`Subiendo foto ${i+1} de ${imgs.length}…`),i/imgs.length);else toast(L('Publicando…','Posting…','Publicando…'));
+      const out=await renderCrop(imgs[i],ar,1080,500000);const key=i?ref.id+'_'+i:ref.id;
+      /* as imagens vão primeiro: se falhar, não fica publicação sem foto */
+      await FB.setDoc(FB.doc(fbDb,'pimg',key),{uid:me,aud,pub:false,d:out});SOC.img[key]=out;putImg('pi-'+key,out,{}).catch(()=>{});if(!i)first=out;}
+    await FB.setDoc(ref,{uid:me,name:myName(),photo:myThumb(),type:imgs.length?'photo':'workout',pub:false,tag:d.tag,cap,wo:wt||null,hasImg:!!imgs.length,n:imgs.length||0,ar,at:Date.now(),aud,rx:{},nc:0});
+    closeModal();ui.np=null;vib('set');pushStats();socGo('feed');toast(L('Publicado','Posted','Publicado'));}
+  catch(e){closeModal();logErr('post-photo',e,{n:imgs.length});toast(cErr(e)+(e&&e.code?'':' ('+String(e&&e.message||e).slice(0,60)+')'));}
   finally{SOC.posting=false;}}
 async function shrinkData(data,max){const im=new Image();await new Promise(r=>{im.onload=r;im.onerror=r;im.src=data;});let W=im.naturalWidth,H=im.naturalHeight,q=.75,out=data;
   for(let k=0;k<8&&out.length>max;k++){const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(im,0,0,W,H);out=c.toDataURL('image/jpeg',q);if(q>.5)q-=.08;else{W=Math.round(W*.85);H=Math.round(H*.85);}}return out;}
-async function npFile(file){try{const data=await compress(file,1080,500000);const im=new Image();await new Promise(r=>{im.onload=r;im.onerror=r;im.src=data;});
-  const r=im.naturalWidth&&im.naturalHeight?im.naturalWidth/im.naturalHeight:0.8;const ar=r<0.9?'4/5':r>1.2?'1.91/1':'1/1';
-  ui.np=Object.assign(ui.np||{tag:'gym',cap:'',wo:true},{img:data,ar,cap:(($('#np-cap')||{}).value)||((ui.np||{}).cap)||''});render();}catch(e){logErr('photo-open',e,{t:file&&file.type,s:file&&file.size});toast(L('Não foi possível abrir a foto','Could not open the photo','No se pudo abrir la foto'));}}
-document.addEventListener('change',ev=>{const el=ev.target;if(!el.dataset||!el.files||!el.files[0])return;const f=el.files[0];if(el.dataset.sfile==='post'){el.value='';npFile(f);}else if(el.dataset.sfile==='reel'){el.value='';reelFile(f);}});
+/* fotos da publicação: até 10, com enquadramento (posição, zoom e giro) e a mesma proporção para todas, como no Instagram */
+const NP_MAX=10,ARS=[['4/5','4:5'],['1/1','1:1'],['1.91/1','1,91:1']];
+const arNum=a=>{const [x,y]=String(a||'4/5').split('/').map(Number);return x/(y||1);};
+function photoPick(d){const imgs=d.imgs||[],ar=d.ar||'4/5';
+  if(!imgs.length)return `<label class="npick">${svgSz(IC.cam,40)}<b>${L('Escolher fotos','Choose photos','Elegir fotos')}</b><span>${L('Até 10 fotos: viram um carrossel','Up to 10 photos: they become a carousel','Hasta 10 fotos: se convierten en carrusel')}</span><input type="file" accept="image/*" multiple data-sfile="post" hidden></label>`;
+  const cur=Math.min(ui.npSel||0,imgs.length-1);
+  return `<div class="npprev" style="aspect-ratio:${ar}" data-act="npedit" data-i="${cur}"><img src="${imgs[cur].prev||imgs[cur].src}" alt=""><span class="npedit">${svgSz(IC.crop,16)} ${L('Ajustar','Adjust','Ajustar')}</span>${imgs.length>1?`<span class="carn">${cur+1}/${imgs.length}</span>`:''}</div>
+   <div class="nparrow">${ARS.map(a=>`<button class="pill sm ${ar===a[0]?'on':''}" data-act="npar" data-v="${a[0]}">${a[1]}</button>`).join('')}<span class="grow"></span><span class="sub">${imgs.length}/${NP_MAX}</span></div>
+   <div class="npstrip">${imgs.map((x,i)=>`<div class="npth ${i===cur?'on':''}"><button data-act="npsel" data-i="${i}" style="aspect-ratio:${ar}"><img src="${x.prev||x.src}" alt=""></button><i data-act="nprm" data-i="${i}" role="button" aria-label="${L('Remover','Remove','Quitar')}">×</i>${i?`<i class="mv" data-act="npmv" data-i="${i}" role="button" aria-label="${L('Mover para a esquerda','Move left','Mover a la izquierda')}">‹</i>`:''}</div>`).join('')}
+    ${imgs.length<NP_MAX?`<label class="npadd" style="aspect-ratio:${ar}">${svgSz(IC.plus,22)}<input type="file" accept="image/*" multiple data-sfile="post" hidden></label>`:''}</div>
+   <div class="sub" style="margin:2px 0 10px">${L('Toque na foto para enquadrar. Arraste as miniaturas pela seta para mudar a ordem.','Tap the photo to frame it. Use the arrow on a thumbnail to reorder.','Toca la foto para encuadrarla. Usa la flecha para reordenar.')}</div>`;}
+async function npFiles(files){const d=ui.np;d.imgs=d.imgs||[];d.cap=(($('#np-cap')||{}).value)||d.cap||'';const room=NP_MAX-d.imgs.length;
+  if(files.length>room)toast(L(`Máximo de ${NP_MAX} fotos por publicação`,`Up to ${NP_MAX} photos per post`,`Máximo ${NP_MAX} fotos por publicación`));
+  for(const f of files.slice(0,room)){try{const src=await compress(f,1600,1200000);const im=await loadIm(src);
+      const it={src,w:im.naturalWidth,h:im.naturalHeight,c:{z:1,x:0,y:0,r:0}};if(!d.imgs.length&&!d.arSet){const r=it.w/it.h;d.ar=r<0.9?'4/5':r>1.3?'1.91/1':'1/1';}
+      it.prev=await renderCrop(it,d.ar||'4/5',360,60000);d.imgs.push(it);}
+    catch(e){logErr('photo-open',e,{t:f&&f.type,s:f&&f.size});toast(L('Não foi possível abrir uma das fotos','Could not open one of the photos','No se pudo abrir una de las fotos'));}}
+  ui.npSel=Math.max(0,d.imgs.length-1);render();}
+/* desenha a foto enquadrada na proporção escolhida */
+async function renderCrop(it,ar,OW,maxLen){const im=await loadIm(it.src),c=it.c||{z:1,x:0,y:0,r:0},rot=((c.r||0)%4+4)%4,OH=Math.round(OW/arNum(ar));
+  const w=rot%2?im.naturalHeight:im.naturalWidth,h=rot%2?im.naturalWidth:im.naturalHeight,sc=Math.max(OW/w,OH/h)*(c.z||1);
+  const cv=document.createElement('canvas');cv.width=OW;cv.height=OH;const x=cv.getContext('2d');x.fillStyle='#111';x.fillRect(0,0,OW,OH);
+  x.translate(OW/2+(c.x||0)*OW,OH/2+(c.y||0)*OH);x.rotate(rot*Math.PI/2);x.drawImage(im,-im.naturalWidth*sc/2,-im.naturalHeight*sc/2,im.naturalWidth*sc,im.naturalHeight*sc);
+  let q=.86,out=cv.toDataURL('image/jpeg',q);while(out.length>maxLen&&q>.45){q-=.08;out=cv.toDataURL('image/jpeg',q);}return out;}
+/* editor: arrastar, pinçar, girar e trocar a proporção */
+function npEditor(i){const d=ui.np,it=d.imgs[i];if(!it)return;const old=$('#npedfx');if(old)old.remove();const el=document.createElement('div');el.id='npedfx';el.className='cropfx';
+  const c=Object.assign({z:1,x:0,y:0,r:0},it.c);let ar=d.ar||'4/5';
+  el.innerHTML=`<div class="crophd"><button class="btn ghost" data-c="x">${L('Cancelar','Cancel','Cancelar')}</button><b>${L('Enquadrar','Frame','Encuadrar')}${d.imgs.length>1?` ${i+1}/${d.imgs.length}`:''}</b><button class="btn primary sm" data-c="ok">${L('Pronto','Done','Listo')}</button></div>
+   <div class="cropvp npvp"><img alt="" draggable="false"><div class="npgrid"></div></div>
+   <div class="cropctl"><div class="pillset" style="width:100%;justify-content:center">${ARS.map(a=>`<button class="pill sm ${ar===a[0]?'on':''}" data-ar="${a[0]}">${a[1]}</button>`).join('')}<button class="pill sm" data-c="rot">${svgSz(IC.rot,14)} ${L('Girar','Rotate','Girar')}</button><button class="pill sm" data-c="rs">${L('Restaurar','Reset','Restablecer')}</button></div>
+    ${svgSz(IC.zoom,18)}<input type="range" min="1" max="4" step="0.01"><span class="sub">${L('Arraste para posicionar · pince ou use a barra para aproximar','Drag to position · pinch or use the slider to zoom','Arrastra para colocar · pellizca o usa la barra para acercar')}${d.imgs.length>1?' · '+L('a proporção vale para todas as fotos','the ratio applies to all photos','la proporción vale para todas'):''}</span></div>`;
+  document.body.appendChild(el);const vp=el.querySelector('.npvp'),img=el.querySelector('img'),rng=el.querySelector('input');
+  const dims=()=>{const rot=((c.r%4)+4)%4;return rot%2?[it.h,it.w]:[it.w,it.h];};
+  const draw=()=>{const FW=vp.clientWidth,FH=vp.clientHeight,[w,h]=dims(),bs=Math.max(FW/w,FH/h),W=w*bs*c.z,H=h*bs*c.z;
+    const mx=Math.max(0,(W-FW)/2)/FW,my=Math.max(0,(H-FH)/2)/FH;c.x=Math.max(-mx,Math.min(mx,c.x));c.y=Math.max(-my,Math.min(my,c.y));
+    img.style.width=it.w*bs+'px';img.style.height=it.h*bs+'px';img.style.transform=`translate(-50%,-50%) translate(${c.x*FW}px,${c.y*FH}px) rotate(${c.r*90}deg) scale(${c.z})`;rng.value=c.z;};
+  const setAr=a=>{ar=a;vp.style.aspectRatio=a;el.querySelectorAll('[data-ar]').forEach(b=>b.classList.toggle('on',b.dataset.ar===a));requestAnimationFrame(draw);};
+  img.onload=()=>setAr(ar);img.src=it.src;
+  const pts=new Map();let last=null,p0=null;
+  vp.addEventListener('pointerdown',e=>{vp.setPointerCapture(e.pointerId);pts.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pts.size===2){const [a,b]=[...pts.values()];p0={d:Math.hypot(a.x-b.x,a.y-b.y),z:c.z};}last={x:e.clientX,y:e.clientY};});
+  vp.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(pts.size===2&&p0){const [a,b]=[...pts.values()];c.z=Math.max(1,Math.min(4,p0.z*Math.hypot(a.x-b.x,a.y-b.y)/p0.d));draw();return;}
+    if(last){c.x+=(e.clientX-last.x)/vp.clientWidth;c.y+=(e.clientY-last.y)/vp.clientHeight;last={x:e.clientX,y:e.clientY};draw();}});
+  const up=e=>{pts.delete(e.pointerId);if(pts.size<2)p0=null;last=pts.size===1?[...pts.values()][0]:null;};vp.addEventListener('pointerup',up);vp.addEventListener('pointercancel',up);
+  vp.addEventListener('wheel',e=>{e.preventDefault();c.z=Math.max(1,Math.min(4,c.z*(e.deltaY<0?1.06:.94)));draw();},{passive:false});
+  rng.addEventListener('input',()=>{c.z=+rng.value;draw();});
+  el.querySelectorAll('[data-ar]').forEach(b=>b.onclick=()=>setAr(b.dataset.ar));
+  el.querySelector('[data-c=rot]').onclick=()=>{c.r=(c.r+1)%4;c.x=c.y=0;draw();};
+  el.querySelector('[data-c=rs]').onclick=()=>{Object.assign(c,{z:1,x:0,y:0,r:0});draw();};
+  el.querySelector('[data-c=x]').onclick=()=>el.remove();
+  el.querySelector('[data-c=ok]').onclick=async()=>{it.c=Object.assign({},c);const arCh=ar!==d.ar;d.ar=ar;d.arSet=true;
+    for(const x of (arCh?d.imgs:[it]))x.prev=await renderCrop(x,ar,360,60000);el.remove();render();};}
+document.addEventListener('change',ev=>{const el=ev.target;if(!el.dataset||!el.files||!el.files[0])return;const f=el.files[0];if(el.dataset.sfile==='post'){const fs=[...el.files];el.value='';npFiles(fs);}else if(el.dataset.sfile==='reel'){el.value='';reelFile(f);}});
 /* publicar treino direto do resumo */
 function socShareBtn(s){if(!logged()||!SOC.on)return '';return `<button class="btn block outline" style="margin-top:10px" data-act="socpostwo" data-id="${esc(s.id)}">${svgSz(IC.cam,16)} ${L('Publicar no Social','Post to Social','Publicar en Social')}</button>`;}
 async function socPublish(type,title,lines,extra){if(!SOC.on)return false;const me=SOC.uid;
@@ -3925,7 +3991,7 @@ function socProfile(uid){const me=SOC.uid,mine=uid===me,u=mine?{name:myName(),ph
 function profTabs(uid,posts){const t=ui.ptab==='reels'?'reels':'grid',reels=posts.filter(p=>p.type==='reel'),grid=posts.filter(p=>p.type!=='reel');
   let h=`<div class="ptabs"><button class="${t==='grid'?'on':''}" data-act="socptab" data-v="grid" aria-label="${L('Publicações','Posts','Publicaciones')}">${svgSz(IC.grid,24)}</button><button class="${t==='reels'?'on':''}" data-act="socptab" data-v="reels" aria-label="Reels">${svgSz(IC.reel,26)}</button></div>`;
   if(t==='reels')return h+`<div class="iggrid reels">${reels.length?reels.map(p=>`<button class="igcell rcell" data-act="reelopen" data-id="${esc(p.id)}" data-u="${esc(uid)}">${p.thumb?`<img src="${p.thumb}" alt="">`:''}<i class="rplay">${svgSz(IC.play,18)}</i></button>`).join(''):`<div class="empty" style="grid-column:1/-1">${L('Nenhum reel ainda','No reels yet','Aún no hay reels')}</div>`}</div>`;
-  return h+`<div class="iggrid">${grid.length?grid.map(p=>`<button class="igcell" data-act="socgo" data-v="post" data-id="${esc(p.id)}">${p.hasImg?`<div class="pimg" data-pimg="${esc(p.id)}"></div>`:p.type==='workout'?`<div class="gwo">${svgSz(IC.dumb,20)}<b>${esc((p.wo&&p.wo.title)||'')}</b><span>${p.wo?fmtN((p.wo.vol||0)/1000,1)+' t':''}</span></div>`:`<div class="gwo">${svgSz(p.type==='challenge'?IC.trophy:IC.flex,20)}<b>${esc(p.title||'')}</b></div>`}</button>`).join(''):`<div class="empty" style="grid-column:1/-1">${L('Nenhuma publicação ainda','No posts yet','Aún no hay publicaciones')}</div>`}</div>`;}
+  return h+`<div class="iggrid">${grid.length?grid.map(p=>`<button class="igcell" data-act="socgo" data-v="post" data-id="${esc(p.id)}">${(p.n||1)>1?`<i class="cicon">${svgSz(IC.copy,16)}</i>`:''}${p.hasImg?`<div class="pimg" data-pimg="${esc(p.id)}"></div>`:p.type==='workout'?`<div class="gwo">${svgSz(IC.dumb,20)}<b>${esc((p.wo&&p.wo.title)||'')}</b><span>${p.wo?fmtN((p.wo.vol||0)/1000,1)+' t':''}</span></div>`:`<div class="gwo">${svgSz(p.type==='challenge'?IC.trophy:IC.flex,20)}<b>${esc(p.title||'')}</b></div>`}</button>`).join(''):`<div class="empty" style="grid-column:1/-1">${L('Nenhuma publicação ainda','No posts yet','Aún no hay publicaciones')}</div>`}</div>`;}
 function socPartners(){const me=SOC.uid;
   return `<div class="ighd">${bk('prof',me)}<div class="hd grow">${L('Parceiros','Partners','Compañeros')}</div></div>${addPartnerBox()}`+(SOC.friends.length?SOC.friends.map(fid=>{const u=SOC.users[fid]||{},s=u.stats||{};
     return `<div class="frow plist"><button class="phu grow" data-act="socgo" data-v="prof" data-id="${esc(fid)}">${uPhoto(u.photo,u.name,48,trainedToday(fid)?'on':'off')}<span><b>${esc(u.name||'')}</b><small>${esc(lastTxt(s.last))}</small></span></button><button class="btn sm" data-act="socgo" data-v="chat" data-id="${esc(fid)}">${L('Mensagem','Message','Mensaje')}</button><button class="iconbtn" data-act="socunf" data-id="${esc(fid)}" aria-label="remove">${svgSz(IC.trash,16)}</button></div>`;}).join(''):`<div class="empty">${L('Você ainda não tem parceiros.','No partners yet.','Aún no tienes compañeros.')}</div>`);}
@@ -4075,10 +4141,14 @@ Object.assign(A,{
    try{await FB.addDoc(FB.collection(fbDb,'posts',pid,'comments'),{uid:SOC.uid,name:myName(),photo:myThumb(),text:t,at:Date.now()});const p=findPost(pid);try{await FB.updateDoc(FB.doc(fbDb,'posts',pid),{nc:((p&&p.nc)||0)+1});}catch(e){}await loadComments(pid);}catch(e){toast(cErr(e));}},
  socsend:b=>sendPostModal(b.dataset.id),
  socsendto:async b=>{closeModal();if(await sendMsg(b.dataset.id,'','post',b.dataset.p))toast(L('Enviado','Sent','Enviado'));},
- socpdel:b=>modal(L('Apagar publicação?','Delete post?','¿Borrar publicación?'),'',[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Apagar','Delete','Borrar'),c:'primary',fn:()=>{closeModal();FB.deleteDoc(FB.doc(fbDb,'posts',b.dataset.id)).catch(e=>toast(cErr(e)));FB.deleteDoc(FB.doc(fbDb,'pimg',b.dataset.id)).catch(()=>{});delVid(findPost(b.dataset.id));if(SV().v==='post')socGo('prof',SOC.uid);}}]),
+ socpdel:b=>modal(L('Apagar publicação?','Delete post?','¿Borrar publicación?'),'',[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Apagar','Delete','Borrar'),c:'primary',fn:()=>{closeModal();FB.deleteDoc(FB.doc(fbDb,'posts',b.dataset.id)).catch(e=>toast(cErr(e)));FB.deleteDoc(FB.doc(fbDb,'pimg',b.dataset.id)).catch(()=>{});delExtraImgs(findPost(b.dataset.id));delVid(findPost(b.dataset.id));if(SV().v==='post')socGo('prof',SOC.uid);}}]),
  socnptag:b=>{ui.np.cap=($('#np-cap')||{}).value||ui.np.cap;ui.np.tag=b.dataset.v;render();},
  socnpwo:()=>{ui.np.cap=($('#np-cap')||{}).value||ui.np.cap;ui.np.wo=!ui.np.wo;render();},
- socnpclr:()=>{ui.np.cap=($('#np-cap')||{}).value||ui.np.cap;ui.np.img=null;render();},
+ npedit:b=>npEditor(+b.dataset.i),
+ npsel:b=>{ui.npSel=+b.dataset.i;render();},
+ nprm:(b,ev)=>{ev.stopPropagation();const d=ui.np;d.cap=($('#np-cap')||{}).value||d.cap;d.imgs.splice(+b.dataset.i,1);ui.npSel=Math.max(0,Math.min(ui.npSel||0,d.imgs.length-1));render();},
+ npmv:(b,ev)=>{ev.stopPropagation();const d=ui.np,i=+b.dataset.i;d.cap=($('#np-cap')||{}).value||d.cap;[d.imgs[i-1],d.imgs[i]]=[d.imgs[i],d.imgs[i-1]];ui.npSel=i-1;render();},
+ npar:async b=>{const d=ui.np;d.cap=($('#np-cap')||{}).value||d.cap;d.ar=b.dataset.v;d.arSet=true;for(const x of d.imgs)x.prev=await renderCrop(x,d.ar,360,60000);render();},
  socpub:()=>socPublishPost(),
  socpostwo:b=>{const s=S.sessions.find(x=>x.id===b.dataset.id);closeModal();ui.tab='social';ui.np={tag:'gym',cap:'',img:null,ar:'4/5',wo:true};if(s&&s.date!==today()){ui.np.wo=false;}socGo('new');},
  dmsend:async b=>{const i=$('#dm-in');const t=(i&&i.value||'').trim();if(!t)return;i.value='';await sendMsg(b.dataset.id,t);},
@@ -4197,6 +4267,7 @@ async function doBlock(uid,quiet){const me=SOC.uid,inf=blkInfo(uid);if(!me||uid=
 /* tira o bloqueado do público das minhas publicações (posts e imagens) */
 async function blkStrip(uid){const me=SOC.uid;for(const p of SOC.posts.filter(x=>x.uid===me&&(x.aud||[]).includes(uid))){const aud=p.aud.filter(x=>x!==uid);
   await FB.updateDoc(FB.doc(fbDb,'posts',p.id),{aud}).catch(()=>{});if(p.hasImg)await FB.updateDoc(FB.doc(fbDb,'pimg',p.id),{aud}).catch(()=>{});
+  for(let i=1;i<(p.n||1);i++)await FB.updateDoc(FB.doc(fbDb,'pimg',p.id+'_'+i),{aud}).catch(()=>{});
   for(let i=0;i<(p.vn||0);i++)await FB.updateDoc(FB.doc(fbDb,'pvid',p.id+'_'+i),{aud}).catch(()=>{});}}
 /* pedidos de quem eu bloqueei são recusados automaticamente */
 function blkClean(){const me=SOC.uid;SOC.fr.filter(f=>f.status==='pending'&&f.to===me&&isBlk(f.from)).forEach(f=>FB.deleteDoc(FB.doc(fbDb,'friendships',f.id)).catch(()=>{}));}
@@ -4309,11 +4380,16 @@ Object.assign(A,{
  socreels:()=>{const list=SOC.posts.filter(x=>x.type==='reel'&&!isBlk(x.uid));if(!list.length){toast(L('Nenhum reel ainda. Que tal publicar o primeiro?','No reels yet. Why not post the first one?','Aún no hay reels. ¿Publicas el primero?'));return;}openReels(list,list[0].id);}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#reelv'))closeReels();});
 
+async function delExtraImgs(p){if(!p||!p.n||p.n<2)return;for(let i=1;i<p.n;i++){await FB.deleteDoc(FB.doc(fbDb,'pimg',p.id+'_'+i)).catch(()=>{});}}
+/* contador e bolinhas do carrossel */
+document.addEventListener('scroll',ev=>{const c=ev.target;if(!c.classList||!c.classList.contains('car'))return;const i=Math.round(c.scrollLeft/Math.max(1,c.clientWidth)),m=c.parentElement;
+  const n=m.querySelector('.carn');if(n)n.textContent=(i+1)+'/'+c.children.length;m.querySelectorAll('.cdots i').forEach((d,k)=>d.classList.toggle('on',k===i));},true);
+
 /* ---------- administrador, métricas de uso, erros, avisos e simulador ----------
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261112.1337";
+const BUILD_AT="261112.1418";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -4360,7 +4436,7 @@ function simBar(){let b=$('#simbar');if(!simOn()){if(b)b.remove();document.body.
 (function(){try{const d=JSON.parse(localStorage.getItem('treinoapp:device')||'null');if(d&&d.owner==='sim'){d.owner=d.simPrev||'local';delete d.simPrev;localStorage.setItem('treinoapp:device',JSON.stringify(d));localStorage.removeItem('treinoapp:u:sim:v1');localStorage.removeItem('treinoapp:u:sim:health');}}catch(e){}})();
 
 /* ---------- painel ---------- */
-const ADM={tab:'ov',busy:false,at:0,dev:[],users:[],reps:[],posts:[],errs:[],ban:{},fr:[],pubs:0,cfg:null,q:'',uSel:null,t:{sex:'M',level:'beginner',goal:'hypertrophy',days:3,time:'mid',gym:'rede',pri:[]},tRes:null,err:''};
+const ADM={tab:'ov',busy:false,at:0,gh:null,dev:[],users:[],reps:[],posts:[],errs:[],ban:{},fr:[],pubs:0,cfg:null,q:'',uSel:null,t:{sex:'M',level:'beginner',goal:'hypertrophy',days:3,time:'mid',gym:'rede',pri:[]},tRes:null,err:''};
 async function admLoad(force){if(ADM.busy||(!force&&ADM.at&&Date.now()-ADM.at<60000))return;ADM.busy=true;ADM.err='';softRender();
   const g=async(fn,fb)=>{try{return await fn();}catch(e){ADM.err=ADM.err||cErr(e);return fb;}};const C=n=>FB.collection(fbDb,n),docs=sn=>sn.docs.map(d=>Object.assign({id:d.id},d.data()));
   try{await cloudInit();
@@ -4374,6 +4450,8 @@ async function admLoad(force){if(ADM.busy||(!force&&ADM.at&&Date.now()-ADM.at<60
       g(async()=>docs(await FB.getDocs(C('friendships'))),[]),
       g(async()=>(await FB.getDocs(C('pubprofiles'))).size,0),
       g(async()=>{const d=await FB.getDoc(FB.doc(fbDb,'config','app'));return d.exists()?d.data():null;},null)]);
+    try{const r=await fetch('https://api.github.com/repos/henriquelima-droid/treino-app/releases?per_page=100');if(r.ok){const rel=await r.json();
+      ADM.gh=rel.filter(x=>!x.prerelease&&/^v/.test(x.tag_name||'')).map(x=>({v:x.tag_name.replace(/^v/,''),at:Date.parse(x.published_at||0),n:(x.assets||[]).reduce((a,b)=>a+(b.download_count||0),0)}));}}catch(e){}
     Object.assign(ADM,{dev,users,reps:reps.sort((a,b)=>(b.at||0)-(a.at||0)),posts,errs,ban,fr,pubs,cfg,at:Date.now()});}
   finally{ADM.busy=false;softRender();}}
 const admCnt=(a,f)=>{const o={};a.forEach(x=>{const k=f(x);if(k==null||k==='')return;o[k]=(o[k]||0)+1;});return Object.entries(o).sort((x,y)=>y[1]-x[1]);};
@@ -4389,30 +4467,43 @@ function renderAdmin(){setTimeout(()=>{if(typeof socHydrate==='function')socHydr
    <div class="row" style="justify-content:space-between;margin:6px 0 10px"><span class="sub">${ADM.busy?L('Carregando…','Loading…','Cargando…'):ADM.at?L('Atualizado ','Updated ','Actualizado ')+new Date(ADM.at).toLocaleTimeString(LANG==='en'?'en-US':'pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</span><button class="btn sm" data-act="admreload">${L('Atualizar','Refresh','Actualizar')}</button></div>
    ${ADM.err?`<div class="note-box">${L('Algumas informações não carregaram: ','Some data did not load: ','Algunos datos no cargaron: ')}${esc(ADM.err)}. ${L('Confira se as regras novas do Firestore foram publicadas.','Check that the new Firestore rules were published.','Comprueba que las reglas nuevas de Firestore estén publicadas.')}</div>`:''}`;
   return h+({ov:admOverview,users:admUsers,mod:admMod,errs:admErrs,ann:admAnn,sim:admSim}[ADM.tab]||admOverview)();}
-function admOverview(){const D=ADM.dev,t=today(),act=n=>D.filter(d=>(d.days||[]).some(x=>x>addD(t,-n))).length,nw=n=>D.filter(d=>d.first&&d.first>Date.now()-n*864e5).length;
-  const opens=n=>D.reduce((a,d)=>a+Object.entries(d.od||{}).filter(([k])=>k>addD(t,-n)).reduce((s,[,v])=>s+v,0),0);
-  const dau=[],lb=[];for(let k=29;k>=0;k--){const day=addD(t,-k);dau.push(D.filter(d=>(d.days||[]).includes(day)).length);lb.push(fmtD(day));}
-  const acc=ADM.fr.filter(f=>f.status==='accepted').length,pend=ADM.fr.length-acc,reels=ADM.posts.filter(p=>p.type==='reel').length;
-  const vers=admCnt(D.filter(d=>d.plat==='android'),d=>d.ver),PN=PLATN();
-  return `<div class="kpis">${[[D.length,L('aparelhos com o app','devices with the app','dispositivos con la app')],[act(1),L('ativos hoje','active today','activos hoy')],[act(7),L('ativos em 7 dias','active in 7 days','activos en 7 días')],[act(30),L('ativos em 30 dias','active in 30 days','activos en 30 días')],
-      [ADM.users.length,L('contas criadas','accounts','cuentas')],[nw(7),L('novos em 7 dias','new in 7 days','nuevos en 7 días')],[opens(1),L('aberturas hoje','opens today','aperturas hoy')],[opens(7),L('aberturas em 7 dias','opens in 7 days','aperturas en 7 días')]].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('')}</div>
-   <div class="card"><div class="hd" style="font-size:16px">${L('Usuários ativos por dia (30 dias)','Daily active users (30 days)','Usuarios activos por día (30 días)')}</div>${admChart(dau,lb)}</div>
-   <div class="card"><div class="hd" style="font-size:16px">${L('Onde o app está instalado','Where the app is installed','Dónde está instalada la app')}</div>${admBars(admCnt(D,d=>PN[d.plat]||d.plat))}
-    ${vers.length?`<div class="lbl2">${L('Versões do Android','Android versions','Versiones de Android')}</div>${admBars(vers)}`:''}</div>
+/* pessoas = contas (qualquer versão do app) + aparelhos sem conta (a partir da 1.0.18) */
+const tsMs=v=>!v?0:typeof v==='number'?v:v.toMillis?v.toMillis():v.seconds?v.seconds*1000:0;
+function admPeople(){const t=today(),devBy={};ADM.dev.forEach(d=>{if(d.uid)(devBy[d.uid]=devBy[d.uid]||[]).push(d);});
+  const ppl=ADM.users.map(u=>{const dv=devBy[u.id]||[],s=u.stats||{};const days=new Set(dv.flatMap(d=>d.days||[]));const seen=Math.max(tsMs(u.updatedAt),s.at||0,...dv.map(d=>d.last||0));
+    if(seen)days.add(new Date(seen-new Date(seen).getTimezoneOffset()*6e4).toISOString().slice(0,10));if(s.last)days.add(s.last);
+    const d0=dv.sort((a,b)=>(b.last||0)-(a.last||0))[0];
+    return {acc:true,id:u.id,name:u.name,seen,first:u.created||null,days,plat:d0?d0.plat:null,ver:d0?d0.ver:null,goal:d0&&d0.goal,lvl:d0&&d0.lvl,prog:d0&&d0.prog,lang:d0?d0.lang:u.lang,od:dv.map(d=>d.od||{}),trained:s.last||null};});
+  ADM.dev.filter(d=>!d.uid||!ADM.users.some(u=>u.id===d.uid)).forEach(d=>ppl.push({acc:false,id:d.id,seen:d.last||0,first:d.first||d.last||0,days:new Set(d.days||[]),plat:d.plat,ver:d.ver,goal:d.goal,lvl:d.lvl,prog:d.prog,lang:d.lang,od:[d.od||{}]}));
+  return ppl;}
+function admOverview(){const t=today(),P0=admPeople(),act=n=>P0.filter(p=>[...p.days].some(x=>x>addD(t,-n))).length,nw=n=>P0.filter(p=>p.first&&isFinite(p.first)&&p.first>Date.now()-n*864e5).length;
+  const opens=n=>P0.reduce((a,p)=>a+p.od.reduce((s,o)=>s+Object.entries(o).filter(([k])=>k>addD(t,-n)).reduce((x,[,v])=>x+v,0),0),0);
+  const dau=[],lb=[];for(let k=29;k>=0;k--){const day=addD(t,-k);dau.push(P0.filter(p=>p.days.has(day)).length);lb.push(fmtD(day));}
+  const acc=ADM.fr.filter(f=>f.status==='accepted').length,pend=ADM.fr.length-acc,reels=ADM.posts.filter(p=>p.type==='reel').length,PN=PLATN();
+  const OLD=L('versão antiga (antes da 1.0.18)','older version (before 1.0.18)','versión antigua (antes de 1.0.18)'),UNK=L('não informado (versão antiga)','not reported (older version)','no informado (versión antigua)');
+  const gh=ADM.gh||[],dl=gh.reduce((a,x)=>a+x.n,0),trained7=P0.filter(p=>p.trained&&p.trained>addD(t,-7)).length;
+  return `<div class="kpis">${[[P0.length,L('pessoas usando o app','people using the app','personas usando la app')],[ADM.users.length,L('contas criadas','accounts','cuentas')],[act(1),L('ativos hoje','active today','activos hoy')],[act(7),L('ativos em 7 dias','active in 7 days','activos en 7 días')],
+      [act(30),L('ativos em 30 dias','active in 30 days','activos en 30 días')],[trained7,L('treinaram em 7 dias','trained in 7 days','entrenaron en 7 días')],[nw(7),L('novos em 7 dias','new in 7 days','nuevos en 7 días')],[ADM.gh?dl:'—',L('downloads do APK (todas as versões)','APK downloads (all versions)','descargas del APK')]].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('')}</div>
+   <div class="card"><div class="hd" style="font-size:16px">${L('Pessoas ativas por dia (30 dias)','Daily active people (30 days)','Personas activas por día (30 días)')}</div>${admChart(dau,lb)}
+    <div class="sub" style="font-size:11.5px">${L('Quem ainda não atualizou conta pelo último acesso e pelo último treino da conta; quem já está na 1.0.18 conta em todos os dias em que abriu o app.','People who haven\'t updated count by their account\'s last access and last workout; people on 1.0.18+ count every day they opened the app.','Quien no actualizó cuenta por el último acceso y entreno de su cuenta.')} ${L('Aberturas registradas: ','Logged opens: ','Aperturas registradas: ')}${opens(1)} ${L('hoje','today','hoy')} · ${opens(7)} ${L('em 7 dias','in 7 days','en 7 días')}.</div></div>
+   <div class="card"><div class="hd" style="font-size:16px">${L('Onde o app está','Where the app is','Dónde está la app')}</div>${admBars(admCnt(P0,p=>p.plat?(PN[p.plat]||p.plat):UNK))}
+    <div class="lbl2">${L('Versão em uso','Version in use','Versión en uso')}</div>${admBars(admCnt(P0,p=>p.ver?(p.plat==='android'?'Android '+p.ver:(PN[p.plat]||p.plat)+(p.ver.startsWith('web-')?'':' '+p.ver)):OLD))}
+    ${gh.length?`<div class="lbl2">${L('Downloads do APK por versão','APK downloads by version','Descargas del APK por versión')}</div>${admBars(gh.slice(0,10).map(x=>['v'+x.v,x.n]))}`:''}</div>
    <div class="card"><div class="hd" style="font-size:16px">${L('Perfil dos usuários','User profile','Perfil de los usuarios')}</div>
-    <div class="lbl2">${L('Objetivo','Goal','Objetivo')}</div>${admBars(admCnt(D,d=>d.goal&&goalName(d.goal)))}
-    <div class="lbl2">${L('Nível','Level','Nivel')}</div>${admBars(admCnt(D,d=>d.lvl&&lvName(d.lvl)))}
-    <div class="lbl2">${L('Programas mais usados','Most used programs','Programas más usados')}</div>${admBars(admCnt(D,d=>d.prog&&progLabel(d.prog)).slice(0,8))}
-    <div class="lbl2">${L('Idioma','Language','Idioma')}</div>${admBars(admCnt(D,d=>d.lang))}</div>
+    <div class="lbl2">${L('Objetivo','Goal','Objetivo')}</div>${admBars(admCnt(P0,p=>p.goal?goalName(p.goal):UNK))}
+    <div class="lbl2">${L('Nível','Level','Nivel')}</div>${admBars(admCnt(P0,p=>p.lvl?lvName(p.lvl):UNK))}
+    <div class="lbl2">${L('Programas mais usados','Most used programs','Programas más usados')}</div>${admBars(admCnt(P0,p=>p.prog?progLabel(p.prog):UNK).slice(0,8))}
+    <div class="lbl2">${L('Idioma','Language','Idioma')}</div>${admBars(admCnt(P0,p=>p.lang||UNK))}</div>
    <div class="card"><div class="hd" style="font-size:16px">GrowSocial</div><div class="kpis sm">${[[ADM.pubs,L('perfis visíveis','visible profiles','perfiles visibles')],[acc,L('parcerias','partnerships','asociaciones')],[pend,L('convites pendentes','pending invites','invitaciones pendientes')],[ADM.posts.length+(ADM.posts.length>=150?'+':''),L('publicações','posts','publicaciones')],[reels,'reels'],[Object.keys(ADM.ban).length,L('banidos','banned','bloqueados')]].map(k=>`<div class="kpi"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('')}</div></div>
-   <div class="sub" style="margin:8px 2px 14px">${L('As métricas de uso começam a contar a partir desta versão: cada aparelho aparece quando abre o app atualizado. Nenhum dado de saúde, peso, medidas ou fotos é coletado.','Usage metrics start counting from this version: each device appears once it opens the updated app. No health data, weight, measurements or photos are collected.','Las métricas empiezan a contar desde esta versión. No se recogen datos de salud, peso, medidas ni fotos.')}</div>`;}
+   <div class="sub" style="margin:8px 2px 14px">${L('Contas aparecem em qualquer versão do app. Quem usa sem conta e ainda não atualizou para a 1.0.18 não tem como ser contado; essas pessoas entram assim que abrirem a versão nova. Objetivo, nível e programa aparecem para quem já atualizou. Nenhum dado de saúde, peso, medidas ou fotos é coletado.','Accounts show up on any app version. People without an account on versions before 1.0.18 can\'t be counted until they open the new version. Goal, level and program show for updated users. No health data, weight, measurements or photos are collected.','Las cuentas aparecen en cualquier versión. Quien usa sin cuenta y no actualizó no puede contarse hasta abrir la versión nueva.')}</div>`;}
 function progLabel(id){const t=typeof tplById==='function'?tplById(id):null;if(t)return L(t[2][0],t[2][1]);if(id===(DEFAULT_PLAN&&DEFAULT_PLAN.id))return P(DEFAULT_PLAN,'name');return id;}
 function admUsers(){const q=(ADM.q||'').toLowerCase(),devBy={};ADM.dev.forEach(d=>{if(d.uid)(devBy[d.uid]=devBy[d.uid]||[]).push(d);});
-  const list=ADM.users.filter(u=>!q||String(u.name||'').toLowerCase().includes(q)||String(u.code||'').toLowerCase().includes(q)).sort((a,b)=>((b.stats||{}).at||0)-((a.stats||{}).at||0));
+  const seenU=u=>Math.max(tsMs(u.updatedAt),(u.stats||{}).at||0,...(devBy[u.id]||[]).map(d=>d.last||0));
+  const list=ADM.users.filter(u=>!q||String(u.name||'').toLowerCase().includes(q)||String(u.code||'').toLowerCase().includes(q)).sort((a,b)=>seenU(b)-seenU(a));
   if(ADM.uSel){const u=ADM.users.find(x=>x.id===ADM.uSel);if(u)return admUser(u,devBy[u.id]||[]);}
   return `<input id="adm-q" placeholder="${L('Buscar por nome ou código','Search by name or code','Buscar por nombre o código')}" value="${esc(ADM.q)}" data-f2="admq" style="margin-bottom:10px">
    <div class="sub" style="margin-bottom:6px">${list.length} ${L('contas','accounts','cuentas')}</div>`+list.map(u=>{const s=u.stats||{},dv=devBy[u.id]||[];
-    return `<button class="frow plist admu" data-act="admusel" data-id="${esc(u.id)}">${uPhoto(u.photo,u.name,42)}<span class="grow"><b>${esc(u.name||'—')}${ADM.ban[u.id]?` <em class="chip sm">${L('banido','banned','bloqueado')}</em>`:''}</b><small>${s.total||0} ${L('treinos','workouts','entrenos')} · ${esc(lastTxt(s.last))}${dv.length?' · '+dv.map(d=>PLATN()[d.plat]||d.plat).join(', '):''}</small></span><span class="chev">›</span></button>`;}).join('');}
+    return `<button class="frow plist admu" data-act="admusel" data-id="${esc(u.id)}">${uPhoto(u.photo,u.name,42)}<span class="grow"><b>${esc(u.name||'—')}${ADM.ban[u.id]?` <em class="chip sm">${L('banido','banned','bloqueado')}</em>`:''}</b><small>${s.total||0} ${L('treinos','workouts','entrenos')} · ${esc(lastTxt(s.last))} · ${L('acesso ','seen ','acceso ')}${(()=>{const m=Math.max(tsMs(u.updatedAt),s.at||0,...dv.map(d=>d.last||0));return m?esc(agoMs(m)):'—';})()}${dv.length?' · '+dv.map(d=>PLATN()[d.plat]||d.plat).join(', '):' · '+L('versão antiga','older version','versión antigua')}</small></span><span class="chev">›</span></button>`;}).join('');}
 function admUser(u,dv){const s=u.stats||{},posts=ADM.posts.filter(p=>p.uid===u.id),fr=ADM.fr.filter(f=>(f.members||[]).includes(u.id)&&f.status==='accepted').length;
   return `<button class="btn sm ghost" data-act="admusel" data-id="" style="margin-bottom:8px">‹ ${L('Voltar','Back','Volver')}</button>
    <div class="card"><div class="row" style="gap:12px">${uPhoto(u.photo,u.name,64)}<div class="grow"><div class="hd" style="font-size:18px">${esc(u.name||'—')}</div><div class="sub">${L('Código','Code','Código')} ${esc(u.code||'—')} · ${u.pub===false?L('oculto das sugestões','hidden from suggestions','oculto'):L('visível','visible','visible')}</div></div></div>
@@ -4477,7 +4568,7 @@ Object.assign(A,{
  admunban:b=>admAct(()=>FB.deleteDoc(FB.doc(fbDb,'banned',b.dataset.id)),L('Banimento removido','Ban removed','Bloqueo retirado')),
  admunpub:b=>admAct(()=>FB.deleteDoc(FB.doc(fbDb,'pubprofiles',b.dataset.id)),L('Removido das sugestões','Removed from suggestions','Quitado de sugerencias')),
  admpdel:b=>modal(L('Apagar esta publicação?','Delete this post?','¿Borrar esta publicación?'),'',[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Apagar','Delete','Borrar'),c:'primary',fn:()=>{closeModal();const id=b.dataset.id,r=b.dataset.r,p=ADM.posts.find(x=>x.id===id);
-   admAct(async()=>{await FB.deleteDoc(FB.doc(fbDb,'posts',id));await FB.deleteDoc(FB.doc(fbDb,'pimg',id)).catch(()=>{});if(p&&p.vn)for(let i=0;i<p.vn;i++)await FB.deleteDoc(FB.doc(fbDb,'pvid',id+'_'+i)).catch(()=>{});if(r)await FB.updateDoc(FB.doc(fbDb,'reports',r),{status:'closed',action:'delete'});},L('Publicação apagada','Post deleted','Publicación borrada'));}}]),
+   admAct(async()=>{await FB.deleteDoc(FB.doc(fbDb,'posts',id));await FB.deleteDoc(FB.doc(fbDb,'pimg',id)).catch(()=>{});if(p&&p.vn)for(let i=0;i<p.vn;i++)await FB.deleteDoc(FB.doc(fbDb,'pvid',id+'_'+i)).catch(()=>{});if(p&&p.n>1)for(let i=1;i<p.n;i++)await FB.deleteDoc(FB.doc(fbDb,'pimg',id+'_'+i)).catch(()=>{});if(r)await FB.updateDoc(FB.doc(fbDb,'reports',r),{status:'closed',action:'delete'});},L('Publicação apagada','Post deleted','Publicación borrada'));}}]),
  admrclose:b=>admAct(()=>FB.updateDoc(FB.doc(fbDb,'reports',b.dataset.id),{status:'closed'}),L('Denúncia arquivada','Report archived','Denuncia archivada')),
  admerrclr:()=>admAct(async()=>{for(const e of ADM.errs)await FB.deleteDoc(FB.doc(fbDb,'errs',e.id)).catch(()=>{});},L('Erros apagados','Errors cleared','Errores borrados')),
  annsave:()=>{const msg=($('#ann-m').value||'').trim();if(!msg){toast(L('Escreva a mensagem','Write the message','Escribe el mensaje'));return;}const days=Math.max(1,Math.min(60,+($('#ann-d').value)||7));
