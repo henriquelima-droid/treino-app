@@ -686,6 +686,14 @@ html.webapp .cropfx{padding-top:calc(10px + env(safe-area-inset-top))}
 .pubinv{border:1px solid color-mix(in srgb,var(--red) 45%,transparent);margin-bottom:14px}.pubinv svg{color:var(--red);flex:none;margin-top:2px}
 .actsheet{display:flex;flex-direction:column;gap:6px}.actsheet button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:13px 14px;border-radius:12px;background:var(--s2,#1F1F1F);border:1px solid var(--s3);color:var(--tx,#fff);font:inherit;font-weight:600;font-size:15px}.actsheet button svg{flex:none;opacity:.85}.actsheet button.dang{color:#ff5a4e}.actsheet.rep button{font-weight:500;font-size:14px;padding:11px 14px}.actsheet.rep button.on{border-color:var(--red);background:color-mix(in srgb,var(--red) 16%,transparent)}
 .blkl{display:flex;align-items:center;gap:6px;margin:10px 0 2px;background:none;border:0;color:var(--mut,#999);font:inherit;font-size:13px;padding:4px 0}.blkl span{margin-left:auto}
+.xvid.vert{aspect-ratio:9/16;max-height:58vh;margin-left:auto;margin-right:auto}
+.cmp .cfw{border-radius:16px;overflow:hidden;background:var(--s2);aspect-ratio:3/4;position:relative}
+.cmp .cfw img{border-radius:0;transform-origin:center;will-change:transform}
+.cmp .cfw.edit{touch-action:none;cursor:grab}.cmp .cfw.edit::after{content:"";position:absolute;inset:0;border:2px dashed var(--red);border-radius:16px;pointer-events:none}
+.cmp .cfw.edit img{pointer-events:none;user-select:none;-webkit-user-drag:none}
+.cfhint{display:flex;gap:8px;align-items:flex-start;font-size:12.5px}.cfhint svg{flex:none;color:var(--red);margin-top:1px}
+.cxs{display:flex;gap:5px;overflow-x:auto;margin-top:6px;padding-bottom:2px;justify-content:center}.cxs button{flex:none;width:34px;height:44px;padding:0;border-radius:8px;overflow:hidden;border:2px solid transparent;background:var(--s2)}.cxs button.on{border-color:var(--red)}.cxs img{width:100%!important;height:100%!important;aspect-ratio:auto!important;object-fit:cover;border-radius:0!important}
+.vzoom.vzc{overflow:hidden}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1452,7 +1460,7 @@ function setBlock(e,i,j,lp,letter){const s=e.sets[j],t=stype(s),key=i+'-'+j,open
 function ytLink(e){const q=LANG==='en'?P(e,'name')+' proper form':LANG==='es'?P(e,'name')+' técnica correcta':e.name+' execução correta';return 'https://www.youtube.com/results?search_query='+encodeURIComponent(q);}
 function exInfo(e0,i){const e=Object.assign({},e0,{id:vidOf(e0)});const has=S.media.ex&&S.media.ex[e.id];const bi=EXIMG.has(e.id);const xl=XL[e.id];
   const hv=hasVid(e.id);if(hv)setTimeout(hydrateVids,0);
-  return `<div class="xinfo">${hv?`<div class="xvid"><video data-vid="${esc(e.id)}" loop playsinline autoplay preload="auto" poster="img/vid/${esc(e.id)}.jpg"></video><button class="vmute" data-act="vmute">${vMuted()?IC.volx:IC.vol}</button></div>`:!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
+  return `<div class="xinfo">${hv?`<div class="xvid${isVert(e.id)?' vert':''}"><video data-vid="${esc(e.id)}" loop playsinline autoplay preload="auto" poster="img/vid/${esc(e.id)}.jpg"></video><button class="vmute" data-act="vmute">${vMuted()?IC.volx:IC.vol}</button></div>`:!has&&bi?`<div class="xanim"><img src="img/ex/${esc(e.id)}-0.jpg" alt="${esc(exName(e))} — ${L('início','start')}"><img class="f2" src="img/ex/${esc(e.id)}-1.jpg" alt="${esc(exName(e))} — ${L('fim','end')}"><span class="xtag">${L('início ⇄ fim','start ⇄ end')}</span></div>
      <div class="row" style="margin-top:6px;gap:6px"><span class="sub grow" style="font-size:11px">${L('Imagem: Free Exercise DB (domínio público)','Image: Free Exercise DB (public domain)')}</span><span class="btn sm filewrap">${L('Usar minha imagem','Use my image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div>`:has?`<img class="ximg" data-img="ex-${esc(e.id)}" alt="${esc(exName(e))}">
      <div class="row" style="margin-top:6px;justify-content:flex-end;gap:6px"><span class="btn sm filewrap">${L('Trocar imagem','Replace image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span><button class="btn sm" data-act="exirm" data-id="${esc(e.id)}">${bi?L('Voltar à padrão','Use default'):L('Remover','Remove')}</button></div>`
     :`<div class="ximg-ph"><b>${L('Sem figura ainda','No picture yet')}</b>${L('Adicione uma imagem de referência da execução (print, foto ou ilustração). Ela fica salva para os próximos treinos.','Add a reference image of the movement (screenshot, photo or illustration). It is saved for future workouts.')}<div style="margin-top:10px"><span class="btn sm play filewrap">+ ${L('Adicionar imagem','Add image')}<input type="file" accept="image/*" data-file="eximg" data-id="${esc(e.id)}"></span></div></div>`}
@@ -1604,6 +1612,31 @@ function renderProg(){const t=today();const bw=[...S.body].sort((a,b)=>a.date.lo
   h+=`</div><div class="card"><div class="hd" style="font-size:20px">${L('Recordes pessoais','Personal records')}</div>${ids.length?ids.sort((a,b)=>H[b].heavy.kg-H[a].heavy.kg).map(id=>{const e=H[id];return `<div class="pr"><div>${esc(P(e.ex,'name'))}<div class="sub">${L('1RM estimado: ','Est. 1RM: ')}${fmtN(e.best,0)} kg · ${fmtD(e.heavy.date)}</div></div><b>${fmtN(e.heavy.kg)} kg <small>× ${e.heavy.reps}</small></b></div>`;}).join('')+`<div class="sub" style="margin-top:6px">${L('Em destaque: a maior carga que você levantou e as repetições feitas. Embaixo, o 1RM estimado.','Highlighted: the heaviest load you lifted and the reps. Below, the estimated 1RM.')}</div>`:`<div class="empty">${L('Ainda sem recordes.','No records yet.')}</div>`}</div>`;
   return h.replace('@@ALERTS@@',ui._ah||'');}
 
+/* ---------- comparação: escolha da foto por lado e enquadramento salvo por foto ---------- */
+const extrasOn=dt=>S.media.photos.filter(x=>x.date===dt&&x.pose==='extra').sort((a,b)=>(a.n||0)-(b.n||0));
+const extraDates=()=>[...new Set(S.media.photos.filter(x=>x.pose==='extra').map(x=>x.date))].sort();
+function cmpPhoto(dt,sd,same){if(ui.cmpPose!=='extra')return S.media.photos.some(x=>x.date===dt&&x.pose===ui.cmpPose)?photoId(dt,ui.cmpPose):null;
+  const xs=extrasOn(dt);if(!xs.length)return null;const f=xs.find(x=>x.id===ui['cmpX'+sd]);if(f)return f.id;return (sd==='B'&&same&&xs.length>1?xs[xs.length-1]:xs[0]).id;}
+const getFit=id=>(S.media.fit&&S.media.fit[id])||{s:1,x:0,y:0};
+const fitT=id=>{const f=getFit(id);return `translate(${(f.x*100).toFixed(2)}%,${(f.y*100).toFixed(2)}%) scale(${f.s.toFixed(3)})`;};
+function setFit(id,f){S.media.fit=S.media.fit||{};f={s:Math.max(.5,Math.min(4,f.s)),x:Math.max(-1,Math.min(1,f.x)),y:Math.max(-1,Math.min(1,f.y))};
+  if(Math.abs(f.s-1)<.01&&Math.abs(f.x)<.005&&Math.abs(f.y)<.005)delete S.media.fit[id];else S.media.fit[id]=f;return f;}
+/* gestos no modo "Ajustar tamanho": pinça (2 dedos) aproxima/afasta, 1 dedo arrasta, roda do mouse no computador */
+(function(){const P=new Map();let st=null,el=null,tm=null;
+  const save=()=>{clearTimeout(tm);tm=setTimeout(()=>persist('media'),400);};
+  const snap=()=>{const pts=[...P.values()];const id=el.dataset.fit,f=getFit(id),r=el.getBoundingClientRect();
+    st={id,f:{...f},w:r.width,h:r.height,n:pts.length,cx:pts.reduce((a,p)=>a+p.x,0)/pts.length,cy:pts.reduce((a,p)=>a+p.y,0)/pts.length,d:pts.length>1?Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y):0};};
+  const apply=f=>{const im=el.querySelector('img');if(im)im.style.transform=fitT(st.id);};
+  document.addEventListener('pointerdown',e=>{const w=e.target.closest&&e.target.closest('.cfw.edit');if(!w)return;e.preventDefault();
+    if(el&&el!==w){P.clear();}el=w;P.set(e.pointerId,{x:e.clientX,y:e.clientY});try{w.setPointerCapture(e.pointerId);}catch(_){}snap();},{passive:false});
+  document.addEventListener('pointermove',e=>{if(!el||!P.has(e.pointerId))return;e.preventDefault();P.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    const pts=[...P.values()];if(pts.length!==st.n){snap();return;}const cx=pts.reduce((a,p)=>a+p.x,0)/pts.length,cy=pts.reduce((a,p)=>a+p.y,0)/pts.length;
+    let s=st.f.s;if(pts.length>1&&st.d>0)s=st.f.s*Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y)/st.d;
+    setFit(st.id,{s,x:st.f.x+(cx-st.cx)/st.w,y:st.f.y+(cy-st.cy)/st.h});apply();},{passive:false});
+  const up=e=>{if(!el||!P.has(e.pointerId))return;P.delete(e.pointerId);if(P.size)snap();else{el=null;st=null;save();}};
+  document.addEventListener('pointerup',up);document.addEventListener('pointercancel',up);
+  document.addEventListener('wheel',e=>{const w=e.target.closest&&e.target.closest('.cfw.edit');if(!w)return;e.preventDefault();const id=w.dataset.fit,f=getFit(id);
+    setFit(id,{...f,s:f.s*(e.deltaY<0?1.06:.94)});const im=w.querySelector('img');if(im)im.style.transform=fitT(id);save();},{passive:false});})();
 /* ---------- photos tab ---------- */
 function renderPhotos(){const d=ui.photoDate;const dates=photoDates();const isDay=today()===photoDue();
   let h=`<div class="hd" style="font-size:22px;margin-bottom:10px">${L('Fotos de progresso','Progress photos')}</div>`;
@@ -1617,15 +1650,22 @@ function renderPhotos(){const d=ui.photoDate;const dates=photoDates();const isDa
    ${dr.length?`${saved.length?`<div class="note-box">${L('Já existem ','There are already ')}${saved.length} ${L('fotos salvas nesta data.','photos saved on this date.')}${rep?' '+rep+L(rep>1?' poses repetidas vão substituir as salvas.':' pose repetida vai substituir a salva.',rep>1?' repeated poses will replace the saved ones.':' repeated pose will replace the saved one.',rep>1?' poses repetidas sustituirán a las guardadas.':' pose repetida sustituirá a la guardada.'):L(' As novas serão somadas a elas.',' The new ones will be added to them.')}</div>`:''}
      <div class="row" style="gap:8px;margin-top:10px"><button class="btn sm grow" data-act="phdiscard">${L('Descartar','Discard')}</button><button class="btn primary grow" data-act="phsave">${L('Salvar no histórico','Save to history')} (${dr.length})</button></div>`
    :`<div class="sub" style="margin-top:8px">${L('Toque num quadro para tirar ou escolher fotos. Pode selecionar várias de uma vez na galeria. Depois toque em “Salvar no histórico”.','Tap a frame to take or pick photos. You can select several at once from your gallery. Then tap “Save to history”.')}</div>`}</div>`;}
-  if(dates.length>=2){const A=ui.cmpA&&dates.includes(ui.cmpA)?ui.cmpA:dates[0],B=ui.cmpB&&dates.includes(ui.cmpB)?ui.cmpB:dates[dates.length-1];
-    const img=(dt)=>{const has=S.media.photos.some(x=>x.date===dt&&x.pose===ui.cmpPose);const w=avgWeight(dt);return `<div class="ci">${has?`<img data-img="${photoId(dt,ui.cmpPose)}" alt="">`:`<div class="noimg">${L('Sem foto desta pose','No photo for this pose')}</div>`}<div class="cap"><b>${fmtD(dt)}</b>${w!=null?' · '+fmtN(w)+' kg':''}</div></div>`;};
+  {const xd=extraDates(),xtot=S.media.photos.filter(x=>x.pose==='extra').length;if(ui.cmpPose==='extra'&&!xd.length)ui.cmpPose='front';
+  const isX=ui.cmpPose==='extra',ds=isX?xd:dates;
+  if(dates.length>=2||xtot>=2){const A=ui.cmpA&&ds.includes(ui.cmpA)?ui.cmpA:ds[0],B=ui.cmpB&&ds.includes(ui.cmpB)?ui.cmpB:ds[ds.length-1];
+    const ia=cmpPhoto(A,'A',A===B),ib=cmpPhoto(B,'B',A===B),ed=!!ui.cmpEdit&&ia&&ib;
+    const img=(dt,id,sd)=>{const w=avgWeight(dt);const xs=isX?extrasOn(dt):[];
+      return `<div class="ci">${id?`<div class="cfw${ed?' edit':''}" data-fit="${id}"><img data-img="${id}" alt="" style="transform:${fitT(id)}"></div>`:`<div class="noimg">${L('Sem foto desta pose','No photo for this pose','Sin foto de esta pose')}</div>`}<div class="cap"><b>${fmtD(dt)}</b>${w!=null?' · '+fmtN(w)+' kg':''}</div>
+       ${xs.length>1?`<div class="cxs">${xs.map((x,k)=>`<button class="${x.id===id?'on':''}" data-act="cmpx" data-s="${sd}" data-v="${x.id}" aria-label="Extra ${k+1}"><img data-img="${x.id}" alt=""></button>`).join('')}</div>`:''}</div>`;};
     h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Comparar','Compare')}</div>
-     <div class="pillset" style="margin:10px 0">${POSES.map(p=>`<button class="pill ${ui.cmpPose===p[0]?'on':''}" data-act="cmppose" data-v="${p[0]}">${esc(poseName(p[0]))}</button>`).join('')}</div>
-     <div class="lbl2" style="margin-top:4px">${L('Antes','Before')}</div><div class="hscroll">${dates.map(x=>`<button class="pill ${x===A?'on':''}" data-act="cmpa" data-v="${x}">${fmtD(x)}</button>`).join('')}</div>
-     <div class="lbl2">${L('Depois','After')}</div><div class="hscroll">${dates.map(x=>`<button class="pill ${x===B?'on':''}" data-act="cmpb" data-v="${x}">${fmtD(x)}</button>`).join('')}</div>
-     <div class="cmp">${img(A)}${img(B)}</div>
-     ${S.media.photos.some(x=>x.date===A&&x.pose===ui.cmpPose)&&S.media.photos.some(x=>x.date===B&&x.pose===ui.cmpPose)?`<button class="btn sm block" style="margin-top:8px" data-act="cmpslide" data-a="${A}" data-b="${B}">${svgSz(IC.zoom,16)} ${L('Comparar deslizando, com zoom','Slide to compare, with zoom','Comparar deslizando, con zoom')}</button>`:''}
-     ${avgWeight(A)!=null&&avgWeight(B)!=null?`<div class="note-box" style="text-align:center">${L('Diferença de peso (média 7d): ','Weight change (7d avg): ')}<b style="color:var(--redTx)">${avgWeight(B)-avgWeight(A)>0?'+':''}${fmtN(avgWeight(B)-avgWeight(A))} kg</b></div>`:''}</div>`;}
+     <div class="pillset" style="margin:10px 0">${POSES.map(p=>`<button class="pill ${ui.cmpPose===p[0]?'on':''}" data-act="cmppose" data-v="${p[0]}">${esc(poseName(p[0]))}</button>`).join('')}${xd.length?`<button class="pill ${isX?'on':''}" data-act="cmppose" data-v="extra">${L('Extras','Extras','Extras')}</button>`:''}</div>
+     <div class="lbl2" style="margin-top:4px">${L('Antes','Before')}</div><div class="hscroll">${ds.map(x=>`<button class="pill ${x===A?'on':''}" data-act="cmpa" data-v="${x}">${fmtD(x)}</button>`).join('')}</div>
+     <div class="lbl2">${L('Depois','After')}</div><div class="hscroll">${ds.map(x=>`<button class="pill ${x===B?'on':''}" data-act="cmpb" data-v="${x}">${fmtD(x)}</button>`).join('')}</div>
+     <div class="cmp${ed?' editing':''}">${img(A,ia,'A')}${img(B,ib,'B')}</div>
+     ${ia&&ib?(ed?`<div class="note-box cfhint">${svgSz(IC.zoom,16)} ${L('Use dois dedos em cada foto para aproximar ou afastar e um dedo para arrastar, até a pessoa ficar do mesmo tamanho e na mesma altura nas duas.','Use two fingers on each photo to zoom in or out and one finger to drag, until the person is the same size and height in both.','Usa dos dedos en cada foto para acercar o alejar y un dedo para arrastrar, hasta que la persona tenga el mismo tamaño y altura en ambas.')}</div>
+       <div class="row" style="gap:8px;margin-top:8px"><button class="btn sm grow" data-act="cmpfitreset" data-a="${ia}" data-b="${ib}">${L('Restaurar','Reset','Restablecer')}</button><button class="btn sm primary grow" data-act="cmpedit">${L('Concluir','Done','Listo')}</button></div>`
+      :`<div class="row" style="gap:8px;margin-top:8px"><button class="btn sm grow" data-act="cmpedit">${svgSz(IC.crop||IC.zoom,16)} ${L('Ajustar tamanho','Adjust size','Ajustar tamaño')}</button><button class="btn sm grow" data-act="cmpslide" data-a="${ia}" data-b="${ib}" data-la="${fmtD(A)}" data-lb="${fmtD(B)}">${svgSz(IC.zoom,16)} ${L('Deslizar','Slide','Deslizar')}</button></div>`):''}
+     ${!isX&&avgWeight(A)!=null&&avgWeight(B)!=null?`<div class="note-box" style="text-align:center">${L('Diferença de peso (média 7d): ','Weight change (7d avg): ')}<b style="color:var(--redTx)">${avgWeight(B)-avgWeight(A)>0?'+':''}${fmtN(avgWeight(B)-avgWeight(A))} kg</b></div>`:''}</div>`;}}
   h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Histórico de fotos','Photo history')}</div>`;
   if(!dates.length)h+=`<div class="empty">${L('Nenhuma foto ainda. A primeira sessão vira sua referência.','No photos yet. Your first session becomes the baseline.')}</div>`;
   else [...dates].reverse().forEach(dt=>{const ps=photosOn(dt);const w=avgWeight(dt);
@@ -2660,7 +2700,7 @@ const A={
  hdel:b=>modal(L('Excluir registro?','Delete entry?'),`<p>${L('Esta sessão será removida do histórico.','This session will be removed from history.')}</p>`,[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Excluir','Delete'),c:'primary',fn:()=>{deleteSession(b.dataset.id);closeModal();render();}}]),
  gorep:()=>{ui.tab='set';ui.report=buildReport(ui.repDays);render();setTimeout(()=>{const r=$('#rep');r&&r.scrollIntoView();},30);},
  pex:b=>{ui.exSel=b.dataset.v;render();},
- phdel:(b,ev)=>{ev.preventDefault();ev.stopPropagation();const id=b.dataset.id;modal(L('Excluir foto?','Delete photo?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Excluir','Delete'),c:'primary',fn:()=>{delImg(id);S.media.photos=S.media.photos.filter(x=>x.id!==id);persist('media');closeModal();render();}}]);},
+ phdel:(b,ev)=>{ev.preventDefault();ev.stopPropagation();const id=b.dataset.id;modal(L('Excluir foto?','Delete photo?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Excluir','Delete'),c:'primary',fn:()=>{delImg(id);S.media.photos=S.media.photos.filter(x=>x.id!==id);if(S.media.fit)delete S.media.fit[id];persist('media');closeModal();render();}}]);},
  progview:b=>{ui.progOpen=ui.progOpen||{};ui.progOpen[b.dataset.id]=!ui.progOpen[b.dataset.id];render();setTimeout(()=>{const el=document.querySelector(`[data-act=progview][data-id="${b.dataset.id}"]`);el&&el.closest('.prog').scrollIntoView({block:'nearest'});},20);},
  proguse:b=>{const p=allPrograms().find(x=>x.id===b.dataset.id);if(!p)return;if(S.active){toast(L('Finalize o treino em andamento antes','Finish the current workout first'));return;}
    const t=today(),dw=pd(t).getDay(),sun=dw===0?t:addD(t,7-dw);
@@ -2727,7 +2767,10 @@ const A={
  eddl:()=>{const p=ui.ed.p;p.edDeload=p.edDeload===false?true:false;edPhasesSync();render();},
  edday:b=>{const p=ui.ed.p,ph=p.phases[+b.dataset.p],i=+b.dataset.i;const opts=[...Object.keys(p.workouts),'cardio','rest'];const cur=opts.indexOf(ph.schedule[i]);ph.schedule[i]=opts[(cur+1)%opts.length];if(p.edSimple)edPhasesSync();render();},
  phday:b=>{S.prefs.photoDay=+b.dataset.v;persist('prefs');render();if(IN_APP)scheduleReminders(false);},
- cmppose:b=>{ui.cmpPose=b.dataset.v;render();},
+ cmppose:b=>{ui.cmpPose=b.dataset.v;ui.cmpA=ui.cmpB=null;render();},
+ cmpx:b=>{ui['cmpX'+b.dataset.s]=b.dataset.v;render();},
+ cmpedit:()=>{ui.cmpEdit=!ui.cmpEdit;render();},
+ cmpfitreset:b=>{[b.dataset.a,b.dataset.b].forEach(id=>{if(S.media.fit)delete S.media.fit[id];});persist('media');render();},
  cmpa:b=>{ui.cmpA=b.dataset.v;render();},
  cmpb:b=>{ui.cmpB=b.dataset.v;render();},
  phedit:b=>{ui.phEdit=ui.phEdit===b.dataset.v?null:b.dataset.v;render();},
@@ -2744,7 +2787,7 @@ const A={
    persist('media');render();toast(ok===1?L('1 foto salva no histórico','1 photo saved to history'):ok+L(' fotos salvas no histórico',' photos saved to history'));},
  phview:b=>{const id=b.dataset.id,ph=S.media.photos.find(x=>x.id===id);if(!ph)return;
    openViewer({id,title:fmtLong(ph.date)+' · '+poseName(ph.pose),del:()=>modal(L('Excluir foto?','Delete photo?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Excluir','Delete'),c:'primary',fn:()=>{delImg(id);S.media.photos=S.media.photos.filter(x=>x.id!==id);persist('media');closeModal();closeViewer();render();}}])});},
- cmpslide:b=>{const A=b.dataset.a,B=b.dataset.b;openViewer({compare:[photoId(A,ui.cmpPose),photoId(B,ui.cmpPose)],labels:[fmtD(A),fmtD(B)],title:poseName(ui.cmpPose)});},
+ cmpslide:b=>{const a=b.dataset.a,c=b.dataset.b;openViewer({compare:[a,c],fits:[getFit(a),getFit(c)],labels:[b.dataset.la,b.dataset.lb],title:ui.cmpPose==='extra'?L('Extras','Extras','Extras'):poseName(ui.cmpPose)});},
  avtype:b=>{const av=S.profile.avatar||(S.profile.avatar={adj:{}});av.type=b.dataset.v;persist('profile');render();},
  avview:b=>{ui.avView=b.dataset.v;render();},
  avadj:b=>{const av=S.profile.avatar||(S.profile.avatar={type:'average',adj:{}});av.adj=av.adj||{};const k=b.dataset.k;av.adj[k]=Math.max(-3,Math.min(3,(+av.adj[k]||0)+(+b.dataset.v)));persist('profile');render();},
@@ -2949,8 +2992,9 @@ function libIdByName(n){if(!n)return null;const t=String(n).toLowerCase().normal
 const hasImg=id=>EXIMG.has(id);
 /* miniatura da execução (ou do mapa muscular, se não houver foto) */
 /* vídeos próprios dos exercícios (hospedados junto da versão web e guardados no aparelho após o 1º uso) */
-const VIDS={"cadeira-extensora": "09c7ca6e", "desenvolvimento-halteres": "281362fb", "leg-press": "0354c8b0"};
+const VIDS={"agachamento-smith": "f318a819", "cadeira-adutora": "00e33ace", "cadeira-extensora": "09c7ca6e", "desenvolvimento-halteres": "281362fb", "leg-press": "0354c8b0", "peck-deck": "e4faaf9b", "remada-baixa": "1accc622", "rosca-direta": "ef260639", "supino-inclinado-halteres": "94c6d254", "supino-reto": "062cd245"};
 const hasVid=id=>!!VIDS[id];
+const VVERT=["cadeira-adutora", "supino-inclinado-halteres", "supino-reto"];const isVert=id=>VVERT.includes(id);
 const VID_BASE=(NATIVE||/github\.io$/.test(location.hostname))?'https://henriquelima-droid.github.io/treino-app/videos/':'videos/';
 const VIDC={};
 async function loadVid(id){if(VIDC[id])return VIDC[id];const k='vid:'+id+':'+VIDS[id],url=VID_BASE+id+'.mp4?v='+VIDS[id];let b=null;try{b=await idbGet(k);}catch(e){}
@@ -3130,10 +3174,11 @@ function avEditor(ctx){const p=S.profile,sex=p.sex==='F'?'F':'M';const av=p.avat
    ${(S.measures||[]).length?`<button class="btn sm block" data-act="avmeas" style="margin-top:8px">${svgSz(IC.tape,16)} ${L('Ajustar pelas minhas medidas','Adjust from my measurements','Ajustar con mis medidas')}</button>`:''}
    <div class="sub" style="margin-top:8px">${L('Escolha o biotipo mais parecido com o seu e ajuste cada região. É uma ilustração para acompanhar sua evolução, não uma medida exata.','Pick the body type closest to yours and adjust each region. It is an illustration to follow your progress, not an exact measurement.','Elige el biotipo más parecido al tuyo y ajusta cada zona. Es una ilustración para seguir tu evolución, no una medida exacta.')}</div>`;}
 /* visualizador de fotos com zoom (pinça, duplo toque) e comparação deslizante */
+const vfit=(o,k)=>{const f=o.fits&&o.fits[k];return f?`transform:translate(${f.x*100}%,${f.y*100}%) scale(${f.s});transform-origin:center`:'';};
 function openViewer(o){closeViewer();const el=document.createElement('div');el.className='viewer';el.id='viewer';
   const cmp=o.compare;const title=esc(o.title||'');
   el.innerHTML=`<div class="vtop"><span class="grow">${title}</span><button class="iconbtn" data-v="sh" aria-label="${L('Compartilhar','Share','Compartir')}">${IC.share}</button>${o.del?`<button class="iconbtn" data-v="del" aria-label="${L('Excluir','Delete','Eliminar')}">${IC.block}</button>`:''}<button class="iconbtn" data-v="x" aria-label="${L('Fechar','Close','Cerrar')}">✕</button></div>
-   <div class="vstage">${cmp?`<div class="vzoom"><img data-img="${cmp[0]}" alt=""><div class="vafter" style="clip-path:inset(0 0 0 50%)"><img data-img="${cmp[1]}" alt=""></div><div class="vline" style="left:50%"><i></i></div><span class="vtag l">${esc(o.labels?o.labels[0]:L('Antes','Before','Antes'))}</span><span class="vtag r">${esc(o.labels?o.labels[1]:L('Depois','After','Después'))}</span></div>`:`<div class="vzoom"><img data-img="${o.id}" alt=""></div>`}</div>
+   <div class="vstage">${cmp?`<div class="vzoom vzc"><img data-img="${cmp[0]}" alt="" style="${vfit(o,0)}"><div class="vafter" style="clip-path:inset(0 0 0 50%)"><img data-img="${cmp[1]}" alt="" style="${vfit(o,1)}"></div><div class="vline" style="left:50%"><i></i></div><span class="vtag l">${esc(o.labels?o.labels[0]:L('Antes','Before','Antes'))}</span><span class="vtag r">${esc(o.labels?o.labels[1]:L('Depois','After','Después'))}</span></div>`:`<div class="vzoom"><img data-img="${o.id}" alt=""></div>`}</div>
    <div class="vhint">${cmp?L('Arraste a linha para comparar · pinça para zoom','Drag the line to compare · pinch to zoom','Arrastra la línea para comparar · pellizca para hacer zoom'):L('Pinça ou toque duplo para zoom','Pinch or double-tap to zoom','Pellizca o toca dos veces para hacer zoom')}</div>`;
   document.body.appendChild(el);hydrateImgs(el);document.body.classList.add('noscroll');
   el.querySelector('[data-v=x]').onclick=closeViewer;el.querySelector('[data-v=sh]').onclick=()=>sharePhotos(o);if(o.del)el.querySelector('[data-v=del]').onclick=o.del;
@@ -3176,7 +3221,7 @@ function endTour(){const el=$('#tour');if(el){el.classList.add('out');el.remove(
 const loadIm=src=>new Promise((r,j)=>{const i=new Image();i.onload=()=>r(i);i.onerror=j;i.src=src;});
 async function sharePhotos(o){try{const ids=o.compare||[o.id];const ims=[];for(const id of ids){const d=await getImg(id);if(!d){toast(L('Foto indisponível','Photo unavailable','Foto no disponible'));return;}ims.push(await loadIm(d));}
   const H=1280,ws=ims.map(i=>Math.round(i.width*H/i.height)),gap=ims.length>1?12:0,W=ws.reduce((a,b)=>a+b,0)+gap,c=document.createElement('canvas');c.width=W;c.height=H+(ims.length>1?90:0);const x=c.getContext('2d');
-  x.fillStyle='#0A0A0A';x.fillRect(0,0,c.width,c.height);let px=0;ims.forEach((im,k)=>{x.drawImage(im,px,0,ws[k],H);px+=ws[k]+gap;});
+  x.fillStyle='#0A0A0A';x.fillRect(0,0,c.width,c.height);let px=0;ims.forEach((im,k)=>{const f=o.fits&&o.fits[k],w=ws[k];if(f){x.save();x.beginPath();x.rect(px,0,w,H);x.clip();x.fillStyle='#141414';x.fillRect(px,0,w,H);x.translate(px+w/2+f.x*w,H/2+f.y*H);x.scale(f.s,f.s);x.drawImage(im,-w/2,-H/2,w,H);x.restore();}else x.drawImage(im,px,0,w,H);px+=w+gap;});
   if(ims.length>1){const lb=o.labels||[L('Antes','Before','Antes'),L('Depois','After','Después')];x.font='700 40px Sora, Inter, sans-serif';x.textBaseline='middle';px=0;ims.forEach((im,k)=>{x.fillStyle=k?'#B8E04A':'#fff';x.fillText(String(lb[k]||'').toUpperCase(),px+24,H+45);px+=ws[k]+gap;});
     x.textAlign='right';x.fillStyle='#fff';x.fillText('GROW',W-104,H+45);x.fillStyle='#B8E04A';x.fillText('UP',W-24,H+45);}
   const blob=await new Promise(r=>c.toBlob(r,'image/jpeg',.9));const fn='growup-'+(ims.length>1?'comparacao':'foto')+'-'+today()+'.jpg';
