@@ -2060,7 +2060,7 @@ function genProgram(t,prof,start){prof=prof||S.profile;const sex=prof.sex==='F'?
       if(opt.t&&lvl==='advanced'&&!techOn&&(!quick||tid==='a-quick')){e.tech=(tid==='a-quick'||wi%2)?'restpause':'drop';techOn=1;}
       return e;});
     workouts[code]={label:code,name:wd.n[0],focus:wd.f[0],en:{name:wd.n[1],focus:wd.f[1]},exercises:exs};});
-  const seq=keys.map(k=>LET[keys.indexOf(k)]);const days=pickDays(avail,n);const weeks=Math.max(1,Math.min(12,+prof.progWeeks||6));const phases=[];
+  const seq=keys.map(k=>LET[keys.indexOf(k)]);const days=pickDays(avail,n);const weeks=Math.max(1,Math.min(24,+prof.progWeeks||6));const phases=[];
   for(let w=1;w<=weeks;w++){const sch=Array(7).fill('rest');if(prof.cardio!==false)avail.forEach(d=>{sch[d]='cardio';});const off=start?days.filter(d=>d<pd(start).getDay()).length:0;days.forEach((d,i)=>{const k=(w-1)*n+i-off;sch[d]=seq[((k%seq.length)+seq.length)%seq.length];});
     const ph={id:'w'+w,name:'Acumulação',from:w,to:w,schedule:sch,en:{name:'Accumulation'}};
     if(w===weeks&&weeks>=4){Object.assign(ph,{id:'dl',name:'Deload',setsFactor:0.5,rirOverride:'4',note:'Mantenha as cargas, metade das séries, RIR 4. Depois o ciclo recomeça.',en:{name:'Deload',note:'Keep the loads, half the sets, RIR 4. Then the cycle restarts.'}});}
@@ -3562,7 +3562,7 @@ function renderOnboarding(){if(!ui.ob)obStart();const st=ui.ob.step,p=S.profile;
     <div class="optl"><button class="opt ${m==='own'?'on':''}" data-act="obmode" data-v="own"><b>${L('Já tenho meu treino','I have my own program','Ya tengo mi entreno')}</b><span>${L('Importe o arquivo do seu personal ou monte o treino no editor.','Import your coach\'s file or build it in the editor.','Importa el archivo de tu entrenador o móntalo en el editor.')}</span></button>
      <button class="opt ${m==='rec'?'on':''}" data-act="obmode" data-v="rec"><b>${L('Quero o recomendado','Recommend one for me','Quiero el recomendado')}</b><span>${L('O app monta e ordena as opções para o seu perfil.','The app builds and ranks options for your profile.','La app crea y ordena las opciones para tu perfil.')}</span></button></div>
     ${m==='own'?`<div class="card"><div class="hd" style="font-size:17px">${L('Importar arquivo do personal','Import your coach\'s file','Importar archivo del entrenador')}</div><input type="file" accept=".json,application/json" data-file="plan" style="margin-top:8px"><div class="sub" style="margin-top:8px">${L('Ou monte do zero:','Or build from scratch:','O créalo desde cero:')}</div><button class="btn block outline" data-act="obcreate" style="margin-top:8px">${L('Montar no editor','Build in the editor','Montar en el editor')}</button></div>`:''}
-    ${m==='rec'?`<div class="card"><div class="hd" style="font-size:17px">${L('Duração do programa','Program length','Duración del programa')}</div><div class="weekpick">${Array.from({length:12},(_,i)=>i+1).map(w=>`<button class="${(+p.progWeeks||6)===w?'on':''}" data-act="obweeks" data-v="${w}">${w}</button>`).join('')}</div><div class="sub" style="margin-top:6px">${(+p.progWeeks||6)} ${L('semanas','weeks','semanas')}${(+p.progWeeks||6)>=4?' · '+L('a última é de deload','the last one is a deload','la última es de descarga'):''}</div></div>
+    ${m==='rec'?`<div class="card"><div class="hd" style="font-size:17px">${L('Duração do programa','Program length','Duración del programa')}</div><div class="weekpick">${Array.from({length:24},(_,i)=>i+1).map(w=>`<button class="${(+p.progWeeks||6)===w?'on':''}" data-act="obweeks" data-v="${w}">${w}</button>`).join('')}</div><div class="sub" style="margin-top:6px">${(+p.progWeeks||6)} ${L('semanas','weeks','semanas')}${(+p.progWeeks||6)>=4?' · '+L('a última é de deload','the last one is a deload','la última es de descarga'):''}</div></div>
      <div class="card"><div class="hd" style="font-size:17px">${svgSz(IC.target,18)} ${L('Grupo muscular prioritário','Priority muscle group','Grupo muscular prioritario')}</div>${prioMap()}</div>`:''}
     <div class="row" style="gap:8px;margin-top:6px"><button class="btn grow" data-act="obback">← ${L('Voltar','Back')}</button>${m==='rec'?`<button class="btn primary grow" data-act="obnext">${L('Ver programas','See programs','Ver programas')}</button>`:''}</div>`;}
   else if(st===6){const rk=rankPrograms();const rec=rk[0],more=!!ui.obMore,alts=rk.slice(1,more?rk.length:5);
@@ -4526,7 +4526,7 @@ document.addEventListener('scroll',ev=>{const c=ev.target;if(!c.classList||!c.cl
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261118.1848";
+const BUILD_AT="261118.1852";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
