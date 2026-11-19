@@ -764,6 +764,7 @@ body.simmode #app{padding-top:34px}
 .edxh{align-items:center}.edxh .exv{margin-right:4px}
 .pkr{display:flex;align-items:center;gap:8px;border-top:1px solid var(--s2)}.pkr .pki{border-top:0;flex:1;min-width:0}
 .exvm .xinfo{margin:0}.exvm .avmap{margin-top:12px}
+.exrow{cursor:pointer;-webkit-tap-highlight-color:transparent}.exrow:active{background:var(--s2)}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -1412,7 +1413,7 @@ function renderHome(){const p=S.profile,t=today(),dp=dayPlan(t);const cw=curWeig
   h+=ui.filter==='day'?renderDay():ui.filter==='week'?renderWeek():renderMonth();
   return h;}
 function dnav(label,small){return `<div class="navd"><button class="iconbtn" data-act="dnav" data-v="-1" aria-label="${L('Anterior','Previous')}">${IC.l}</button><div class="lbl">${label}${small?`<small>${small}</small>`:''}</div><button class="iconbtn" data-act="dnav" data-v="1" aria-label="${L('Próximo','Next')}">${IC.r}</button></div>`;}
-function dayList(T){let h='';const row=(e,lt)=>`<div class="exi">${exvBtn(vidOf(e))}<div class="grow"><div class="n">${lt?`<span class="lt sm">${lt}</span>`:''}${esc(P(e,'name'))}</div><div class="m">${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${L('descanso','rest')} ${mmss(rS(e))}</div></div><div class="r">${setSpecs(e).length}<small>${L('séries','sets')}</small></div></div>`;
+function dayList(T){let h='';const row=(e,lt)=>`<div class="exi exrow" data-act="exview" data-id="${esc(vidOf(e))}" role="button" tabindex="0">${exvBtn(vidOf(e))}<div class="grow"><div class="n">${lt?`<span class="lt sm">${lt}</span>`:''}${esc(P(e,'name'))}</div><div class="m">${esc(e.reps)} ${repU(e)} · RIR ${esc(e.rir)} · ${L('descanso','rest')} ${mmss(rS(e))}</div></div><div class="r">${setSpecs(e).length}<small>${L('séries','sets')}</small></div></div>`;
   for(let i=0;i<T.length;i++){const e=T[i],n=T[i+1];if(e.superset&&n&&n.superset===e.superset){h+=`<div class="bisd"><div class="bisdh"><span class="bistag sm">BI-SET</span> ${L('alterne A e B sem descanso','alternate A and B with no rest')}</div>${row(e,'A')}${row(n,'B')}</div>`;i++;}else h+=row(e,'');}
   return h;}
 function renderDay(){const d=ui.date,dp=dayPlan(d),isT=d===today();const ss=sessionsOn(d);
@@ -4548,7 +4549,7 @@ document.addEventListener('scroll',ev=>{const c=ev.target;if(!c.classList||!c.cl
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261119.1413";
+const BUILD_AT="261119.1502";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
