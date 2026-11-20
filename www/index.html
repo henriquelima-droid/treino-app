@@ -2776,7 +2776,7 @@ function exView(id,from){const c=catalog()[id];const e=Object.assign({},c||{name
   const acts=from==='pk'?[{l:L('Voltar','Back','Volver'),fn:()=>openExPicker(q,g,eqf)},{l:L('Adicionar','Add','Añadir'),c:'primary',fn:()=>{if(c)addExToEditor(c);}}]:[{l:L('Fechar','Close','Cerrar'),c:'primary',fn:closeModal}];
   modal(P(e,'name'),`<div class="exvm">${exInfo(e,-1)}</div>`,acts);}
 function pickList(q){const cat=catalog(),nz=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');q=nz(q);const g=ui.pickG||'';
-  const eq=ui.pickE||'';const items=Object.values(cat).filter(e=>(!g||catMatch(e.id,e,g))&&(!eq||(XL[e.id]&&(eq==='none'?!XL[e.id].eq.length:XL[e.id].eq.includes(eq))))&&(!q||nz(P(e,'name')).includes(q)||nz(e.name).includes(q)||(XL[e.id]&&nz(XL[e.id].en.name).includes(q)))).sort((a,b)=>P(a,'name').localeCompare(P(b,'name')));
+  const eq=ui.pickE||'';const items=Object.values(cat).filter(e=>!XDUP[e.id]&&(!g||catMatch(e.id,e,g))&&(!eq||(XL[e.id]&&(eq==='none'?!XL[e.id].eq.length:XL[e.id].eq.includes(eq))))&&(!q||nz(P(e,'name')).includes(q)||nz(e.name).includes(q)||(XL[e.id]&&nz(XL[e.id].en.name).includes(q)))).sort((a,b)=>P(a,'name').localeCompare(P(b,'name')));
   setTimeout(()=>{const n=$('#pk-n');if(n)n.textContent=items.length+' '+L('exercícios','exercises','ejercicios');},0);
   return items.map(e=>`<div class="pkr">${exvBtn(e.id,'pk')}<button class="pki" data-act="edpick" data-id="${esc(e.id)}"><span class="grow"><b>${esc(P(e,'name'))}</b><span>${esc(mcatName(exCat(e.id,e)))}${XL[e.id]&&!eqOk(e.id)?' · '+L('fora dos seus aparelhos','not in your equipment','fuera de tu equipo'):''}</span></span></button></div>`).join('')||`<div class="empty">${L('Nada encontrado.','Nothing found.')}</div>`;}
 function addExToEditor(e){const w=edW();const x=clone(e);delete x.superset;delete x.bonusFromWeek;x.sets=x.sets||3;if(!x.reps){x.repMin=8;x.repMax=12;x.reps='8–12';}x.rir=x.rir||'1–2';x.rest=x.rest||90;x.scheme=x.scheme||(x.feeders&&x.feeders.length?'topBackoff':'straight');
@@ -3190,6 +3190,8 @@ const XLIB=[
  ['dead-bug','Dead bug','Dead bug','Dead bug','abdomen',['abs'],['obliq'],[],'core',''],
  ['lenhador-polia','Lenhador na polia','Cable woodchop','Leñador en polea','abdomen',['obliq'],['abs'],['cable'],'core',''],
  ['copenhagen','Prancha copenhagen','Copenhagen plank','Plancha Copenhague','adutores',['adduct'],['obliq'],['bench'],'adduct','']];
+/* entradas repetidas: continuam valendo para fichas antigas, mas somem das listas */
+const XDUP={'triceps-frances-halter':'triceps-halter','crucifixo-maquina':'peck-deck','panturrilha-unilateral':'panturrilha-halter'};
 const XL={};XLIB.concat(typeof XLIB2!=='undefined'?XLIB2:[]).forEach(r=>{XL[r[0]]={id:r[0],name:r[1],en:{name:r[2]},es:{name:r[3]},group:r[4],mp:r[5],ms:r[6],eq:r[7],pat:r[8],img:r[9]};});
 const xName=id=>{const x=XL[id];return x?L(x.name,x.en.name,x.es.name):id;};
 const eqName=k=>{const x=EQ.find(e=>e[0]===k);return x?L(x[1],x[2],x[3]):k;};
@@ -3201,7 +3203,7 @@ const SKILL=new Set(['muscle-up','flexao-um-braco','flexao-palmas','flexao-parad
 const CORE_IDS=new Set(XLIB.map(r=>r[0]));
 function equivalents(id,limit,strict){const x=XL[id];if(!x)return [];const eq=userEq();
   const sc=y=>(y.pat===x.pat?10:0)+(y.group===x.group?4:0)+y.mp.filter(m=>x.mp.includes(m)).length*2+(CORE_IDS.has(y.id)?2:0)-(SKILL.has(y.id)?(SKILL.has(id)?0:12):0)-(y.eq.length===0&&x.eq.length?1:0);
-  return Object.values(XL).filter(y=>y.id!==id&&eqOk(y.id,eq)&&!(strict&&SKILL.has(y.id)&&!SKILL.has(id))&&!(['cardio','mob'].includes(y.pat)&&y.pat!==x.pat)&&(y.pat===x.pat||(y.group===x.group&&y.mp.some(m=>x.mp.includes(m))))).sort((a,b)=>sc(b)-sc(a)).slice(0,limit||6).map(y=>y.id);}
+  return Object.values(XL).filter(y=>y.id!==id&&!XDUP[y.id]&&eqOk(y.id,eq)&&!(strict&&SKILL.has(y.id)&&!SKILL.has(id))&&!(['cardio','mob'].includes(y.pat)&&y.pat!==x.pat)&&(y.pat===x.pat||(y.group===x.group&&y.mp.some(m=>x.mp.includes(m))))).sort((a,b)=>sc(b)-sc(a)).slice(0,limit||6).map(y=>y.id);}
 /* acha o id da biblioteca pelo nome livre de uma substituição antiga */
 function libIdByName(n){if(!n)return null;const t=String(n).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)/g,'').trim();
   let best=null,bs=0;Object.values(XL).forEach(x=>{[x.name,x.en.name,x.es.name].forEach(nm=>{const u=nm.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\(.*?\)/g,'').trim();
@@ -4694,7 +4696,7 @@ document.addEventListener('scroll',ev=>{const c=ev.target;if(!c.classList||!c.cl
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261120.1347";
+const BUILD_AT="261120.1352";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
