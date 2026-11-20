@@ -780,6 +780,23 @@ body.simmode #app{padding-top:34px}
 .pkf{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 4px}
 .pkf select{appearance:none;-webkit-appearance:none;background:var(--s2);color:inherit;border:1px solid var(--s3,#333);border-radius:12px;padding:11px 12px;font:inherit;font-size:13.5px;font-weight:600;width:100%;text-overflow:ellipsis}
 .tchk input{appearance:auto;-webkit-appearance:checkbox}
+/* área segura inferior (barra de navegação do Android / indicador do iPhone) */
+body{padding-bottom:calc(150px + var(--sab))}
+body.wo-mode{padding-bottom:calc(120px + var(--sab))}
+body:not(.wo-mode).has-timer{padding-bottom:calc(170px + var(--sab))}
+.modal-bg{padding:12px 12px calc(12px + var(--sab))}
+.chatin{bottom:calc(84px + var(--sab))}
+.quick{bottom:calc(142px + var(--sab))}
+.cropfx{padding-bottom:calc(20px + var(--sab))}
+.cbkin{padding-bottom:calc(28px + var(--sab))}
+.vhint{padding-bottom:calc(14px + var(--sab))}
+.tour{padding-bottom:calc(20px + var(--sab))}
+.rside{bottom:calc(110px + var(--sab))}.rinfo{bottom:calc(40px + var(--sab))}
+/* termos: tudo cabe na tela, botão sempre acima da barra do sistema */
+body.wo-mode:has(.tgate){padding-bottom:calc(16px + var(--sab))}
+.tgate .tscroll{max-height:max(150px,calc(100dvh - 600px - var(--sat) - var(--sab)))}
+body.simmode .tgate .tscroll{max-height:max(150px,calc(100dvh - 634px - var(--sat) - var(--sab)))}
+.modal{max-height:min(88vh,calc(100dvh - 24px - var(--sat) - var(--sab)))}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -4698,7 +4715,7 @@ document.addEventListener('scroll',ev=>{const c=ev.target;if(!c.classList||!c.cl
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261120.1405";
+const BUILD_AT="261120.1423";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
