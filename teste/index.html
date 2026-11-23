@@ -868,6 +868,18 @@ body.stv-on{overflow:hidden}body:has(#stv) .modal-bg{z-index:300}
 .edlink button{display:flex;align-items:center;gap:6px;background:transparent;border:1px dashed var(--s3);border-radius:999px;padding:5px 12px;font:inherit;font-size:12px;font-weight:600;color:var(--mut);cursor:pointer}
 .edlink button.on{border:1px solid var(--red);color:var(--redTx);background:color-mix(in srgb,var(--red) 12%,transparent)}
 .medal .boltf{color:inherit;margin:0}
+/* story: galeria/câmera e treino do dia com vídeos */
+.stpick{cursor:default}.stpbtns{display:flex;gap:14px;margin-bottom:6px}
+.stpb{display:flex;flex-direction:column;align-items:center;gap:8px;width:110px;padding:18px 8px;border-radius:18px;background:var(--s2);border:1px solid var(--s3);color:var(--tx);cursor:pointer}.stpb svg{color:var(--red)}
+.stchgs{position:absolute;right:10px;bottom:10px;display:flex;gap:6px}.stchgs .stchg{position:static}
+.stwox{position:absolute;left:10px;right:10px;top:50%;transform:translateY(-50%);z-index:1}
+.stwox.onph{top:auto;bottom:12px;transform:none;background:rgba(10,10,10,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border-radius:18px;padding:10px}
+#stv .stwox.onph{bottom:calc(120px + var(--sab))}
+.stwoh{display:flex;align-items:center;gap:7px;flex-wrap:wrap;color:#fff;margin-bottom:8px}.stwoh svg{color:var(--red)}.stwoh b{font:700 16px Sora,Inter,sans-serif}.stwoh span{font-size:12px;opacity:.75;width:100%}
+.stgrid{display:grid;gap:7px}.stgrid.c1{grid-template-columns:1fr}.stgrid.c2{grid-template-columns:1fr 1fr}.stgrid.c3{grid-template-columns:1fr 1fr 1fr}
+.stex{display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:0}
+.stex .exthumb{width:100%!important;height:auto!important;aspect-ratio:16/10;border-radius:10px;object-fit:cover}
+.stex b{color:var(--red);font:700 13px Sora,Inter,sans-serif;white-space:nowrap}.stex span{color:#fff;font-size:10.5px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -4932,19 +4944,28 @@ function stClean(){if(stCleaning||!SOC.on)return;const old=(SOC.stories||[]).fil
 function stBubble(u){const me=SOC.uid,mine=u===me,has=stOf(u).length,ring=has?(stUnseen(u)||mine?'st':'seen'):(trainedToday(u)?'on':'off');
   const act=has?`data-act="stopen" data-id="${esc(u)}"`:(mine?`data-act="stnew"`:`data-act="socgo" data-v="prof" data-id="${esc(u)}"`);
   return `<div class="story"><button class="stb" ${act}>${uPhoto(uPh(u),uName(u),62,ring)}</button>${mine?`<button class="splus" data-act="stnew" aria-label="${L('Novo story','New story','Nueva historia')}">${svgSz(IC.plus,12)}</button>`:''}<span>${esc(mine?L('Seu story','Your story','Tu historia'):(uName(u)||'').split(' ')[0])}</span></div>`;}
+/* treino de hoje: exercícios com vídeo em miniatura e a melhor série */
+function stWoData(){const s=S.sessions.filter(x=>x.type==='workout'&&x.date===today()).sort((a,b)=>(b.endedAt||0)-(a.endedAt||0))[0];if(!s)return null;const base=todayWo();const u=UW();
+  const ex=[];(s.exercises||[]).forEach(e=>{const d=(e.sets||[]).filter(x=>x.done&&isWork(x));if(!d.length)return;let b=d[0];d.forEach(x=>{const sc=(num(x.kg)||0)*1000+(num(x.reps)||0),sb=(num(b.kg)||0)*1000+(num(b.reps)||0);if(sc>sb)b=x;});
+    ex.push({id:vidOf(e),n:P(e,'name')||e.name||'',s:d.length,kg:num(b.kg)||0,r:num(b.reps)||0,t:e.unit==='s'?1:0});});
+  return Object.assign(base,{ex:ex.slice(0,9),u});}
+function stBest(x,u){if(x.t)return `${x.s}× ${x.r}s`;return x.kg?`${x.s}× ${fmtN(x.kg)} ${u||'kg'} × ${x.r}`:`${x.s}× ${x.r}`;}
+function stWoHtml(w,photo){if(!w)return '';const ex=w.ex||[];
+  return `<div class="stwox ${photo?'onph':''}"><div class="stwoh">${svgSz(IC.dumb,16)}<b>${esc(w.title||'')}</b><span>${w.dur||0} min · ${w.sets||0} ${L('séries','sets','series')}${w.prs?` · ${w.prs} ${L('recordes','PRs','récords')}`:''}</span></div>
+   ${ex.length?`<div class="stgrid c${Math.min(3,ex.length)}">${ex.map(x=>`<div class="stex">${exThumb(x.id,96)}<b>${esc(stBest(x,w.u))}</b><span>${esc(x.n)}</span></div>`).join('')}</div>`:woTile(w,true)}</div>`;}
 /* criação */
-function stNew(d){const wt=todayWo();const can=!!d.simg||(wt&&d.wo);
+function stNew(d){const wt=todayWo();const w=d.wo&&wt?stWoData():null;const can=!!d.simg||!!w;
   return `<div class="ighd">${bk()}<div class="hd grow">${L('Novo story','New story','Nueva historia')}</div><button class="btn sm primary" data-act="socpub" ${can?'':'disabled'}>${L('Publicar','Share','Publicar')}</button></div>
    <div class="npkind"><button data-act="socnpkind" data-v="photo">${svgSz(IC.grid,16)} ${L('Foto','Photo','Foto')}</button><button data-act="socnpkind" data-v="reel">${svgSz(IC.reel,16)} Reel</button><button class="on" data-act="socnpkind" data-v="story">${svgSz(IC.plus,16)} Story</button></div>
-   <div class="stprev">${d.simg?`<div class="stimg" style="background-image:url('${d.simg.prev}')"></div>`:(wt&&d.wo?`<div class="stbg"></div>`:`<label class="stpick">${svgSz(IC.cam,40)}<b>${L('Escolher foto','Choose photo','Elegir foto')}</b><span>${L('Fica visível por 24 horas para seus parceiros','Visible for 24 hours to your partners','Visible 24 horas para tus compañeros')}</span><input type="file" accept="image/*" data-sfile="story" hidden></label>`)}
-    ${wt&&d.wo?`<div class="stwo">${woTile(wt,true)}</div>`:''}${d.simg?`<label class="stchg">${svgSz(IC.cam,16)} ${L('Trocar','Change','Cambiar')}<input type="file" accept="image/*" data-sfile="story" hidden></label>`:''}</div>
+   <div class="stprev">${d.simg?`<div class="stimg" style="background-image:url('${d.simg.prev}')"></div>`:(w?`<div class="stbg"></div>`:`<div class="stpick"><div class="stpbtns"><label class="stpb">${svgSz(IC.grid,30)}<b>${L('Galeria','Gallery','Galería')}</b><input type="file" accept="image/*" data-sfile="story" hidden></label><label class="stpb">${svgSz(IC.cam,30)}<b>${L('Câmera','Camera','Cámara')}</b><input type="file" accept="image/*" capture="environment" data-sfile="story" hidden></label></div><span>${L('Fica visível por 24 horas para seus parceiros','Visible for 24 hours to your partners','Visible 24 horas para tus compañeros')}</span></div>`)}
+    ${w?stWoHtml(w,!!d.simg):''}${d.simg?`<div class="stchgs"><label class="stchg">${svgSz(IC.grid,15)} ${L('Galeria','Gallery','Galería')}<input type="file" accept="image/*" data-sfile="story" hidden></label><label class="stchg">${svgSz(IC.cam,15)} ${L('Câmera','Camera','Cámara')}<input type="file" accept="image/*" capture="environment" data-sfile="story" hidden></label></div>`:''}</div>
    <textarea id="np-cap" rows="2" maxlength="140" placeholder="${L('Texto no story (opcional)','Text on the story (optional)','Texto en la historia (opcional)')}" style="margin-top:12px">${esc(d.cap||'')}</textarea>
-   ${wt?`<button class="toggle" data-act="socnpwo" style="margin-top:8px"><span>${L('Mostrar o treino de hoje','Show today\'s workout','Mostrar el entreno de hoy')}<small class="sub" style="display:block">${esc(wt.title)} · ${wt.dur} min · ${fmtN(wt.vol/1000,1)} t</small></span><i class="sw ${d.wo?'on':''}"></i></button>`:''}
+   ${wt?`<button class="toggle" data-act="socnpwo" style="margin-top:8px"><span>${L('Adicionar o treino de hoje','Add today\'s workout','Añadir el entreno de hoy')}<small class="sub" style="display:block">${L('Vídeos dos exercícios com a melhor série de cada um','Exercise videos with your best set of each','Vídeos de los ejercicios con tu mejor serie')}</small></span><i class="sw ${d.wo?'on':''}"></i></button>`:''}
    <div class="sub" style="margin-top:10px">${L('Seus parceiros veem o story por 24 horas. Você vê quem visualizou.','Your partners see the story for 24 hours. You can see who viewed it.','Tus compañeros ven la historia durante 24 horas. Verás quién la vio.')}</div>`;}
 async function stFile(f){const d=ui.np;d.cap=(($('#np-cap')||{}).value)||d.cap||'';
   try{const src=await compress(f,1600,1200000);const im=await loadIm(src);const it={src,w:im.naturalWidth,h:im.naturalHeight,c:{z:1,x:0,y:0,r:0}};it.prev=await renderCrop(it,'9/16',360,70000);d.simg=it;}
   catch(e){logErr('story-open',e,{t:f&&f.type,s:f&&f.size});toast(L('Não foi possível abrir a foto','Could not open the photo','No se pudo abrir la foto'));}render();}
-async function stPublish(d,cap){const wt=d.wo?todayWo():null;if(!d.simg&&!wt)return;if(SOC.posting)return;SOC.posting=true;const me=SOC.uid,aud=[me].concat(SOC.friends).slice(0,200);
+async function stPublish(d,cap){const wt=d.wo?stWoData():null;if(!d.simg&&!wt)return;if(SOC.posting)return;SOC.posting=true;const me=SOC.uid,aud=[me].concat(SOC.friends).slice(0,200);
   try{toast(L('Publicando…','Posting…','Publicando…'));const ref=FB.doc(FB.collection(fbDb,'posts'));const at=Date.now();
     if(d.simg){const out=await renderCrop(d.simg,'9/16',1080,520000);await FB.setDoc(FB.doc(fbDb,'pimg',ref.id),{uid:me,aud,pub:false,d:out});SOC.img[ref.id]=out;putImg('pi-'+ref.id,out,{}).catch(()=>{});}
     await FB.setDoc(ref,{uid:me,name:myName(),photo:myThumb(),type:'story',pub:false,cap:cap.slice(0,140),wo:wt||null,hasImg:!!d.simg,n:d.simg?1:0,ar:'9/16',at,exp:at+ST_MS,aud,rx:{},nc:0});
@@ -4966,12 +4987,13 @@ function stCur(){const l=STV.g[STV.gi];return l&&l[STV.i];}
 function stShow(){const p=stCur(),o=$('#stv');if(!p||!o)return stClose();const me=SOC.uid,mine=p.uid===me,list=STV.g[STV.gi];
   if(!mine&&!stSeen[p.id]){stMark(p.id);if(!(p.rx||{})[me]){p.rx=Object.assign({},p.rx,{[me]:1});FB.updateDoc(FB.doc(fbDb,'posts',p.id),{['rx.'+me]:1}).catch(()=>{});}}
   const views=Object.keys(p.rx||{}).filter(u=>u!==me).length;
-  o.innerHTML=`<div class="stvbox"><div class="stvmedia ${p.hasImg?'':'nobg'}" ${p.hasImg?`data-simg="${esc(p.id)}"`:''}></div>${p.wo?`<div class="stwo">${woTile(p.wo,true)}</div>`:''}
+  o.innerHTML=`<div class="stvbox"><div class="stvmedia ${p.hasImg?'':'nobg'}" ${p.hasImg?`data-simg="${esc(p.id)}"`:''}></div>${p.wo?stWoHtml(p.wo,p.hasImg):''}
    <div class="stvbars">${list.map((x,k)=>`<i><b style="width:${k<STV.i?100:0}%"></b></i>`).join('')}</div>
    <div class="stvh">${uPhoto(mine?myPhoto():(uPh(p.uid)||p.photo),p.name,34)}<b>${esc(mine?myName():p.name)}</b><span>${agoMs(p.at)}</span><span class="grow"></span>
     ${mine?`<button class="iconbtn" data-act="stdel" data-id="${esc(p.id)}" aria-label="${L('Apagar','Delete','Borrar')}">${svgSz(IC.trash,20)}</button>`:''}<button class="iconbtn" data-act="stclose" aria-label="${L('Fechar','Close','Cerrar')}">${ST_X}</button></div>
    ${p.cap?`<div class="stvcap">${esc(p.cap)}</div>`:''}
    ${mine?`<button class="stvviews" data-act="stviews" data-id="${esc(p.id)}">${svgSz(ST_EYE,16)} ${views===1?L('1 visualização','1 view','1 visualización'):views+L(' visualizações',' views',' visualizaciones')}</button>`:''}</div>`;
+  if(typeof scanThumbs==='function')scanThumbs();
   if(p.hasImg)postImg(p.id).then(d=>{const m=o.querySelector('[data-simg]');if(d&&m)m.style.backgroundImage=`url("${d}")`;});
   STV.t0=performance.now();STV.el=0;cancelAnimationFrame(STV.raf);let last=performance.now();
   const tick=now=>{if(!$('#stv'))return;if(!STV.paused)STV.el+=now-last;last=now;const b=o.querySelectorAll('.stvbars b')[STV.i];if(b)b.style.width=Math.min(100,STV.el/STV.dur*100)+'%';if(STV.el>=STV.dur)return stNext();STV.raf=requestAnimationFrame(tick);};
@@ -4981,7 +5003,7 @@ function stPrev(){if(STV.i>0){STV.i--;stShow();}else if(STV.gi>0){STV.gi--;STV.i
 function stNextG(){if(STV.gi<STV.g.length-1){STV.gi++;const l=STV.g[STV.gi];STV.i=Math.max(0,l.findIndex(p=>!stSeen[p.id]));stShow();}else stClose();}
 function stPrevG(){if(STV.gi>0){STV.gi--;STV.i=0;stShow();}else{STV.i=0;stShow();}}
 Object.assign(A,{
- stnew:()=>{ui.np={kind:'story',cap:'',wo:!!todayWo()};socGo('new');},
+ stnew:()=>{ui.np={kind:'story',cap:'',wo:false};socGo('new');},
  stopen:b=>stOpen(b.dataset.id),
  stclose:()=>stClose(),
  stdel:b=>{STV.paused=true;modal(L('Apagar story?','Delete story?','¿Borrar historia?'),'',[{l:L('Cancelar','Cancel','Cancelar'),fn:()=>{closeModal();STV.paused=false;}},{l:L('Apagar','Delete','Borrar'),c:'primary',fn:()=>{closeModal();const id=b.dataset.id;
@@ -4994,7 +5016,7 @@ Object.assign(A,{
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261123.1754";
+const BUILD_AT="261123.1759";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
