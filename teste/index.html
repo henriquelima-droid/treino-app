@@ -982,6 +982,52 @@ html[data-theme=light] .thopt.on{border-color:#141414;background:#FFFFFF;color:#
 .banner[style*="--wine"] b{color:var(--embTx)}
 .banner[style*="--wine"] span{color:var(--embTx);opacity:.85}
 
+/* ===== tela grande (computador e tablet deitado) ===== */
+.fnbrand{display:none}
+body:not(.wo-mode) .timerbar{bottom:calc(88px + var(--sab))}
+@media (min-width:760px) and (max-width:999px){
+  .wrap{max-width:720px}
+  .bnav.fnav{max-width:600px;margin:0 auto}
+}
+@media (min-width:1000px){
+  body{padding-bottom:40px;padding-left:256px}
+  body.wo-mode{padding-left:0}
+  .wrap{max-width:1120px;padding:22px 28px 10px}
+  /* menu lateral */
+  .bnav.fnav{top:16px;bottom:16px;left:16px;right:auto;width:224px;height:auto;flex-direction:column;align-items:stretch;justify-content:flex-start;gap:4px;padding:18px 12px;border-radius:24px;box-shadow:none}
+  .fnbrand{display:block;font-family:Archivo,Inter,sans-serif;font-weight:800;font-size:24px;letter-spacing:-.02em;padding:4px 12px 18px}
+  .fnbrand b{color:var(--redTx)}
+  html[data-theme=light] .fnbrand b{background:var(--red);color:#141414;padding:0 5px;border-radius:6px;margin-left:2px}
+  .bnav.fnav button{flex:none;height:48px;justify-content:flex-start;padding:0 14px;gap:12px;font-size:14px;color:var(--mut)}
+  .bnav.fnav .nl{display:inline}
+  .bnav.fnav button.on{flex-grow:0}
+  .bnav.fnav button:not(.on):hover{background:var(--s2);color:var(--tx)}
+  .bnav.fnav button.bdot::after,.bnav.fnav button.live:not(.on)::before{top:50%;right:14px;margin-top:-4px}
+  .top .brand{visibility:hidden}
+  .timerbar{left:calc(256px + 24px);right:24px;bottom:20px!important;max-width:620px}
+  body.wo-mode .timerbar{left:24px}
+  /* início: treino à esquerda, avisos e progresso à direita */
+  .tab-home .hgrid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
+  .tab-home .hmain{grid-column:1;grid-row:1}
+  .tab-home .hside{grid-column:2;grid-row:1;position:sticky;top:16px}
+  .tab-home .hello .hd{font-size:34px}
+  .tab-home .wkstrip{max-width:640px}
+  .daycard .dhero{min-height:280px}
+  .daycard .dhero .wk{font-size:44px}
+  /* páginas de cartões: duas colunas, na ordem de leitura */
+  .tab-prog,.tab-profile,.tab-progs,.tab-set,.tab-hist,.tab-measures,.tab-medals,.tab-report,.tab-pedit{column-count:2;column-gap:20px}
+  .tab-prog>*,.tab-profile>*,.tab-progs>*,.tab-set>*,.tab-hist>*,.tab-measures>*,.tab-medals>*,.tab-report>*,.tab-pedit>*{break-inside:avoid;-webkit-column-break-inside:avoid}
+  .wrap>.top,.wrap>.pghd,.wrap>.subhd,.wrap>.banner,.wrap>.hello{column-span:all;-webkit-column-span:all}
+  .tab-photos,.tab-social,.tab-admin{max-width:760px}
+  /* treino em andamento: coluna mais larga e centralizada */
+  body.wo-mode .wrap,.wo-head .in{max-width:760px}
+  .xhero{height:300px}
+  .modal-bg{align-items:center}
+  .modal{max-width:600px}
+}
+@media (min-width:1400px){.wrap{max-width:1240px}}
+@media (min-width:1000px){.wrap.ob{max-width:520px}}
+
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
 <link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#0A0A0A"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
@@ -1586,7 +1632,7 @@ function suggestion(lp,ex){if(!lp)return null;const reps=lp.sets.map(s=>num(s.re
   return{t:L('Mesma carga, +1 repetição','Same load, +1 rep'),c:'keep'};}
 function curWeight(){const b=[...S.body].sort((a,b)=>a.date.localeCompare(b.date));return b.length?b[b.length-1].kg:S.profile.pesoInicial;}
 function avgWeight(end,days){days=days||7;const st=addD(end,-(days-1));const v=S.body.filter(b=>b.date>=st&&b.date<=end).map(b=>b.kg);return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
-function setBody(date,kg){S.body=S.body.filter(b=>b.date!==date);S.body.push({date,kg});S.body.sort((a,b)=>a.date.localeCompare(b.date));persist('body');}
+function setBody(date,kg){S.body=S.body.filter(b=>b.date!==date);S.body.push({date,kg,t:Date.now()});S.body.sort((a,b)=>a.date.localeCompare(b.date));persist('body');}
 const wLabel=(code,pl)=>{pl=pl||S.plan;const w=pl.workouts[code];return w&&w.label?w.label:code;};
 const sLabel=s=>s.label||wLabel(s.workout);
 const repU=e=>e.unit==='s'?L('s','s'):e.uni?L('reps/lado','reps/side'):'reps';
@@ -1631,7 +1677,7 @@ function render(){ensureTick();
   else if(ui.tab==='workout'&&S.active){h=renderWorkout();}
   else{if(ui.tab==='workout'||ui.tab==='editor')ui.tab='home';
     const body=pageBody;
-    h=`<div class="wrap">${topBar()}${S.active?activeBanner():''}`+body()+`</div>`+navBar();}
+    h=`<div class="wrap tab-${esc(ui.tab)}">${topBar()}${S.active?activeBanner():''}`+body()+`</div>`+navBar();}
   $('#app').innerHTML=h;
   if(ui._lt!==ui.tab){const w=$('#app .wrap');if(w){w.classList.add('enter');if(ui._lt&&PROFILE_PAGES.includes(ui._lt)&&ui.tab==='profile')w.classList.add('back');}ui._lt=ui.tab;}
   if(!(ui.tab==='workout'&&S.active)&&!T)$('#timerbar').classList.add('hidden');
@@ -1646,16 +1692,17 @@ function activeBanner(){const a=S.active;const done=a.exercises.reduce((n,e)=>n+
 
 function renderHome(){const p=S.profile,t=today(),dp=dayPlan(t);const cw=curWeight();const delta=cw-p.pesoInicial;const toGoal=Math.max(0,cw-p.metaMax);
   let h=`<div class="hello"><div class="sub">${dp.pre?L('Plano começa ','Plan starts ','El plan empieza ')+fmtD(S.plan.startDate):L('Semana ','Week ','Semana ')+dp.week+' · '+esc(phName(dp.phase))}</div><div class="hd">${L('Bora treinar','Let\'s train','A entrenar')}${p.name?', '+esc((p.name||'').split(' ')[0]):''}</div></div>`;
-  h+=weekStrip();
+  h+=weekStrip();const h0=h;h='';
   h+=updBanner();if(typeof annCard==='function')h+=annCard();if(typeof reentryCard==='function')h+=reentryCard();if(typeof homeGameStrip==='function'&&S.sessions.length)h+=homeGameStrip();
   {const al=alerts();if(al.list.length||al.deload)h+=`<button class="banner" data-act="tab" data-v="prog" style="background:var(--s2);color:var(--tx);border:1px solid var(--red)">⚠<div class="grow"><b>${al.deload?L('Sugestão de deload','Deload suggested'):al.list.length+' '+L('alerta(s) de progresso','progress alert(s)')}</b><span>${esc([...new Set(al.list.map(x=>x.name))].slice(0,3).join(' · '))}</span></div>${svgSz(IC.r,20)}</button>`;}
   {const lc=levelCheck();if(lc.ready&&!(S.prefs.levelSnooze&&S.prefs.levelSnooze>today()))h+=`<button class="banner" data-act="lvup">⬆<div class="grow"><b>${L('Pronto para o nível ','Ready for ')}${esc(lvName(lc.next))}</b><span>${L('Toque para ver os critérios atingidos','Tap to see the criteria you met')}</span></div>${svgSz(IC.r,20)}</button>`;}
   if(measureLate())h+=`<button class="banner" data-act="msadd" style="background:var(--wine)">📏<div class="grow"><b>${L('Medidas atrasadas','Measurements overdue')}</b><span>${L('Faltam as medidas de ','Missing measurements from ')}${fmtLong(measureDue())}</span></div>${svgSz(IC.r,20)}</button>`;
   if(photoLate())h+=`<button class="banner" data-act="tab" data-v="photos" style="background:var(--wine)">${svgSz(IC.cam,22)}<div class="grow"><b>${L('Fotos atrasadas','Photos overdue')}</b><span>${L('Faltam as fotos de ','Missing photos from ')}${fmtLong(photoDue())}</span></div>${svgSz(IC.r,20)}</button>`;
   h+=stepsHomeHtml();
-  h+=`<div class="seg">${[['day',L('Dia','Day')],['week',L('Semana','Week')],['month',L('Mês','Month')]].map(x=>`<button data-act="filter" data-v="${x[0]}" class="${ui.filter===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>`;
-  h+=ui.filter==='day'?renderDay():ui.filter==='week'?renderWeek():renderMonth();
-  return h;}
+  /* no celular: avisos e depois o treino; na tela grande: treino à esquerda, avisos à direita */
+  let mn=`<div class="seg">${[['day',L('Dia','Day')],['week',L('Semana','Week')],['month',L('Mês','Month')]].map(x=>`<button data-act="filter" data-v="${x[0]}" class="${ui.filter===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>`;
+  mn+=ui.filter==='day'?renderDay():ui.filter==='week'?renderWeek():renderMonth();
+  return h0+`<div class="hgrid"><div class="hside">${h}</div><div class="hmain">${mn}</div></div>`;}
 function weekStrip(){const t=today(),ws=weekStart(t),dn=DOWS[LANG]||DOWS.pt||DOWS.en;let h='';
   for(let i=0;i<7;i++){const d=addD(ws,i),dp=dayPlan(d),ss=sessionsOn(d);const done=ss.some(s=>s.type==='workout'||s.type==='cardio');const plan=dp.type==='workout'||dp.type==='cardio';
     const cls=(d===t?'today ':'')+(ui.filter==='day'&&d===ui.date&&d!==t?'sel ':'')+(done?'done':plan&&d>=t?'plan':plan?'miss':'rest');
@@ -2522,7 +2569,7 @@ async function hcSync(force){const p=HP();if(!p||hBusy)return;if(!force&&Date.no
       Object.keys(per).forEach(d=>{hDay(d).sleep=Math.round(per[d]);});}catch(e){}}
     if(H.opts.weight){try{const r=await p.readSamples(Object.assign({dataType:'weight',limit:200,ascending:true},range));let ch=false;
       (r.samples||[]).forEach(s=>{const d=localYmd(s.startDate),kg0=Math.round(s.value*10)/10;if(!(kg0>20&&kg0<400))return;const kg=S.prefs.units==='imp'?Math.round(kg0*22.046226)/10:kg0;const ex=S.body.find(b=>b.date===d);
-        if(!ex){S.body.push({date:d,kg,src:'hc'});ch=true;}else if(ex.src==='hc'&&ex.kg!==kg){ex.kg=kg;ch=true;}});
+        if(!ex){S.body.push({date:d,kg,src:'hc',t:Date.now()});ch=true;}else if(ex.src==='hc'&&ex.kg!==kg){ex.kg=kg;ex.t=Date.now();ch=true;}});
       if(ch){S.body.sort((a,b)=>a.date.localeCompare(b.date));persist('body');}}catch(e){}}
     try{const t0=new Date();t0.setHours(0,0,0,0);const r=await p.readSamples({dataType:'steps',startDate:t0.toISOString(),endDate:range.endDate,limit:300});const cnt={};
       (r.samples||[]).forEach(s=>{const n=srcLabel(s);if(n)cnt[n]=(cnt[n]||0)+(s.value||0);});const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];if(top)H.src=top[0];}catch(e){}
@@ -2851,7 +2898,7 @@ function measureForm(){const t=today();const last=[...S.measures].sort((a,b)=>a.
 function openMeasureForm(){modal(L('Registrar medidas','Log measurements'),measureForm(),[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Salvar','Save'),c:'primary',fn:()=>{
   const d=$('#ms-date').value.trim();if(!isDate(d)){toast(L('Use AAAA-MM-DD','Use YYYY-MM-DD'));return;}const rec={date:d};let n=0;
   MFIELDS.forEach(f=>{const v=num($('#ms-'+f[0]).value);if(v!=null&&v>0){rec[f[0]]=v;n++;}});if(!n){toast(L('Preencha ao menos uma medida','Fill at least one measurement'));return;}
-  const old=S.measures.find(m=>m.date===d);S.measures=S.measures.filter(m=>m.date!==d);S.measures.push(Object.assign({},old||{},rec));S.measures.sort((a,b)=>a.date.localeCompare(b.date));persist('measures');closeModal();ui.tab='prog';render();toast(L('Medidas salvas','Measurements saved'));}}]);}
+  const old=S.measures.find(m=>m.date===d);S.measures=S.measures.filter(m=>m.date!==d);S.measures.push(Object.assign({},old||{},rec,{t:Date.now()}));S.measures.sort((a,b)=>a.date.localeCompare(b.date));persist('measures');closeModal();ui.tab='prog';render();toast(L('Medidas salvas','Measurements saved'));}}]);}
 function renderMeasures(){const ms=[...S.measures].sort((a,b)=>a.date.localeCompare(b.date));const fr=FREQ.find(x=>x[0]===(S.prefs.measureFreq||'weekly'));
   let h=`<div class="card"><div class="row"><div class="grow"><div class="hd" style="font-size:20px">${L('Medidas corporais','Body measurements')}</div><div class="sub">${fr&&fr[3]?L(fr[1],fr[2])+' · '+dowName(mDay()):L('Lembrete desligado','Reminder off')}</div></div><button class="btn sm outline" data-act="msadd">+ ${L('Medidas','Measure')}</button></div>`+measureHow();
   if(measurePending())h+=`<div class="note-box" style="color:var(--redTx);font-weight:600">${today()===measureDue()?L('Hoje é dia de medir.','Today is measurement day.'):L('Medidas atrasadas desde ','Measurements overdue since ')+fmtLong(measureDue())+'.'}</div>`;
@@ -3639,7 +3686,7 @@ function subHead(title,back){return `<div class="subhd"><button class="iconbtn" 
 function navBar(){const t=[['progs',L('Fichas','Plans','Rutinas'),IC.clip],['social',L('Social','Social','Social'),IC.users],['home',L('Treino','Workout','Entreno'),IC.dumb],['prog',L('Evolução','Progress','Evolución'),IC.chart],['profile',L('Perfil','Profile','Perfil'),IC.user]];
   const on=x=>ui.tab===x||(x==='profile'&&PROFILE_PAGES.includes(ui.tab))||(x==='home'&&ui.tab==='workout');
   const dot=x=>(x==='profile'&&(photoPending()||measurePending()))||(x==='social'&&typeof socUnread==='function'&&socUnread()>0);
-  return `<nav class="bnav fnav">${t.map(x=>`<button data-act="tab" data-v="${x[0]}" class="${x[0]==='home'&&S.active?'live ':''}${on(x[0])?'on':''} ${dot(x[0])?'bdot':''}" aria-label="${esc(x[1])}"${on(x[0])?' aria-current="page"':''}>${x[2]}<span class="nl">${x[1]}</span></button>`).join('')}</nav>`;}
+  return `<nav class="bnav fnav"><div class="fnbrand" aria-hidden="true">GROW<b>UP</b></div>${t.map(x=>`<button data-act="tab" data-v="${x[0]}" class="${x[0]==='home'&&S.active?'live ':''}${on(x[0])?'on':''} ${dot(x[0])?'bdot':''}" aria-label="${esc(x[1])}"${on(x[0])?' aria-current="page"':''}>${x[2]}<span class="nl">${x[1]}</span></button>`).join('')}</nav>`;}
 function pageBody(){const pg={home:renderHome,prog:()=>pageTitle(L('Evolução','Progress','Evolución'))+renderProg(),photos:()=>subHead(L('Fotos','Photos','Fotos'))+renderPhotos(),hist:()=>subHead(L('Histórico','History','Historial'))+renderHist(),
   progs:()=>pageTitle(L('Fichas','Plans','Rutinas'))+renderPrograms()+cardPlanImport(),
   set:renderSet,profile:renderProfile,measures:()=>subHead(L('Medidas','Measurements','Medidas'))+renderMeasures(),report:()=>subHead(L('Relatório','Report','Informe'))+cardReport(),
@@ -4339,16 +4386,16 @@ async function afterLogin(u){const uid=u.uid,cur=owner();
   if(cur!==uid){const hasLocal=!!localStorage.getItem(slotKey(uid)),guestData=cur==='local'&&slotHasData('local');
     CL.switching=true;switchSlot(uid);
     if(!hasLocal){CL.meta=await backupMeta(uid);
-      if(CL.meta&&CL.meta.n){await cloudRestore(true);}
-      else if(guestData){moveSlot('local',uid);loadSlot(uid);setTimeout(()=>cloudBackup(false),500);}
+      if(CL.meta&&CL.meta.n){await cloudSync('login',true);S.prefs.onboarded=true;lsSave();render();toast(L('Dados da conta carregados','Account data loaded','Datos de la cuenta cargados'));}
+      else if(guestData){moveSlot('local',uid);loadSlot(uid);setTimeout(()=>cloudSync('guest'),500);}
       else if(false){await new Promise(res=>modal(L('Usar os dados deste aparelho?','Use this device\'s data?','¿Usar los datos de este dispositivo?'),
         `<p>${L('Esta conta ainda não tem dados. Quer levar para ela os treinos, medidas e fotos que estão neste aparelho sem conta?','This account has no data yet. Bring over the workouts, measurements and photos stored on this device without an account?','Esta cuenta aún no tiene datos. ¿Quieres llevar los entrenos, medidas y fotos guardados en este dispositivo sin cuenta?')}</p>`,
         [{l:L('Começar do zero','Start fresh','Empezar de cero'),fn:()=>{closeModal();res();}},{l:L('Usar estes dados','Use this data','Usar estos datos'),c:'primary',fn:()=>{closeModal();moveSlot('local',uid);loadSlot(uid);setTimeout(()=>cloudBackup(false),500);res();}}]));}}
     CL.switching=false;}
-  else CL.meta=await backupMeta(uid);
-  S.prefs.cloudUid=uid;const p=S.profile;if(!p.name&&u.displayName)p.name=u.displayName;if(u.photoURL&&p.photoURL!==u.photoURL)p.photoURL=u.photoURL;persist('profile');persist('prefs');
+  else await cloudSync('login',true);
+  S.prefs.cloudUid=uid;const p=S.profile;let pch=false;if(!p.name&&u.displayName){p.name=u.displayName;pch=true;}if(u.photoURL&&p.photoURL!==u.photoURL){p.photoURL=u.photoURL;pch=true;}if(pch)persist('profile');lsSave();
   await ensureUserDoc(u);
-  if(!CL.meta&&S.sessions.length)cloudBackup(false);
+  syncWatch(uid);
   if(typeof socStart==='function')socStart();if(typeof devPing==='function')devPing(true);softRender();}
 const CODE_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const newCode=()=>Array.from({length:6},()=>CODE_AB[Math.floor(Math.random()*CODE_AB.length)]).join('');
@@ -4364,10 +4411,10 @@ function pubStats(){const c=consistency(),g=gameStats(),t=today();const ws=S.ses
   const w30=ws.filter(s=>s.date>addD(t,-30)).length;const cw=c.weeks[c.weeks.length-1]||{};const last=ws.reduce((a,s)=>s.date>a?s.date:a,'');
   return{streak:c.streak,w30,last:last||null,d7,weekDone:cw.done||0,weekPlan:cw.full||0,xp:g.xp,lv:g.lv,total:ws.length,prs:g.prs,at:Date.now()};}
 async function pushStats(){if(!logged())return;try{await FB.updateDoc(FB.doc(fbDb,'users',CL.user.uid),{stats:pubStats(),updatedAt:FB.serverTimestamp()});}catch(e){}if(typeof pubSync==='function')pubSync();}
-async function signOutAll(){try{if(typeof socStop==='function')socStop();const FA=CP().FirebaseAuthentication;if(FA)try{await FA.signOut();}catch(e){}await FB.signOut(fbAuth);}catch(e){}}
+async function signOutAll(){try{if(CL.unw){CL.unw();CL.unw=null;}if(typeof socStop==='function')socStop();const FA=CP().FirebaseAuthentication;if(FA)try{await FA.signOut();}catch(e){}await FB.signOut(fbAuth);}catch(e){}}
 async function cloudLogout(){modal(L('Sair da conta?','Sign out?','¿Cerrar sesión?'),`<p>${L('Ao sair, os dados desta conta deixam de aparecer neste aparelho. Eles voltam quando você entrar de novo.','Once you sign out, this account\'s data is hidden on this device. It comes back when you sign in again.','Al salir, los datos de esta cuenta dejan de mostrarse en este dispositivo. Vuelven cuando entres de nuevo.')}</p>`,
   [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Sair','Sign out','Salir'),c:'primary',fn:async()=>{closeModal();toast(L('Salvando…','Saving…','Guardando…'));
-    CL.switching=true;try{if(logged())await cloudBackup(false,true);}catch(e){}await signOutAll();switchSlot('local');CL.switching=false;}}]);}
+    CL.switching=true;try{if(logged())await cloudSync('logout',true,true);}catch(e){}await signOutAll();switchSlot('local');CL.switching=false;}}]);}
 async function cloudDelete(){const guestFree=!slotHasData('local');
   modal(L('Excluir conta?','Delete account?','¿Eliminar cuenta?'),`<p>${L('Isto apaga para sempre o backup na nuvem, seu perfil social, parcerias, publicações, mensagens e desafios.','This permanently deletes your cloud backup, social profile, partners, posts, messages and challenges.','Esto borra para siempre la copia en la nube, tu perfil social, compañeros, publicaciones, mensajes y retos.')}</p>
    <p class="sub" style="margin-top:8px">${L('E os dados deste aparelho (treinos, medidas e fotos)?','And the data on this device (workouts, measurements, photos)?','¿Y los datos de este dispositivo (entrenos, medidas y fotos)?')}</p>`,
@@ -4384,22 +4431,75 @@ async function doDelete(keepLocal){toast(L('Excluindo…','Deleting…','Elimina
   CL.switching=false;}
 
 /* ---------- backup ---------- */
-function cloudDirty(){if(!logged()||S.prefs.cloudAuto===false)return;CL.dirty=true;clearTimeout(CL.t);CL.t=setTimeout(()=>cloudBackup(false),45000);}
+function cloudDirty(){if(!logged()||S.prefs.cloudAuto===false)return;CL.dirty=true;clearTimeout(CL.t);CL.t=setTimeout(()=>cloudSync('dirty'),6000);}
+
+/* ---------- sincronização entre aparelhos ----------
+   a nuvem guarda o estado completo; cada aparelho, ao abrir, voltar ao app, receber aviso de mudança
+   ou salvar algo, baixa a versão da nuvem, junta com a sua e envia o resultado:
+   · treinos: por id, vence a edição mais recente; exclusões valem (lápides com data)
+   · peso e medidas: juntados por data, vence o registro mais recente
+   · perfil, fichas, biblioteca e ajustes da conta: vence a seção alterada por último
+   fotos, saúde/passos e treino em andamento ficam em cada aparelho */
+const LOCAL_PREFS=['theme','keepAwake','vidMute','cloudLast','cloudAuto','cloudUid','cloudConsent','cloudPulled','stepsAsk','workoutReminder','sound','vibrate','lastOpen','tourDone','photoAsk'];
+function devId(){const d=devGet()||{owner:owner()};if(!d.id){d.id=Math.random().toString(36).slice(2,10)+Date.now().toString(36);devSet(d);}return d.id;}
+function syncObj(){const o=backupObj();delete o.health;o.media=S.media;o.updated=S.updated;o.tomb=S.tomb;return o;}
+function syncSig(o){const pf={};Object.keys(o.prefs||{}).sort().forEach(k=>{if(!LOCAL_PREFS.includes(k))pf[k]=o.prefs[k];});
+  return JSON.stringify([o.profile,o.plan,o.library,o.body,o.measures,pf,(o.sessions||[]).map(s=>s.id+':'+(s.updatedAt||0)).sort(),Object.keys(o.tomb||{}).sort()]);}
+function mergeArr(a,b,newerB){const m={};(a||[]).forEach(x=>{if(x&&x.date)m[x.date]=x;});
+  (b||[]).forEach(y=>{if(!y||!y.date)return;const x=m[y.date];if(!x){m[y.date]=y;return;}const tx=x.t||0,ty=y.t||0;if(ty>tx||(ty===tx&&newerB))m[y.date]=y;});
+  return Object.values(m).sort((p,q)=>p.date.localeCompare(q.date));}
+function mergeRemote(o){let ch=false;const ru=o.updated||null,rAt=(o.exportedAt&&Date.parse(o.exportedAt))||0;const rts=k=>ru?(ru[k]||0):rAt;
+  /* vence a seção alterada por último; se este aparelho nunca alterou a seção, vale a da nuvem */
+  const wins=k=>{const l=S.updated[k]||0;return rts(k)>l||(!l&&JSON.stringify(o[k])!==JSON.stringify(S[k]));};
+  ['profile','plan','library'].forEach(k=>{if(o[k]!=null&&wins(k)){S[k]=o[k];S.updated[k]=rts(k);ch=true;}});
+  if(o.prefs&&wins('prefs')){const keep={};LOCAL_PREFS.forEach(k=>{if(k in S.prefs)keep[k]=S.prefs[k];});S.prefs=Object.assign({},S.prefs,o.prefs,keep);S.updated.prefs=rts('prefs');ch=true;}
+  ['body','measures'].forEach(k=>{if(!Array.isArray(o[k]))return;const bef=JSON.stringify(S[k]||[]);const m=mergeArr(S[k],o[k],rts(k)>(S.updated[k]||0));
+    if(JSON.stringify(m)!==bef){S[k]=m;S.updated[k]=Math.max(S.updated[k]||0,rts(k));ch=true;}});
+  const T=Object.assign({},S.tomb||{});Object.entries(o.tomb||{}).forEach(([id,t])=>{if(!T[id]||t>T[id]){T[id]=t;ch=true;}});
+  const map=new Map(S.sessions.map(x=>[x.id,x]));
+  (o.sessions||[]).forEach(r=>{if(!r||!r.id)return;if(T[r.id]&&T[r.id]>=(r.updatedAt||0))return;const l=map.get(r.id);if(!l||(r.updatedAt||0)>(l.updatedAt||0)){map.set(r.id,r);ch=true;}});
+  for(const [id,x] of [...map]){if(T[id]&&T[id]>=(x.updatedAt||0)){map.delete(id);ch=true;}}
+  /* lápides antigas (mais de 1 ano) podem sair */
+  const lim=Date.now()-365*864e5;Object.keys(T).forEach(id=>{if(T[id]<lim)delete T[id];});
+  S.tomb=T;S.sessions=[...map.values()];
+  if(ch){normAll();lsSave();}
+  return ch;}
+async function readBackup(uid,m){let txt='';for(let i=0;i<m.n;i++){const c=await FB.getDoc(FB.doc(fbDb,'users',uid,'backup','c'+i));if(!c.exists())return null;txt+=c.data().d;}
+  let o;try{o=JSON.parse(txt);}catch(e){return null;}
+  if(o.profile&&o.profile.photoId&&!(await getImg(o.profile.photoId))){o.profile=Object.assign({},o.profile);delete o.profile.photoId;}
+  return o;}
+async function cloudSync(why,inLogin,forceUp){if(!logged()||(!inLogin&&CL.switching))return false;const uid=CL.user.uid;if(owner()!==uid)return false;
+  if(CL.syncing){CL.again=true;return false;}CL.syncing=true;let merged=false;
+  try{const m=await backupMeta(uid);CL.meta=m;let up=!!(CL.dirty||forceUp),remote=null;
+    if(m&&m.n&&m.at&&m.at!==S.prefs.cloudPulled){remote=await readBackup(uid,m);
+      if(remote){merged=mergeRemote(remote);S.prefs.cloudPulled=m.at;lsSave();}else{CL.again=true;}}
+    if(remote)up=up||syncSig(syncObj())!==syncSig(remote);
+    else if(!m||!m.n)up=up||S.sessions.length>0||S.prefs.onboarded;
+    if(up&&S.prefs.cloudAuto!==false||forceUp)await uploadNow();
+    if(merged&&!inLogin){softRender();if(why==='watch'||why==='resume')toast(L('Sincronizado com seus outros aparelhos','Synced with your other devices','Sincronizado con tus otros dispositivos'));}
+    return true;}
+  catch(e){return false;}
+  finally{CL.syncing=false;if(CL.again){CL.again=false;setTimeout(()=>cloudSync('again'),2500);}}}
+/* aviso em tempo real: quando outro aparelho envia, este puxa */
+function syncWatch(uid){try{if(CL.unw)CL.unw();CL.unw=FB.onSnapshot(FB.doc(fbDb,'users',uid,'private','backup'),sn=>{const d=sn.exists()?sn.data():null;if(!d||!d.at)return;
+  if(d.at!==S.prefs.cloudPulled&&d.dev!==devId()){clearTimeout(CL.wt);CL.wt=setTimeout(()=>cloudSync('watch'),800);}},()=>{});}catch(e){}}
+async function cloudBackup(manual,force){if(!logged())return;if(manual){toast(L('Sincronizando…','Syncing…','Sincronizando…'));softRender();}
+  const ok=await cloudSync('backup',false,true);if(manual)toast(ok?L('Tudo sincronizado na nuvem','Everything synced to the cloud','Todo sincronizado en la nube'):L('Não foi possível sincronizar agora','Could not sync right now','No se pudo sincronizar ahora'));if(manual||ui.tab==='set')softRender();}
 /* backup só de dados (sem fotos) em blocos de até 300 mil caracteres no Firestore — cabe no plano gratuito */
 const CHUNK=300000;
 async function delChunks(uid,from){const m=await FB.getDoc(FB.doc(fbDb,'users',uid,'private','backup')).catch(()=>null);const n=m&&m.exists()?(m.data().n||0):0;
   for(let i=from||0;i<Math.max(n,from||0);i++)await FB.deleteDoc(FB.doc(fbDb,'users',uid,'backup','c'+i)).catch(()=>{});}
-async function cloudBackup(manual,force){if(!logged()||(CL.up&&!force)||CL.switching)return;const uid=CL.user.uid;if(owner()!==uid)return;CL.up=true;CL.dirty=false;clearTimeout(CL.t);
-  if(manual){toast(L('Enviando backup…','Uploading backup…','Subiendo copia…'));softRender();}
-  try{const o=backupObj();delete o.health;o.media=S.media;const txt=JSON.stringify(o);const parts=[];for(let i=0;i<txt.length;i+=CHUNK)parts.push(txt.slice(i,i+CHUNK));
+async function uploadNow(){if(!logged()||CL.up)return;const uid=CL.user.uid;if(owner()!==uid)return;CL.up=true;CL.dirty=false;clearTimeout(CL.t);const manual=false;
+  try{const o=syncObj();const txt=JSON.stringify(o);const parts=[];for(let i=0;i<txt.length;i+=CHUNK)parts.push(txt.slice(i,i+CHUNK));
     const prevN=(CL.meta&&CL.meta.n)||0;
     for(let i=0;i<parts.length;i++)await FB.setDoc(FB.doc(fbDb,'users',uid,'backup','c'+i),{d:parts[i]});
     for(let i=parts.length;i<prevN;i++)await FB.deleteDoc(FB.doc(fbDb,'users',uid,'backup','c'+i)).catch(()=>{});
-    CL.meta={at:Date.now(),n:parts.length,sessions:S.sessions.length,chars:txt.length,app:(APPV&&APPV.version)||''};
-    await FB.setDoc(FB.doc(fbDb,'users',uid,'private','backup'),CL.meta);S.prefs.cloudLast=CL.meta.at;lsSave();CL.dirty=false;
-    pushStats();if(manual)toast(L('Backup salvo na nuvem','Backup saved to cloud','Copia guardada en la nube'));}
-  catch(e){if(manual)toast(cErr(e));}
-  CL.up=false;if(manual||ui.tab==='set')softRender();}
+    CL.meta={at:Date.now(),n:parts.length,sessions:S.sessions.length,chars:txt.length,app:(APPV&&APPV.version)||'',dev:devId(),v:2};
+    S.prefs.cloudPulled=CL.meta.at;
+    await FB.setDoc(FB.doc(fbDb,'users',uid,'private','backup'),CL.meta);S.prefs.cloudLast=CL.meta.at;lsSave();
+    pushStats();}
+  catch(e){CL.dirty=true;}
+  CL.up=false;}
 /* silent=true: restaura direto (entrada numa conta neste aparelho); senão pede confirmação */
 async function cloudRestore(silent){if(!logged())return;toast(L('Baixando dados da conta…','Downloading account data…','Descargando datos de la cuenta…'));const uid=CL.user.uid;
   try{const m=await FB.getDoc(FB.doc(fbDb,'users',uid,'private','backup'));if(!m.exists()||!m.data().n){toast(L('Nenhum backup nesta conta','No backup in this account','No hay copias en esta cuenta'));return;}
@@ -4417,14 +4517,14 @@ function loginBlock(ob){if(typeof simOn==='function'&&simOn())return ob?`<div cl
   return `<div class="${ob?'card':''} loginb">${ob?`<div class="hd" style="font-size:18px">${L('Entre para salvar tudo na nuvem','Sign in to save everything to the cloud','Entra para guardar todo en la nube')}</div><div class="sub" style="margin:4px 0 10px">${L('Backup automático, troca de aparelho sem perder nada e treino com amigos.','Automatic backup, switch phones without losing anything, and train with friends.','Copia automática, cambia de móvil sin perder nada y entrena con amigos.')}</div>`:''}
    <button class="btn block gbtn" data-act="clgoogle" ${CL.busy?'disabled':''}>${svgSz(IC.google,18)} ${L('Continuar com Google','Continue with Google','Continuar con Google')}</button>
    <button class="btn block outline" data-act="clemail" style="margin-top:8px">${svgSz(IC.send,16)} ${L('Entrar com e-mail','Sign in with email','Entrar con correo')}</button></div>`;}
-function accountCard(){let h=`<div class="card"><div class="hd" style="font-size:20px">${svgSz(IC.cloud,20)} ${L('Conta e backup na nuvem','Account & cloud backup','Cuenta y copia en la nube')}</div>`;
+function accountCard(){let h=`<div class="card"><div class="hd" style="font-size:20px">${svgSz(IC.cloud,20)} ${L('Conta e sincronização','Account & sync','Cuenta y sincronización')}</div>`;
   if(!cloudOn())return h+`<div class="sub" style="margin-top:6px">${L('Em breve: entre com Google ou e-mail para ter backup automático e a aba Social. Até lá, use “Exportar backup”.','Coming soon: sign in with Google or email for automatic backup and the Social tab. Meanwhile, use “Export backup”.','Pronto: entra con Google o correo para tener copia automática y la pestaña Social. Mientras, usa «Exportar copia».')}</div></div>`;
   if(!CL.ready&&owner()!=='local'){cloudInit().catch(()=>{});return h+`<div class="sub" style="margin-top:6px">${L('Conectando…','Connecting…','Conectando…')}</div></div>`;}
   if(!logged())return h+`<div class="sub" style="margin:6px 0 10px">${L('Backup automático dos treinos, peso e medidas, e a aba Social com amigos. Fotos ficam só no celular.','Automatic backup of workouts, weight and measurements, plus the Social tab. Photos stay on your phone.','Copia automática de entrenos, peso y medidas, y la pestaña Social. Las fotos se quedan en el móvil.')}</div>${loginBlock(false)}</div>`;
   const u=CL.user,last=S.prefs.cloudLast;
   return h+`<div class="row" style="margin:10px 0">${pfPhoto(48)}<div class="grow"><b>${esc(u.name||S.profile.name||'')}</b><div class="sub">${esc(u.email||'')}${u.google?' · Google':''}</div></div></div>
-   <button class="toggle" data-act="clauto"><span>${L('Backup automático','Automatic backup','Copia automática')}<small class="sub" style="display:block">${L('Último: ','Last: ','Última: ')}${last?agoTxt(last):L('nunca','never','nunca')}${CL.up?' · '+L('enviando…','uploading…','subiendo…'):''}</small></span><i class="sw ${S.prefs.cloudAuto!==false?'on':''}"></i></button>
-   <div class="row" style="gap:8px;margin-top:10px"><button class="btn grow" data-act="clbk" ${CL.up?'disabled':''}>${svgSz(IC.cloud,16)} ${L('Backup agora','Back up now','Copiar ahora')}</button><button class="btn grow" data-act="clrs">${L('Restaurar','Restore','Restaurar')}</button></div>
+   <button class="toggle" data-act="clauto"><span>${L('Sincronizar automaticamente','Sync automatically','Sincronizar automáticamente')}<small class="sub" style="display:block">${L('Celular, iPhone e computador ficam iguais. Última: ','Phone, iPhone and computer stay the same. Last: ','Móvil, iPhone y ordenador quedan iguales. Última: ')}${last?agoTxt(last):L('nunca','never','nunca')}${CL.up?' · '+L('sincronizando…','syncing…','sincronizando…'):''}</small></span><i class="sw ${S.prefs.cloudAuto!==false?'on':''}"></i></button>
+   <div class="row" style="gap:8px;margin-top:10px"><button class="btn grow" data-act="clbk" ${CL.up?'disabled':''}>${svgSz(IC.cloud,16)} ${L('Sincronizar agora','Sync now','Sincronizar ahora')}</button><button class="btn grow" data-act="clrs">${L('Restaurar','Restore','Restaurar')}</button></div>
    <div class="row" style="gap:8px;margin-top:8px"><button class="btn ghost grow" data-act="clout">${svgSz(IC.logout,16)} ${L('Sair','Sign out','Salir')}</button><button class="btn ghost grow" data-act="cldel" style="color:var(--red2,#FF1E1E)">${L('Excluir conta','Delete account','Eliminar cuenta')}</button></div></div>`;}
 Object.assign(A,{
  clgoogle:()=>withConsent(loginGoogle),
@@ -4438,8 +4538,10 @@ Object.assign(A,{
  clout:()=>cloudLogout(),
  cldel:()=>cloudDelete()});
 /* backup automático: marca como pendente a cada alteração salva */
-{const _p=persist;persist=function(k){_p(k);if(k!=='prefs')cloudDirty();};const _s=saveSession;saveSession=function(s){_s(s);cloudDirty();if(s&&s.endedAt&&logged())setTimeout(pushStats,1500);};}
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&CL.dirty&&logged())cloudBackup(false);});
+{const _p=persist;persist=function(k){_p(k);if(k!=='prefs'&&k!=='active'&&k!=='media')cloudDirty();};const _s=saveSession;saveSession=function(s){_s(s);cloudDirty();if(s&&s.endedAt&&logged())setTimeout(pushStats,1500);};}
+document.addEventListener('visibilitychange',()=>{if(!logged())return;if(document.hidden){if(CL.dirty)cloudSync('hide');}else cloudSync('resume');});
+window.addEventListener('focus',()=>{if(logged()&&Date.now()-(CL.lastFocus||0)>20000){CL.lastFocus=Date.now();cloudSync('resume');}});
+setInterval(()=>{if(logged()&&!document.hidden)cloudSync('tick');},120000);
 /* Google na versão web (iPhone): login por redirecionamento direto no Google, sem janela pop-up
    (pop-ups e cookies de terceiros falham no app instalado do iPhone) */
 const GOOGLE_WEB_CLIENT='209647298910-fehh2a9fbc6467n32o2fol3pcfbjtlq7.apps.googleusercontent.com';
@@ -5162,7 +5264,7 @@ Object.assign(A,{
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261125.1442";
+const BUILD_AT="261125.1520";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
