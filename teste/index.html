@@ -4342,6 +4342,10 @@ const cErr=e=>{const c=(e&&e.code)||'';return ({'auth/invalid-credential':L('E-m
   'auth/email-already-in-use':L('Este e-mail já tem conta. Use Entrar.','This email already has an account. Sign in instead.','Este correo ya tiene cuenta. Usa Entrar.'),'auth/weak-password':L('Senha fraca: use ao menos 6 caracteres','Weak password: use at least 6 characters','Contraseña débil: usa al menos 6 caracteres'),
   'auth/invalid-email':L('E-mail inválido','Invalid email','Correo no válido'),'auth/network-request-failed':L('Sem conexão com a internet','No internet connection','Sin conexión a internet'),'auth/too-many-requests':L('Muitas tentativas. Aguarde alguns minutos.','Too many attempts. Wait a few minutes.','Demasiados intentos. Espera unos minutos.'),
   'auth/requires-recent-login':L('Por segurança, saia e entre de novo antes de continuar','For security, sign out and back in first','Por seguridad, sal y vuelve a entrar antes de continuar'),'permission-denied':L('Sem permissão no servidor (confira as regras do Firebase)','Server permission denied (check Firebase rules)','Sin permiso en el servidor (revisa las reglas de Firebase)'),
+  'auth/operation-not-allowed':L('Login por e-mail e senha desativado no Firebase (Authentication → Método de login → E-mail/senha)','Email/password sign-in is disabled in Firebase','El inicio con correo y contraseña está desactivado en Firebase'),
+  'auth/admin-restricted-operation':L('Criação de contas bloqueada no Firebase (Authentication → Configurações → Ações do usuário)','Account creation is blocked in Firebase','La creación de cuentas está bloqueada en Firebase'),
+  'auth/unauthorized-domain':L('Este endereço não está autorizado no Firebase (Authentication → Configurações → Domínios autorizados)','This address is not authorized in Firebase','Esta dirección no está autorizada en Firebase'),
+  'auth/invalid-api-key':L('Chave do Firebase inválida','Invalid Firebase key','Clave de Firebase no válida'),
   'storage/unauthorized':L('Sem permissão no armazenamento','Storage permission denied','Sin permiso en el almacenamiento'),'storage/quota-exceeded':L('Cota de armazenamento excedida','Storage quota exceeded','Cuota de almacenamiento superada')})[c]||(L('Erro: ','Error: ','Error: ')+(c||(e&&e.message)||'?'));};
 
 /* ---------- consentimento (LGPD) ---------- */
@@ -4375,12 +4379,13 @@ function loginEmail(mode){mode=mode||'in';const up=mode==='up';
    ${up?`<div class="field"><label>${L('Nome','Name','Nombre')}</label><input id="cl-nm" autocomplete="name" value="${esc(S.profile.name||'')}"></div>`:''}
    <div class="field"><label>E-mail</label><input id="cl-em" type="email" autocomplete="email" inputmode="email"></div>
    <div class="field"><label>${L('Senha','Password','Contraseña')}</label><input id="cl-pw" type="password" autocomplete="${up?'new-password':'current-password'}" placeholder="${up?L('mínimo 6 caracteres','at least 6 characters','mínimo 6 caracteres'):''}"></div>
+   <div id="cl-err" class="note-box" hidden style="margin:4px 0 8px;border-left:4px solid var(--emb)"></div>
    <div class="row" style="justify-content:space-between;margin-top:4px"><button class="btn ghost sm" data-act="clmode" data-v="${up?'in':'up'}">${up?L('Já tenho conta','I have an account','Ya tengo cuenta'):L('Criar conta','Create account','Crear cuenta')}</button>${up?'':`<button class="btn ghost sm" data-act="clreset">${L('Esqueci a senha','Forgot password','Olvidé la contraseña')}</button>`}</div>`,
    [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:up?L('Criar conta','Create account','Crear cuenta'):L('Entrar','Sign in','Entrar'),c:'primary',fn:async()=>{
      const em=($('#cl-em').value||'').trim(),pw=$('#cl-pw').value||'',nm=up?($('#cl-nm').value||'').trim():'';
      if(!/^\S+@\S+\.\S+$/.test(em)){toast(L('E-mail inválido','Invalid email','Correo no válido'));return;}if(pw.length<6){toast(L('A senha precisa de 6 caracteres ou mais','Password needs 6+ characters','La contraseña necesita 6 caracteres o más'));return;}
      try{await cloudInit();if(up){const r=await FB.createUserWithEmailAndPassword(fbAuth,em,pw);if(nm)await FB.updateProfile(r.user,{displayName:nm});CL.user&&(CL.user.name=nm);}else await FB.signInWithEmailAndPassword(fbAuth,em,pw);
-       closeModal();toast(up?L('Conta criada','Account created','Cuenta creada'):L('Conectado','Signed in','Conectado'));}catch(e){toast(cErr(e));}}}]);
+       closeModal();toast(up?L('Conta criada','Account created','Cuenta creada'):L('Conectado','Signed in','Conectado'));}catch(e){toast(cErr(e));const eb=$('#cl-err');if(eb){eb.hidden=false;eb.textContent=cErr(e)+((e&&e.code)?' ('+e.code+')':'');}try{if(typeof logErr==='function')logErr(up?'signup':'login',{message:String((e&&e.code)||'')+' '+String((e&&e.message)||e).slice(0,200)});}catch(x){}}}}]);
   setTimeout(()=>{const i=$(up?'#cl-nm':'#cl-em');if(i&&!i.value)i.focus();},80);}
 /* ---------- dados separados por conta ----------
    cada conta tem seu próprio espaço neste aparelho; sem login usa o espaço "local" */
@@ -5293,7 +5298,7 @@ const ADMIN_EMAIL='guimaraeswin@gmail.com';
 /* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
    o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
 const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
-const BUILD_AT="261125.1619";
+const BUILD_AT="261125.1632";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
