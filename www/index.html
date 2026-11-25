@@ -1028,6 +1028,31 @@ body:not(.wo-mode) .timerbar{bottom:calc(88px + var(--sab))}
 @media (min-width:1400px){.wrap{max-width:1240px}}
 @media (min-width:1000px){.wrap.ob{max-width:520px}}
 
+/* ===== personal trainer ===== */
+.procode{display:flex;align-items:center;gap:14px}
+.procode .col{display:flex;flex-direction:column}
+.pcode{font-family:Archivo,Inter,sans-serif;font-weight:800;font-size:30px;letter-spacing:.12em;margin:2px 0 4px}
+.alist{display:flex;flex-direction:column;gap:8px}
+.alrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--s1);border:1px solid var(--s2);border-radius:18px;padding:10px 12px}
+.alrow .grow{min-width:0}
+.alrow b{display:block;font-size:15px}
+.alrow .grow>span{display:block;font-size:12px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.alst{display:flex;flex-direction:column;align-items:center;min-width:56px;padding:6px 8px;border-radius:12px;background:var(--s2)}
+.alst b{font-family:Archivo,Inter,sans-serif;font-size:17px}
+.alst small{font-size:10px;color:var(--mut)}
+.alst.ok{background:var(--redSoft);color:var(--redTx)}
+.alst.warn{background:rgba(255,159,28,.14);color:var(--orange)}
+.alst.bad{background:var(--embBg);color:var(--embTx)}
+.alst.ok small,.alst.warn small,.alst.bad small{color:inherit;opacity:.8}
+.permrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--s2);font-size:14px}
+.logex{display:flex;flex-direction:column;gap:2px;padding:8px 0;border-top:1px solid var(--s2);font-size:13px}
+.logex b{font-weight:600}
+.logex span{color:var(--mut)}
+.coachban{display:flex;align-items:center;gap:12px;background:var(--redSoft);color:var(--redTx);border-radius:18px;padding:12px 14px;margin-bottom:12px}
+.coachban b{display:block;color:var(--tx);font-size:14px}
+.coachban span{font-size:12px;color:var(--mut)}
+@media (min-width:1000px){.tab-alunos .alist{display:grid;grid-template-columns:1fr 1fr;gap:10px}.tab-pro{column-count:2;column-gap:20px}.tab-pro>*{break-inside:avoid}}
+
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
 </head>
@@ -3082,6 +3107,7 @@ function saveEditor(){const ed=ui.ed,p=ed.p;edPhasesSync();
   const er=validatePlan(p);if(er.length){modal(L('Revise o programa','Check the program'),`<ul style="padding-left:18px">${er.slice(0,6).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`,[{l:'OK',fn:closeModal}]);return;}
   p.version=(p.version||1)+(ed.isNew?0:1);p.author=p.author||L('Você','You');p.meta=Object.assign({},p.meta||{},{split:Object.keys(p.workouts).map(k=>p.workouts[k].label||k).join(''),days:(p.phases.find(x=>!x.setsFactor)||p.phases[0]).schedule.filter(c=>p.workouts[c]).length});
   if(p.meta.desc&&!ed.isNew)delete p.meta.desc;
+  if(ed.coach&&typeof coachSavePlan==='function'){const l=PRO.links.find(x=>x.id===ed.coach.id);ui.ed=null;ui.tab='alunos';PRO.sel=ed.coach.id;PRO.tab='plan';render();window.scrollTo(0,0);coachSavePlan(l,p);return;}
   S.library=S.library.filter(x=>x.id!==p.id);S.library.push(clone(p));persist('library');
   if(S.plan.id===p.id){const st=S.plan.startDate;S.plan=clone(p);S.plan.startDate=st;persist('plan');}
   ui.ed=null;ui.tab='progs';render();window.scrollTo(0,0);toast(L('Programa salvo','Program saved')+(unused.length?' · '+L('fora do cronograma: ','not scheduled: ')+unused.join(', '):''));}
@@ -3201,8 +3227,8 @@ const A={
  msfreq:b=>{S.prefs.measureFreq=b.dataset.v;persist('prefs');render();if(IN_APP)scheduleReminders(false);},
  msday:b=>{S.prefs.measureDay=+b.dataset.v;persist('prefs');render();if(IN_APP)scheduleReminders(false);},
  edneW:()=>openEditor(newProgram(),true),
- edopen:b=>{const p=allPrograms().find(x=>x.id===b.dataset.id);if(!p)return;if(isBuiltin(p.id)){const c=clone(p);c.id='custom-'+uid();c.name=L('Minha versão — ','My version — ')+P(p,'name');if(c.en)delete c.en.name;c.version=1;c.author=L('Você','You');if(c.meta)delete c.meta.desc;openEditor(c,true);toast(L('Editando uma cópia — o original fica preservado','Editing a copy — the original is kept'));}else openEditor(p,false);},
- edclose:()=>modal(L('Sair sem salvar?','Leave without saving?'),'',[{l:L('Continuar editando','Keep editing'),fn:closeModal},{l:L('Sair','Leave'),c:'primary',fn:()=>{closeModal();ui.ed=null;ui.tab='progs';render();}}]),
+ edopen:b=>{if(S.plan&&S.plan.coach&&b.dataset.id===S.plan.id){modal(L('Ficha do seu personal','Plan from your trainer','Rutina de tu entrenador'),`<p>${L('Esta ficha foi montada por ','This plan was built by ','Esta rutina la creó ')}<b>${esc(S.plan.coach.name||'')}</b>. ${L('Para mudar exercícios, séries ou dias, fale com ele. No treino, você ainda pode substituir um exercício quando precisar.','To change exercises, sets or days, ask them. During a workout you can still swap an exercise when needed.','Para cambiar ejercicios, series o días, habla con tu entrenador. En el entreno aún puedes sustituir un ejercicio cuando lo necesites.')}</p>`,[{l:'OK',c:'primary',fn:closeModal}]);return;}const p=allPrograms().find(x=>x.id===b.dataset.id);if(!p)return;if(isBuiltin(p.id)){const c=clone(p);c.id='custom-'+uid();c.name=L('Minha versão — ','My version — ')+P(p,'name');if(c.en)delete c.en.name;c.version=1;c.author=L('Você','You');if(c.meta)delete c.meta.desc;openEditor(c,true);toast(L('Editando uma cópia — o original fica preservado','Editing a copy — the original is kept'));}else openEditor(p,false);},
+ edclose:()=>modal(L('Sair sem salvar?','Leave without saving?'),'',[{l:L('Continuar editando','Keep editing'),fn:closeModal},{l:L('Sair','Leave'),c:'primary',fn:()=>{closeModal();const co=ui.ed&&ui.ed.coach;ui.ed=null;ui.tab=co?'alunos':'progs';render();}}]),
  edsave:()=>saveEditor(),
  eddel:()=>{const p=ui.ed.p;if(S.plan.id===p.id){toast(L('Troque de programa antes de excluir este','Switch programs before deleting this one'));return;}modal(L('Excluir programa?','Delete program?'),'',[{l:L('Cancelar','Cancel'),fn:closeModal},{l:L('Excluir','Delete'),c:'primary',fn:()=>{S.library=S.library.filter(x=>x.id!==p.id);persist('library');ui.ed=null;closeModal();ui.tab='progs';render();}}]);},
  edw:b=>{ui.ed.w=b.dataset.v;ui.ed.openEx={};render();},
@@ -3678,15 +3704,16 @@ Object.assign(IC,{
 });})();
 
 /* ---------- navegação, Perfil e páginas internas ---------- */
-const PROFILE_PAGES=['profile','hist','measures','photos','report','medals','pedit','set','admin'];
+const PROFILE_PAGES=['profile','hist','measures','photos','report','medals','pedit','set','admin','pro'];
 const pageTitle=t=>`<div class="pghd"><div class="hd">${esc(t)}</div></div>`;
 function subHead(title,back){return `<div class="subhd"><button class="iconbtn" data-act="tab" data-v="${back||'profile'}" aria-label="${L('Voltar','Back','Volver')}">${IC.back}</button><div class="hd">${esc(title)}</div></div>`;}
-function navBar(){const t=[['progs',L('Fichas','Plans','Rutinas'),IC.clip],['social',L('Social','Social','Social'),IC.users],['home',L('Treino','Workout','Entreno'),IC.dumb],['prog',L('Evolução','Progress','Evolución'),IC.chart],['profile',L('Perfil','Profile','Perfil'),IC.user]];
+function navBar(){const t=[['progs',L('Fichas','Plans','Rutinas'),IC.clip]].concat(typeof proOn==='function'&&proOn()?[['alunos',L('Alunos','Students','Alumnos'),IC.coach]]:[]).concat([['social',L('Social','Social','Social'),IC.users],['home',L('Treino','Workout','Entreno'),IC.dumb],['prog',L('Evolução','Progress','Evolución'),IC.chart],['profile',L('Perfil','Profile','Perfil'),IC.user]]);
   const on=x=>ui.tab===x||(x==='profile'&&PROFILE_PAGES.includes(ui.tab))||(x==='home'&&ui.tab==='workout');
   const dot=x=>(x==='profile'&&(photoPending()||measurePending()))||(x==='social'&&typeof socUnread==='function'&&socUnread()>0);
   return `<nav class="bnav fnav"><div class="fnbrand" aria-hidden="true">GROW<b>UP</b></div>${t.map(x=>`<button data-act="tab" data-v="${x[0]}" class="${x[0]==='home'&&S.active?'live ':''}${on(x[0])?'on':''} ${dot(x[0])?'bdot':''}" aria-label="${esc(x[1])}"${on(x[0])?' aria-current="page"':''}>${x[2]}<span class="nl">${x[1]}</span></button>`).join('')}</nav>`;}
 function pageBody(){const pg={home:renderHome,prog:()=>pageTitle(L('Evolução','Progress','Evolución'))+renderProg(),photos:()=>subHead(L('Fotos','Photos','Fotos'))+renderPhotos(),hist:()=>subHead(L('Histórico','History','Historial'))+renderHist(),
-  progs:()=>pageTitle(L('Fichas','Plans','Rutinas'))+renderPrograms()+cardPlanImport(),
+  progs:()=>pageTitle(L('Fichas','Plans','Rutinas'))+(typeof coachBanner==='function'?coachBanner():'')+renderPrograms()+cardPlanImport(),
+  alunos:()=>typeof renderAlunos==='function'?renderAlunos():'',pro:()=>typeof renderProPage==='function'?renderProPage():'',
   set:renderSet,profile:renderProfile,measures:()=>subHead(L('Medidas','Measurements','Medidas'))+renderMeasures(),report:()=>subHead(L('Relatório','Report','Informe'))+cardReport(),
   medals:renderMedals,pedit:renderPEdit,admin:()=>typeof renderAdmin==='function'?renderAdmin():'',social:()=>typeof renderSocial==='function'?renderSocial():''};
   return (pg[ui.tab]||renderHome)();}
@@ -3703,7 +3730,7 @@ function renderProfile(){const p=S.profile,g=gameStats();const c=consistency();
     <div class="row wrapx" style="margin-top:12px;gap:6px"><span class="chip">${esc(p.idade||'—')} ${L('anos','years','años')}</span><span class="chip">${esc(sexName(p.sex))}</span><span class="chip ${delta<=0?'red':''}">${delta>0?'+':''}${fmtN(delta)} ${UW()} ${L('desde o início','since start','desde el inicio')}</span><span class="chip">${toGoal>0?L('Faltam ','','Faltan ')+fmtN(toGoal)+' '+UW()+L('','  to go',''):L('Na meta','At goal','En la meta')}</span><span class="grow"></span><button class="btn sm primary" data-act="logw">+ ${L('Peso','Weight','Peso')}</button></div></div>`;}
   h+=`<div class="card">${xpBar(g)}<div class="pfstats"><div><b data-count="${g.workouts}">${g.workouts}</b><span>${L('treinos','workouts','entrenos')}</span></div><div><b>${c.streak?flameLive():svgSz(IC.flame,18)} ${c.streak}</b><span>${L('semanas seguidas','weeks in a row','semanas seguidas')}</span></div><div><b>${boltFall('pf',18)}<span data-count="${g.prs}">${g.prs}</span></b><span>${L('recordes','PRs','récords')}</span></div></div></div>`;
   const tiles=[['hist',IC.list,L('Histórico','History','Historial')],['measures',IC.tape,L('Medidas','Measurements','Medidas'),measurePending()],['photos',IC.cam,L('Fotos','Photos','Fotos'),photoPending()],['report',IC.doc,L('Relatório','Report','Informe')],
-    ['medals',IC.trophy,L('Conquistas','Achievements','Logros')],['pedit',IC.user,L('Editar perfil','Edit profile','Editar perfil')]];
+    ['medals',IC.trophy,L('Conquistas','Achievements','Logros')],['pedit',IC.user,L('Editar perfil','Edit profile','Editar perfil')],['pro',IC.coach,L('Personal trainer','Personal trainer','Entrenador personal')]];
   if(typeof isAdmin==='function'&&isAdmin())tiles.push(['admin',IC.shield,L('Administrador','Admin','Administrador')]);
   h+=`<div class="pftiles">${tiles.map(t=>`<button class="pftile ${t[3]?'bdot':''}" data-act="tab" data-v="${t[0]}"><span class="pti">${svgSz(t[1],24)}</span>${esc(t[2])}</button>`).join('')}</div>`;
   h+=`<button class="btn block ghost" data-act="tour" style="margin-top:6px;color:var(--mut)">${svgSz(IC.star,16)} ${L('Rever o tour do app','Replay the app tour','Ver de nuevo el tour')}</button>`;
@@ -4393,7 +4420,7 @@ async function afterLogin(u){const uid=u.uid,cur=owner();
   else await cloudSync('login',true);
   S.prefs.cloudUid=uid;const p=S.profile;let pch=false;if(!p.name&&u.displayName){p.name=u.displayName;pch=true;}if(u.photoURL&&p.photoURL!==u.photoURL){p.photoURL=u.photoURL;pch=true;}if(pch)persist('profile');lsSave();
   await ensureUserDoc(u);
-  syncWatch(uid);
+  syncWatch(uid);if(typeof proBoot==='function')proBoot();
   if(typeof socStart==='function')socStart();if(typeof devPing==='function')devPing(true);softRender();}
 const CODE_AB='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const newCode=()=>Array.from({length:6},()=>CODE_AB[Math.floor(Math.random()*CODE_AB.length)]).join('');
@@ -4409,7 +4436,7 @@ function pubStats(){const c=consistency(),g=gameStats(),t=today();const ws=S.ses
   const w30=ws.filter(s=>s.date>addD(t,-30)).length;const cw=c.weeks[c.weeks.length-1]||{};const last=ws.reduce((a,s)=>s.date>a?s.date:a,'');
   return{streak:c.streak,w30,last:last||null,d7,weekDone:cw.done||0,weekPlan:cw.full||0,xp:g.xp,lv:g.lv,total:ws.length,prs:g.prs,at:Date.now()};}
 async function pushStats(){if(!logged())return;try{await FB.updateDoc(FB.doc(fbDb,'users',CL.user.uid),{stats:pubStats(),updatedAt:FB.serverTimestamp()});}catch(e){}if(typeof pubSync==='function')pubSync();}
-async function signOutAll(){try{if(CL.unw){CL.unw();CL.unw=null;}if(typeof socStop==='function')socStop();const FA=CP().FirebaseAuthentication;if(FA)try{await FA.signOut();}catch(e){}await FB.signOut(fbAuth);}catch(e){}}
+async function signOutAll(){try{if(CL.unw){CL.unw();CL.unw=null;}if(typeof PRO!=='undefined'){PRO.myLinks=[];PRO.links=[];PRO.me=null;PRO.req=null;PRO.share={};PRO.sel=null;coachWatch();}if(typeof socStop==='function')socStop();const FA=CP().FirebaseAuthentication;if(FA)try{await FA.signOut();}catch(e){}await FB.signOut(fbAuth);}catch(e){}}
 async function cloudLogout(){modal(L('Sair da conta?','Sign out?','¿Cerrar sesión?'),`<p>${L('Ao sair, os dados desta conta deixam de aparecer neste aparelho. Eles voltam quando você entrar de novo.','Once you sign out, this account\'s data is hidden on this device. It comes back when you sign in again.','Al salir, los datos de esta cuenta dejan de mostrarse en este dispositivo. Vuelven cuando entres de nuevo.')}</p>`,
   [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Sair','Sign out','Salir'),c:'primary',fn:async()=>{closeModal();toast(L('Salvando…','Saving…','Guardando…'));
     CL.switching=true;try{if(logged())await cloudSync('logout',true,true);}catch(e){}await signOutAll();switchSlot('local');CL.switching=false;}}]);}
@@ -4438,7 +4465,7 @@ function cloudDirty(){if(!logged()||S.prefs.cloudAuto===false)return;CL.dirty=tr
    · peso e medidas: juntados por data, vence o registro mais recente
    · perfil, fichas, biblioteca e ajustes da conta: vence a seção alterada por último
    fotos, saúde/passos e treino em andamento ficam em cada aparelho */
-const LOCAL_PREFS=['theme','keepAwake','vidMute','cloudLast','cloudAuto','cloudUid','cloudConsent','cloudPulled','stepsAsk','workoutReminder','sound','vibrate','lastOpen','tourDone','photoAsk'];
+const LOCAL_PREFS=['theme','keepAwake','vidMute','cloudLast','cloudAuto','cloudUid','cloudConsent','cloudPulled','stepsAsk','workoutReminder','sound','vibrate','lastOpen','tourDone','photoAsk','coachSeen'];
 function devId(){const d=devGet()||{owner:owner()};if(!d.id){d.id=Math.random().toString(36).slice(2,10)+Date.now().toString(36);devSet(d);}return d.id;}
 function syncObj(){const o=backupObj();delete o.health;o.media=S.media;o.updated=S.updated;o.tomb=S.tomb;return o;}
 function syncSig(o){const pf={};Object.keys(o.prefs||{}).sort().forEach(k=>{if(!LOCAL_PREFS.includes(k))pf[k]=o.prefs[k];});
@@ -4495,7 +4522,7 @@ async function uploadNow(){if(!logged()||CL.up)return;const uid=CL.user.uid;if(o
     CL.meta={at:Date.now(),n:parts.length,sessions:S.sessions.length,chars:txt.length,app:(APPV&&APPV.version)||'',dev:devId(),v:2};
     S.prefs.cloudPulled=CL.meta.at;
     await FB.setDoc(FB.doc(fbDb,'users',uid,'private','backup'),CL.meta);S.prefs.cloudLast=CL.meta.at;lsSave();
-    pushStats();}
+    pushStats();if(typeof publishShareSoon==='function'&&typeof PRO!=='undefined'&&PRO.myLinks.length)publishShareSoon();}
   catch(e){CL.dirty=true;}
   CL.up=false;}
 /* silent=true: restaura direto (entrada numa conta neste aparelho); senão pede confirmação */
@@ -5262,7 +5289,7 @@ Object.assign(A,{
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
 const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261125.1520";
+const BUILD_AT="261125.1553";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -5335,11 +5362,11 @@ function admChart(vals,labels){const W=320,H=110,mx=Math.max(1,...vals),bw=W/val
    <text x="0" y="${H+13}">${labels[0]}</text><text x="${W}" y="${H+13}" text-anchor="end">${labels[labels.length-1]}</text><text x="${W}" y="10" text-anchor="end">${mx}</text></svg>`;}
 function renderAdmin(){setTimeout(()=>{if(typeof socHydrate==='function')socHydrate();},0);if(!isAdmin())return subHead(L('Administrador','Admin','Administrador'))+`<div class="empty">${L('Acesso restrito.','Restricted access.','Acceso restringido.')}</div>`;
   if(!ADM.at&&!ADM.busy)setTimeout(()=>admLoad(),0);
-  const tabs=[['ov',L('Visão geral','Overview','Resumen')],['users',L('Usuários','Users','Usuarios')],['mod',L('Moderação','Moderation','Moderación')+(ADM.reps.filter(r=>r.status!=='closed').length?` (${ADM.reps.filter(r=>r.status!=='closed').length})`:'')],['errs',L('Erros','Errors','Errores')],['ann',L('Aviso','Notice','Aviso')],['sim',L('Simulador','Simulator','Simulador')]];
+  const tabs=[['ov',L('Visão geral','Overview','Resumen')],['users',L('Usuários','Users','Usuarios')],['mod',L('Moderação','Moderation','Moderación')+(ADM.reps.filter(r=>r.status!=='closed').length?` (${ADM.reps.filter(r=>r.status!=='closed').length})`:'')],['pros',L('Profissionais','Professionals','Profesionales')+(typeof PRO!=='undefined'&&PRO.adm&&PRO.adm.reqs&&PRO.adm.reqs.filter(r=>r.status==='pending').length?` (${PRO.adm.reqs.filter(r=>r.status==='pending').length})`:'')],['errs',L('Erros','Errors','Errores')],['ann',L('Aviso','Notice','Aviso')],['sim',L('Simulador','Simulator','Simulador')]];
   let h=subHead(L('Administrador','Admin','Administrador'))+`<div class="hscroll admtabs">${tabs.map(t=>`<button class="pill ${ADM.tab===t[0]?'on':''}" data-act="admtab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
    <div class="row" style="justify-content:space-between;margin:6px 0 10px"><span class="sub">${ADM.busy?L('Carregando…','Loading…','Cargando…'):ADM.at?L('Atualizado ','Updated ','Actualizado ')+new Date(ADM.at).toLocaleTimeString(LANG==='en'?'en-US':'pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</span><button class="btn sm" data-act="admreload">${L('Atualizar','Refresh','Actualizar')}</button></div>
    ${ADM.err?`<div class="note-box">${L('Algumas informações não carregaram: ','Some data did not load: ','Algunos datos no cargaron: ')}${esc(ADM.err)}. ${L('Confira se as regras novas do Firestore foram publicadas.','Check that the new Firestore rules were published.','Comprueba que las reglas nuevas de Firestore estén publicadas.')}</div>`:''}`;
-  return h+({ov:admOverview,users:admUsers,mod:admMod,errs:admErrs,ann:admAnn,sim:admSim}[ADM.tab]||admOverview)();}
+  return h+({ov:admOverview,users:admUsers,mod:admMod,pros:()=>typeof admPros==='function'?admPros():'',errs:admErrs,ann:admAnn,sim:admSim}[ADM.tab]||admOverview)();}
 /* pessoas = contas (qualquer versão do app) + aparelhos sem conta (a partir da 1.0.18) */
 const tsMs=v=>!v?0:typeof v==='number'?v:v.toMillis?v.toMillis():v.seconds?v.seconds*1000:0;
 function admPeople(){const t=today(),devBy={};ADM.dev.forEach(d=>{if(d.uid)(devBy[d.uid]=devBy[d.uid]||[]).push(d);});
@@ -5454,6 +5481,262 @@ Object.assign(A,{
  admtest:()=>admTest()});
 document.addEventListener('input',ev=>{const el=ev.target;if(!el.dataset||el.dataset.f2!=='admq')return;ADM.q=el.value;clearTimeout(ADM.qt);ADM.qt=setTimeout(()=>{render();const i=$('#adm-q');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}},350);});
 document.addEventListener('change',ev=>{const el=ev.target;if(!el.dataset||el.dataset.f2!=='admt')return;ADM.t[el.dataset.k]=el.value;if(el.dataset.k==='sex'&&!goalsFor(el.value).some(g=>g[0]===ADM.t.goal))ADM.t.goal='hypertrophy';ADM.tRes=null;render();});
+
+/* ---------- Personal trainer: acesso profissional, vínculo com alunos, fichas e acompanhamento ----------
+   Firestore:
+   · proReqs/{uid}   pedido de acesso profissional (o usuário cria; o administrador aprova)
+   · pros/{uid}      profissional aprovado (só o administrador grava)
+   · links/{pro_aluno}   vínculo criado pelo ALUNO com o código do personal; permissões ficam aqui
+   · share/{pro_aluno} (+ /c/cN)   cópia que o aluno publica para aquele personal: perfil básico, ficha,
+                     treinos dos últimos 6 meses e, só se autorizado, peso, medidas e % de gordura
+   · coach/{pro_aluno}      ficha enviada pelo personal
+   · coachData/{pro_aluno}  peso e medidas registrados pelo personal (só com permissão "ver e editar")
+   Fotos não são compartilhadas (ficam só no celular). */
+const PRO={me:null,req:null,links:[],sel:null,share:{},busy:false,at:0,err:'',myLinks:[],un:[],tab:'plan',open:{},last:{},adm:null};
+const proOn=()=>!!(PRO.me&&PRO.me.status==='approved');
+const D_=(...p)=>FB.doc(fbDb,...p),C_=n=>FB.collection(fbDb,n);
+const lnkId=(pro,st)=>pro+'_'+st;
+const daysAgo=d=>d?Math.round((pd(today())-pd(d))/864e5):null;
+function agoDay(d){const n=daysAgo(d);if(n==null)return '—';if(n<=0)return L('hoje','today','hoy');if(n===1)return L('ontem','yesterday','ayer');return L('há ','','hace ')+n+L(' dias',' days ago',' días');}
+const kindName=k=>k==='nutri'?L('Nutricionista','Nutritionist','Nutricionista'):L('Personal trainer','Personal trainer','Entrenador personal');
+
+/* ---------- carga inicial (depois do login) ---------- */
+async function proBoot(){if(!logged())return;const me=CL.user.uid;
+  try{const s=await FB.getDoc(D_('pros',me));PRO.me=s.exists()?s.data():null;}catch(e){PRO.me=null;}
+  try{const r=await FB.getDoc(D_('proReqs',me));PRO.req=r.exists()?r.data():null;}catch(e){PRO.req=null;}
+  await myLinksLoad();
+  if(proOn())proLinksLoad();
+  softRender();}
+
+/* ---------- lado do ALUNO ---------- */
+async function myLinksLoad(){if(!logged())return;const me=CL.user.uid;
+  try{const sn=await FB.getDocs(FB.query(C_('links'),FB.where('student','==',me)));PRO.myLinks=sn.docs.map(d=>Object.assign({id:d.id},d.data())).filter(l=>l.status==='active');}catch(e){PRO.myLinks=[];}
+  coachWatch();if(PRO.myLinks.length)publishShareSoon(1500);}
+function coachWatch(){PRO.un.forEach(u=>{try{u();}catch(e){}});PRO.un=[];if(!logged())return;
+  PRO.myLinks.forEach(l=>{
+    PRO.un.push(FB.onSnapshot(D_('coach',l.id),sn=>{if(sn.exists())applyCoachPlan(l,sn.data());},()=>{}));
+    if(l.perms&&l.perms.body==='edit')PRO.un.push(FB.onSnapshot(D_('coachData',l.id),sn=>{if(sn.exists())applyCoachData(l,sn.data());},()=>{}));});}
+function applyCoachPlan(l,d){if(!d||!d.plan||!d.planAt)return;const seen=(S.prefs.coachSeen||{})[l.id]||0;if(d.planAt<=seen)return;
+  const p=clone(d.plan);p.coach={pro:l.pro,name:l.proName||d.byName||'',at:d.planAt};
+  if(!p.startDate||p.startDate>addD(today(),60))p.startDate=today();
+  S.plan=p;S.prefs.coachSeen=Object.assign({},S.prefs.coachSeen||{},{[l.id]:d.planAt});persist('plan');lsSave();
+  toast(L('Seu personal atualizou sua ficha','Your trainer updated your plan','Tu entrenador actualizó tu rutina'));softRender();}
+function applyCoachData(l,d){if(!d)return;let ch=false;
+  ['body','measures'].forEach(k=>{if(!Array.isArray(d[k]))return;const bef=JSON.stringify(S[k]||[]);const m=mergeArr(S[k],d[k],false);if(JSON.stringify(m)!==bef){S[k]=m;persist(k);ch=true;}});
+  if(ch){toast(L('Seu personal registrou novas medidas','Your trainer logged new measurements','Tu entrenador registró nuevas medidas'));softRender();}}
+function shareData(l){const lim=addD(today(),-183),p=S.profile;
+  const o={v:1,at:Date.now(),name:p.name||(CL.user&&CL.user.name)||'',units:S.prefs.units||'met',
+    profile:{sex:p.sex,idade:p.idade,altura:p.altura,goal:p.goal,level:p.level,days:p.days,gym:p.gym,pesoInicial:p.pesoInicial,metaMax:p.metaMax},
+    plan:S.plan,sessions:S.sessions.filter(s=>s.date>=lim)};
+  if(l.perms&&(l.perms.body==='view'||l.perms.body==='edit')){o.body=S.body;o.measures=S.measures;}
+  return o;}
+function shareSum(o){const ws=o.sessions.filter(s=>s.type==='workout');const last=ws.reduce((a,s)=>s.date>a?s.date:a,'');let c={streak:0,weeks:[]};try{c=consistency();}catch(e){}const cw=c.weeks[c.weeks.length-1]||{};
+  return{last:last||null,week:cw.done||0,weekPlan:cw.full||0,streak:c.streak||0,plan:(o.plan&&o.plan.name)||'',n30:ws.filter(s=>s.date>addD(today(),-30)).length,kg:o.body&&o.body.length?o.body[o.body.length-1].kg:null};}
+async function publishShare(){if(!logged()||!PRO.myLinks.length)return;const me=CL.user.uid;
+  for(const l of PRO.myLinks){try{const o=shareData(l);const txt=JSON.stringify(Object.assign({},o,{at:0}));if(PRO.last[l.id]===txt)continue;
+    const full=JSON.stringify(o),parts=[];for(let i=0;i<full.length;i+=CHUNK)parts.push(full.slice(i,i+CHUNK));
+    const ref=D_('share',l.id);const prev=await FB.getDoc(ref).catch(()=>null);const prevN=prev&&prev.exists()?(prev.data().n||0):0;
+    const meta={pro:l.pro,student:me,at:o.at,n:parts.length,sum:shareSum(o),name:o.name,photo:S.profile.photoSoc||S.profile.photoURL||null,body:!!o.body,units:o.units};
+    if(!prev||!prev.exists())await FB.setDoc(ref,Object.assign({},meta,{n:0}));
+    for(let i=0;i<parts.length;i++)await FB.setDoc(D_('share',l.id,'c','c'+i),{d:parts[i]});
+    for(let i=parts.length;i<prevN;i++)await FB.deleteDoc(D_('share',l.id,'c','c'+i)).catch(()=>{});
+    await FB.setDoc(ref,meta);PRO.last[l.id]=txt;}catch(e){}}}
+let pubT=null;function publishShareSoon(ms){clearTimeout(pubT);pubT=setTimeout(publishShare,ms||4000);}
+async function linkByCode(code){code=String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
+  if(code.length<5){toast(L('Digite o código do seu personal','Enter your trainer\'s code','Escribe el código de tu entrenador'));return;}
+  if(!logged()){toast(L('Entre na sua conta primeiro','Sign in first','Inicia sesión primero'));return;}
+  try{await cloudInit();const c=await FB.getDoc(D_('codes',code));if(!c.exists()){toast(L('Código não encontrado','Code not found','Código no encontrado'));return;}
+    const pro=c.data().uid,me=CL.user.uid;if(pro===me){toast(L('Este é o seu próprio código','This is your own code','Este es tu propio código'));return;}
+    const pd0=await FB.getDoc(D_('pros',pro));if(!pd0.exists()||pd0.data().status!=='approved'){toast(L('Este código não é de um personal trainer cadastrado no Grow Up','This code does not belong to a registered trainer','Este código no es de un entrenador registrado'));return;}
+    const P0=pd0.data(),pname=P0.name||c.data().name||'';
+    modal(L('Vincular ao personal?','Link to this trainer?','¿Vincular al entrenador?'),`<p><b>${esc(pname)}</b>${P0.reg?` · <span class="sub">${esc(P0.reg)}</span>`:''}</p>
+      <p style="margin-top:8px">${L('Ao vincular, este personal poderá:','Once linked, this trainer will be able to:','Al vincular, este entrenador podrá:')}</p>
+      <ul class="cl-list"><li>${L('<b>montar e editar suas fichas</b> — elas chegam direto no seu app;','<b>create and edit your plans</b> — they arrive straight in your app;','<b>crear y editar tus rutinas</b> — llegan directo a tu app;')}</li>
+      <li>${L('<b>ver seus treinos</b> dos últimos 6 meses (cargas, repetições, RIR) e seu perfil básico (sexo, idade, altura, objetivo e nível).','<b>see your workouts</b> from the last 6 months (loads, reps, RIR) and your basic profile (sex, age, height, goal and level).','<b>ver tus entrenos</b> de los últimos 6 meses (cargas, repeticiones, RIR) y tu perfil básico (sexo, edad, altura, objetivo y nivel).')}</li></ul>
+      <p class="sub" style="margin-top:8px">${L('Peso, medidas e % de gordura só são compartilhados se você autorizar depois. Fotos nunca são compartilhadas. Você pode encerrar o vínculo a qualquer momento.','Weight, measurements and body fat are only shared if you allow it later. Photos are never shared. You can end the link at any time.','Peso, medidas y % de grasa solo se comparten si lo autorizas después. Las fotos nunca se comparten. Puedes terminar el vínculo cuando quieras.')}</p>`,
+      [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Concordo e vincular','Agree and link','Acepto y vincular'),c:'primary',fn:async()=>{closeModal();
+        try{for(const l of PRO.myLinks.filter(x=>(x.kind||'trainer')==='trainer'&&x.pro!==pro))await unlink(l,true);
+          const id=lnkId(pro,me),link={pro,student:me,status:'active',kind:'trainer',perms:{plans:'edit',logs:'view',body:'none'},proName:pname,proReg:P0.reg||'',studentName:S.profile.name||CL.user.name||'',studentPhoto:S.profile.photoSoc||S.profile.photoURL||null,at:Date.now(),consent:{at:Date.now(),items:['plans','logs']}};
+          await FB.setDoc(D_('links',id),link);PRO.myLinks=PRO.myLinks.filter(x=>x.id!==id).concat([Object.assign({id},link)]);PRO.last={};coachWatch();await publishShare();
+          toast(L('Vinculado a ','Linked to ','Vinculado a ')+pname);render();}
+        catch(e){toast(cErr(e));}}}]);}
+  catch(e){toast(cErr(e));}}
+async function unlink(l,silent){try{const sh=await FB.getDoc(D_('share',l.id)).catch(()=>null);const n=sh&&sh.exists()?(sh.data().n||0):0;
+    for(let i=0;i<n;i++)await FB.deleteDoc(D_('share',l.id,'c','c'+i)).catch(()=>{});
+    await FB.deleteDoc(D_('share',l.id)).catch(()=>{});await FB.deleteDoc(D_('coach',l.id)).catch(()=>{});await FB.deleteDoc(D_('coachData',l.id)).catch(()=>{});
+    await FB.deleteDoc(D_('links',l.id));}catch(e){if(!silent)toast(cErr(e));}
+  PRO.myLinks=PRO.myLinks.filter(x=>x.id!==l.id);coachWatch();
+  if(S.plan.coach&&S.plan.coach.pro===l.pro){delete S.plan.coach;persist('plan');}
+  if(!silent){toast(L('Vínculo encerrado','Link ended','Vínculo terminado'));render();}}
+async function setBodyPerm(v){const l=PRO.myLinks[0];if(!l)return;
+  const go=async()=>{try{await FB.updateDoc(D_('links',l.id),{'perms.body':v,'consent.body':v==='none'?null:Date.now()});l.perms=Object.assign({},l.perms,{body:v});PRO.last={};coachWatch();await publishShare();render();
+      toast(v==='none'?L('Peso e medidas deixaram de ser compartilhados','Weight and measurements are no longer shared','Peso y medidas ya no se comparten'):L('Permissão atualizada','Permission updated','Permiso actualizado'));}catch(e){toast(cErr(e));}};
+  if(v==='none'){go();return;}
+  modal(L('Compartilhar peso e medidas?','Share weight and measurements?','¿Compartir peso y medidas?'),`<p>${v==='edit'?L('<b>'+esc(l.proName||'Seu personal')+'</b> poderá <b>ver e registrar</b> seu peso, suas medidas e seu % de gordura. O que ele registrar aparece no seu app.','<b>'+esc(l.proName||'Your trainer')+'</b> will be able to <b>see and log</b> your weight, measurements and body fat. What they log shows up in your app.','<b>'+esc(l.proName||'Tu entrenador')+'</b> podrá <b>ver y registrar</b> tu peso, medidas y % de grasa. Lo que registre aparecerá en tu app.'):L('<b>'+esc(l.proName||'Seu personal')+'</b> poderá <b>ver</b> seu peso, suas medidas e seu % de gordura.','<b>'+esc(l.proName||'Your trainer')+'</b> will be able to <b>see</b> your weight, measurements and body fat.','<b>'+esc(l.proName||'Tu entrenador')+'</b> podrá <b>ver</b> tu peso, medidas y % de grasa.')}</p>
+    <p class="sub" style="margin-top:8px">${L('São dados de saúde. Eles servem só para o acompanhamento do seu treino e você pode retirar a permissão a qualquer momento. Fotos não são compartilhadas.','This is health data. It is used only to follow up your training and you can withdraw permission at any time. Photos are not shared.','Son datos de salud. Solo sirven para el seguimiento de tu entreno y puedes retirar el permiso cuando quieras. Las fotos no se comparten.')}</p>`,
+    [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Autorizar','Allow','Autorizar'),c:'primary',fn:()=>{closeModal();go();}}]);}
+function coachBanner(){const c=S.plan&&S.plan.coach;if(!c)return '';
+  return `<div class="coachban">${svgSz(IC.coach,20)}<div class="grow"><b>${L('Ficha do seu personal','Plan from your trainer','Rutina de tu entrenador')}</b><span>${esc(c.name||'')}${c.at?' · '+L('atualizada ','updated ','actualizada ')+agoDay(localYmd(c.at)):''}</span></div></div>`;}
+
+/* página "Personal trainer" (dentro do Perfil): meu personal + pedir acesso de personal */
+function renderProPage(){let h=subHead(L('Personal trainer','Personal trainer','Entrenador personal'));
+  if(!cloudOn()||!logged())return h+`<div class="note-box">${L('Entre na sua conta para vincular um personal.','Sign in to link a trainer.','Inicia sesión para vincular un entrenador.')}</div>`;
+  const l=PRO.myLinks[0];
+  h+=`<div class="card"><div class="hd" style="font-size:19px">${L('Meu personal','My trainer','Mi entrenador')}</div>`;
+  if(!l)h+=`<div class="sub" style="margin:6px 0 12px">${L('Tem personal trainer? Digite o código dele para ele montar e acompanhar suas fichas pelo Grow Up.','Have a personal trainer? Enter their code so they can build and follow your plans in Grow Up.','¿Tienes entrenador personal? Escribe su código para que cree y siga tus rutinas en Grow Up.')}</div>
+     <div class="row" style="gap:8px"><input id="pro-code" placeholder="${L('Código do personal','Trainer code','Código del entrenador')}" autocapitalize="characters" style="text-transform:uppercase;letter-spacing:.08em;font-weight:700"><button class="btn primary" data-act="prolink">${L('Vincular','Link','Vincular')}</button></div>`;
+  else{const b=(l.perms&&l.perms.body)||'none';
+    h+=`<div class="row" style="margin:10px 0 6px;gap:12px">${typeof uPhoto==='function'?uPhoto(null,l.proName||'P',46):''}<div class="grow"><b>${esc(l.proName||'')}</b><div class="sub">${l.proReg?esc(l.proReg)+' · ':''}${L('desde ','since ','desde ')}${fmtD(localYmd(l.at||Date.now()))}</div></div></div>
+     <div class="permrow"><span class="grow">${L('Montar e editar suas fichas','Build and edit your plans','Crear y editar tus rutinas')}</span><span class="chip red">${L('Sim','Yes','Sí')}</span></div>
+     <div class="permrow"><span class="grow">${L('Ver seus treinos e perfil básico','See your workouts and basic profile','Ver tus entrenos y perfil básico')}</span><span class="chip red">${L('Sim','Yes','Sí')}</span></div>
+     <div class="lbl2">${L('Peso, medidas e % de gordura','Weight, measurements and body fat','Peso, medidas y % de grasa')}</div>
+     <div class="pillset">${[['none',L('Não compartilhar','Don\'t share','No compartir')],['view',L('Ver','View','Ver')],['edit',L('Ver e editar','View and edit','Ver y editar')]].map(x=>`<button class="pill ${b===x[0]?'on':''}" data-act="probody" data-v="${x[0]}">${x[1]}</button>`).join('')}</div>
+     <div class="permrow" style="margin-top:10px"><span class="grow">${L('Fotos de evolução','Progress photos','Fotos de progreso')}</span><span class="chip">${L('Não compartilhadas','Not shared','No compartidas')}</span></div>
+     <button class="btn block ghost" data-act="prounlink" style="margin-top:12px;color:var(--emb)">${L('Encerrar vínculo','End link','Terminar vínculo')}</button>`;}
+  h+=`</div>`;
+  /* pedir acesso profissional */
+  h+=`<div class="card"><div class="hd" style="font-size:19px">${L('Você é personal trainer?','Are you a personal trainer?','¿Eres entrenador personal?')}</div>`;
+  if(proOn())h+=`<div class="sub" style="margin:6px 0 10px">${L('Seu acesso de personal está ativo. Seus alunos ficam na aba Alunos.','Your trainer access is active. Your students are in the Students tab.','Tu acceso de entrenador está activo. Tus alumnos están en la pestaña Alumnos.')}</div><button class="btn primary block" data-act="tab" data-v="alunos">${L('Abrir meus alunos','Open my students','Abrir mis alumnos')}</button>`;
+  else if(PRO.req&&PRO.req.status==='pending')h+=`<div class="note-box" style="margin-top:8px">${L('Pedido enviado em ','Request sent on ','Solicitud enviada el ')}${fmtD(localYmd(PRO.req.at||Date.now()))}. ${L('Você será avisado quando for aprovado.','You will be notified once approved.','Te avisaremos cuando sea aprobada.')}</div>`;
+  else h+=`${PRO.req&&PRO.req.status==='rejected'?`<div class="note-box" style="margin-top:8px">${L('Seu último pedido não foi aprovado. Você pode enviar outro com mais informações.','Your last request was not approved. You can send another with more details.','Tu última solicitud no fue aprobada. Puedes enviar otra con más información.')}</div>`:''}<div class="sub" style="margin:6px 0 10px">${L('Gerencie sua carteira de alunos e as fichas de cada um, acompanhe os treinos e, se o aluno autorizar, peso e medidas.','Manage your students and their plans, follow their workouts and, if the student allows, weight and measurements.','Gestiona tus alumnos y sus rutinas, sigue sus entrenos y, si el alumno lo autoriza, peso y medidas.')}</div><button class="btn primary block" data-act="proreq">${L('Solicitar acesso de personal','Request trainer access','Solicitar acceso de entrenador')}</button>`;
+  return h+`</div>`;}
+function proRequestForm(){const p=S.profile,r=PRO.req||{};
+  modal(L('Acesso de personal trainer','Personal trainer access','Acceso de entrenador personal'),`
+   <div class="field"><label>${L('Nome profissional','Professional name','Nombre profesional')}</label><input id="pr-nm" value="${esc(r.name||p.name||(CL.user&&CL.user.name)||'')}"></div>
+   <div class="g2"><div class="field"><label>${L('País','Country','País')}</label><input id="pr-ct" value="${esc(r.country||(LANG==='pt'?'Brasil':''))}"></div><div class="field"><label>${L('Cidade','City','Ciudad')}</label><input id="pr-cy" value="${esc(r.city||'')}"></div></div>
+   <div class="field"><label>${L('Registro profissional (opcional)','Professional registration (optional)','Registro profesional (opcional)')}</label><input id="pr-rg" value="${esc(r.reg||'')}" placeholder="${L('Ex.: CREF 012345-G/SP','E.g.: certification / license number','Ej.: número de colegiado o certificación')}"></div>
+   <div class="field"><label>${L('Conte um pouco sobre seu trabalho (opcional)','Tell us about your work (optional)','Cuéntanos sobre tu trabajo (opcional)')}</label><textarea id="pr-nt" maxlength="500" style="min-height:70px">${esc(r.note||'')}</textarea></div>
+   <div class="sub" style="font-size:12px">${L('O pedido é analisado pela equipe do Grow Up. O registro profissional não é obrigatório, mas ajuda na aprovação.','The request is reviewed by the Grow Up team. Registration is optional but helps approval.','El equipo de Grow Up revisa la solicitud. El registro no es obligatorio, pero ayuda a la aprobación.')}</div>`,
+   [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Enviar pedido','Send request','Enviar solicitud'),c:'primary',fn:async()=>{const v=id=>($(id).value||'').trim();
+     const d={uid:CL.user.uid,kind:'trainer',name:v('#pr-nm'),country:v('#pr-ct'),city:v('#pr-cy'),reg:v('#pr-rg'),note:v('#pr-nt').slice(0,500),email:CL.user.email||'',status:'pending',at:Date.now(),lang:LANG};
+     if(d.name.length<2){toast(L('Informe seu nome profissional','Enter your professional name','Indica tu nombre profesional'));return;}
+     try{await FB.setDoc(D_('proReqs',CL.user.uid),d);PRO.req=d;closeModal();toast(L('Pedido enviado','Request sent','Solicitud enviada'));render();}catch(e){toast(cErr(e));}}}]);}
+
+/* ---------- lado do PERSONAL ---------- */
+async function proLinksLoad(force){if(!logged()||!proOn()||(PRO.busy&&!force))return;const me=CL.user.uid;PRO.busy=true;PRO.err='';
+  try{const sn=await FB.getDocs(FB.query(C_('links'),FB.where('pro','==',me)));PRO.links=sn.docs.map(d=>Object.assign({id:d.id},d.data())).filter(l=>l.status==='active');
+    await Promise.all(PRO.links.map(async l=>{try{const s=await FB.getDoc(D_('share',l.id));l.meta=s.exists()?s.data():null;}catch(e){l.meta=null;}}));}
+  catch(e){PRO.err=cErr(e);}
+  PRO.busy=false;PRO.at=Date.now();if(ui.tab==='alunos')softRender();}
+async function proShareLoad(l){try{const m=await FB.getDoc(D_('share',l.id));if(!m.exists())return null;const n=m.data().n||0;let txt='';
+  for(let i=0;i<n;i++){const c=await FB.getDoc(D_('share',l.id,'c','c'+i));if(!c.exists())return null;txt+=c.data().d;}
+  const o=JSON.parse(txt);try{const cd=await FB.getDoc(D_('coachData',l.id));if(cd.exists()){const d=cd.data();o.body=mergeArr(o.body||[],d.body||[],false);o.measures=mergeArr(o.measures||[],d.measures||[],false);}}catch(e){}
+  try{const cp=await FB.getDoc(D_('coach',l.id));if(cp.exists()&&cp.data().planAt>(o.at||0))o.plan=cp.data().plan,o.pending=true;}catch(e){}
+  return o;}catch(e){return null;}}
+async function coachSavePlan(l,p){if(!l)return;const me=CL.user.uid;p=clone(p);delete p.coach;p.author=(PRO.me&&PRO.me.name)||S.profile.name||'';if(!p.startDate)p.startDate=today();
+  try{await FB.setDoc(D_('coach',l.id),{pro:me,student:l.student,by:me,byName:(PRO.me&&PRO.me.name)||'',plan:p,planAt:Date.now()});
+    const sh=PRO.share[l.id];if(sh){sh.plan=p;sh.pending=true;}toast(L('Ficha enviada para ','Plan sent to ','Rutina enviada a ')+(l.studentName||L('o aluno','the student','el alumno')));}
+  catch(e){toast(cErr(e));}render();}
+async function coachAddRec(l,kind,rec){const ref=D_('coachData',l.id);let d={};try{const cur=await FB.getDoc(ref);d=cur.exists()?cur.data():{};}catch(e){}
+  const arr=(d[kind]||[]).filter(x=>x.date!==rec.date);arr.push(Object.assign({},rec,{t:Date.now(),src:'coach'}));arr.sort((a,b)=>a.date.localeCompare(b.date));
+  try{await FB.setDoc(ref,{pro:CL.user.uid,student:l.student,by:CL.user.uid,body:kind==='body'?arr:(d.body||[]),measures:kind==='measures'?arr:(d.measures||[]),at:Date.now()});
+    const sh=PRO.share[l.id];if(sh)sh[kind]=mergeArr(sh[kind]||[],arr,true);toast(L('Registrado','Logged','Registrado'));}
+  catch(e){toast(cErr(e));}render();}
+
+function renderAlunos(){if(!proOn())return pageTitle(L('Alunos','Students','Alumnos'))+`<div class="empty">${L('Acesso de personal não ativo.','Trainer access is not active.','Acceso de entrenador no activo.')}</div>`;
+  if(PRO.sel)return renderAluno();
+  if(!PRO.at&&!PRO.busy)setTimeout(proLinksLoad,0);
+  const code=CL.code||'';
+  let h=`<div class="pghd"><div class="hd">${L('Alunos','Students','Alumnos')}</div></div>`;
+  h+=`<div class="card procode"><div class="grow"><div class="lbl3">${L('Seu código de personal','Your trainer code','Tu código de entrenador')}</div><div class="pcode">${esc(code||'…')}</div>
+    <div class="sub" style="font-size:12px">${L('O aluno digita este código em Perfil → Personal trainer.','Students enter this code in Profile → Personal trainer.','El alumno escribe este código en Perfil → Entrenador personal.')}</div></div>
+    <div class="col" style="gap:8px"><button class="btn sm" data-act="procopy" ${code?'':'disabled'}>${L('Copiar','Copy','Copiar')}</button><button class="btn sm primary" data-act="proinvite" ${code?'':'disabled'}>${L('Convidar','Invite','Invitar')}</button></div></div>`;
+  if(PRO.err)h+=`<div class="note-box">${L('Não foi possível carregar: ','Could not load: ','No se pudo cargar: ')}${esc(PRO.err)}</div>`;
+  const ls=[...PRO.links].sort((a,b)=>((b.meta&&b.meta.sum&&b.meta.sum.last)||'').localeCompare((a.meta&&a.meta.sum&&a.meta.sum.last)||''));
+  const late=ls.filter(l=>{const d=daysAgo(l.meta&&l.meta.sum&&l.meta.sum.last);return d==null||d>7;}).length;
+  h+=`<div class="row" style="justify-content:space-between;margin:4px 2px 8px"><span class="lbl3" style="margin:0">${ls.length} ${ls.length===1?L('aluno','student','alumno'):L('alunos','students','alumnos')}${late?` · <span style="color:var(--embTx)">${late} ${L('sem treinar há 7+ dias','without training for 7+ days','sin entrenar hace 7+ días')}</span>`:''}</span><button class="btn sm ghost" data-act="proreload">${PRO.busy?L('Carregando…','Loading…','Cargando…'):L('Atualizar','Refresh','Actualizar')}</button></div>`;
+  if(!ls.length&&!PRO.busy)h+=`<div class="empty">${L('Nenhum aluno ainda. Envie seu código para seus alunos se vincularem.','No students yet. Send your code so your students can link.','Aún no hay alumnos. Envía tu código para que se vinculen.')}</div>`;
+  h+=`<div class="alist">${ls.map(l=>{const m=l.meta||{},s=m.sum||{};const d=daysAgo(s.last);const st=d==null?'nd':d<=3?'ok':d<=7?'warn':'bad';
+    return `<button class="alrow" data-act="alsel" data-id="${esc(l.id)}">${uPhoto(l.studentPhoto||m.photo||null,l.studentName||m.name||'?',46)}<div class="grow"><b>${esc(l.studentName||m.name||L('Aluno','Student','Alumno'))}</b><span>${s.plan?esc(s.plan)+' · ':''}${s.last?L('último treino ','last workout ','último entreno ')+agoDay(s.last):m.at?L('ainda sem treinos','no workouts yet','aún sin entrenos'):L('aguardando o app do aluno sincronizar','waiting for the student\'s app to sync','esperando que la app del alumno sincronice')}</span></div>
+      <div class="alst ${st}"><b>${s.week||0}/${s.weekPlan||0}</b><small>${L('semana','week','semana')}</small></div></button>`;}).join('')}</div>`;
+  return h;}
+function wName2(w,c){const n=P(w,'name')||'';return /^(treino|workout|entreno)\b/i.test(n)?n:L('Treino','Workout','Entreno')+' '+(w.label||c)+(n?' · '+n:'');}
+function plW(pl,c){return pl&&pl.workouts&&pl.workouts[c];}
+function renderAluno(){const l=PRO.links.find(x=>x.id===PRO.sel);if(!l){PRO.sel=null;return renderAlunos();}
+  if(!(l.id in PRO.share)){PRO.share[l.id]=undefined;proShareLoad(l).then(o=>{PRO.share[l.id]=o||false;if(ui.tab==='alunos')render();});}
+  const sh=PRO.share[l.id],m=l.meta||{},s=m.sum||{};
+  let h=`<div class="subhd"><button class="iconbtn" data-act="alback" aria-label="${L('Voltar','Back','Volver')}">${IC.back}</button><div class="hd">${esc(l.studentName||m.name||L('Aluno','Student','Alumno'))}</div></div>`;
+  if(sh===undefined)return h+`<div class="empty">${L('Carregando dados do aluno…','Loading student data…','Cargando datos del alumno…')}</div>`;
+  if(!sh)return h+`<div class="note-box">${L('O aluno ainda não sincronizou os dados com você. Peça para ele abrir o Grow Up com internet.','The student has not synced data with you yet. Ask them to open Grow Up online.','El alumno aún no sincronizó sus datos contigo. Pídele que abra Grow Up con internet.')}</div>`;
+  const p=sh.profile||{},imp=sh.units==='imp';
+  h+=`<div class="card"><div class="row" style="gap:12px">${uPhoto(l.studentPhoto||m.photo||null,l.studentName||'?',56)}<div class="grow"><div class="chips">${p.sex?`<span class="chip">${esc(sexName(p.sex))}</span>`:''}${p.idade?`<span class="chip">${esc(p.idade)} ${L('anos','years','años')}</span>`:''}${p.altura?`<span class="chip">${imp?esc(p.altura)+' in':fmtN(p.altura/100,2)+' m'}</span>`:''}${p.goal?`<span class="chip red">${esc(goalName(p.goal))}</span>`:''}${p.level?`<span class="chip">${esc(lvName(p.level))}</span>`:''}</div></div></div>
+    <div class="pfstats" style="margin-top:12px"><div><b>${s.last?esc(agoDay(s.last)):'—'}</b><span>${L('último treino','last workout','último entreno')}</span></div><div><b>${s.week||0}/${s.weekPlan||0}</b><span>${L('nesta semana','this week','esta semana')}</span></div><div><b>${s.n30||0}</b><span>${L('treinos em 30 dias','workouts in 30 days','entrenos en 30 días')}</span></div></div></div>`;
+  const tabs=[['plan',L('Ficha','Plan','Rutina')],['logs',L('Treinos','Workouts','Entrenos')]].concat(sh.body?[['body',L('Peso e medidas','Weight & measures','Peso y medidas')]]:[]);
+  if(!tabs.some(t=>t[0]===PRO.tab))PRO.tab='plan';
+  h+=`<div class="seg">${tabs.map(t=>`<button data-act="altab" data-v="${t[0]}" class="${PRO.tab===t[0]?'on':''}">${t[1]}</button>`).join('')}</div>`;
+  if(PRO.tab==='plan'){const pl=sh.plan;
+    h+=`<div class="card"><div class="row"><div class="grow"><div class="lbl3">${sh.pending?L('Ficha enviada · aguardando o aluno abrir o app','Plan sent · waiting for the student to open the app','Rutina enviada · esperando que el alumno abra la app'):L('Ficha atual','Current plan','Rutina actual')}</div><div class="hd" style="font-size:20px">${esc(pl?P(pl,'name'):'—')}</div></div></div>
+      <div class="row" style="gap:8px;margin-top:12px"><button class="btn primary grow" data-act="aledit">${L('Editar ficha','Edit plan','Editar rutina')}</button><button class="btn grow" data-act="alpick">${L('Trocar ficha','Change plan','Cambiar rutina')}</button></div></div>`;
+    if(pl&&pl.workouts)Object.keys(pl.workouts).forEach(c=>{const w=pl.workouts[c];
+      h+=`<div class="card"><div class="hd" style="font-size:17px">${esc(wName2(w,c))}</div>${P(w,'focus')?`<div class="sub">${esc(P(w,'focus'))}</div>`:''}
+        <div class="exl" style="margin-top:8px">${(w.exercises||[]).map((e,i)=>`<div class="exi"><span class="acc-th">${exThumb(vidOf(e),40)}</span><div class="grow"><div class="n">${e.superset?'<span class="bistag sm">BI</span> ':''}${esc(P(e,'name'))}</div><div class="m">${esc(e.sets)} × ${esc(e.reps||((e.repMin||'')+'–'+(e.repMax||'')))} · RIR ${esc(e.rir||'—')} · ${mmss(e.rest||60)}</div></div></div>`).join('')}</div></div>`;});}
+  else if(PRO.tab==='logs'){const ss=[...(sh.sessions||[])].filter(x=>x.type==='workout'||x.type==='cardio').sort((a,b)=>b.date.localeCompare(a.date)||(b.endedAt||0)-(a.endedAt||0)).slice(0,40);
+    if(!ss.length)h+=`<div class="empty">${L('Nenhum treino registrado nos últimos 6 meses.','No workouts logged in the last 6 months.','Ningún entreno en los últimos 6 meses.')}</div>`;
+    ss.forEach(x=>{const open=!!PRO.open[x.id];let sets=0,vol=0;(x.exercises||[]).forEach(e=>(e.sets||[]).forEach(t=>{if(t.done){sets++;vol+=(num(t.kg)||0)*(e.unit==='s'?0:(num(t.reps)||0));}}));
+      const dur=x.startedAt&&x.endedAt?Math.round((x.endedAt-x.startedAt)/6e4):null;const w=plW(sh.plan,x.workout);
+      const title=x.type==='cardio'?L('Cardio','Cardio','Cardio')+(x.device?' · '+devName(x.device):''):(w?wName2(w,x.workout):(x.title||L('Treino','Workout','Entreno')));
+      h+=`<div class="card" style="padding:0"><button class="acc-h" data-act="allog" data-id="${esc(x.id)}" style="padding:12px 14px"><div class="acc-t"><b>${esc(title)}</b><span>${esc(fmtLong(x.date))}${x.type==='workout'?' · '+sets+' '+L('séries','sets','series')+(vol?' · '+fmtN(vol/1000,1)+' t':''):''}${dur?' · '+dur+' min':''}${x.min?' · '+x.min+' min':''}</span></div><span class="acc-ch" style="${open?'transform:rotate(90deg)':''}">${IC.r}</span></button>
+        ${open&&x.type==='workout'?`<div style="padding:0 14px 12px">${(x.exercises||[]).map(e=>{const ds=(e.sets||[]).filter(t=>t.done);return `<div class="logex"><b>${esc(P(e,'name'))}</b><span>${ds.length?ds.map(t=>`${esc(t.kg||0)}${imp?'lb':'kg'}×${esc(t.reps||0)}`).join(' · '):L('não feito','not done','no hecho')}</span></div>`;}).join('')}${x.note?`<div class="note-box">${esc(x.note)}</div>`:''}</div>`:''}</div>`;});}
+  else{const b=[...(sh.body||[])].sort((a,b2)=>b2.date.localeCompare(a.date)),ms=[...(sh.measures||[])].sort((a,b2)=>b2.date.localeCompare(a.date));const canEd=l.perms&&l.perms.body==='edit';
+    if(canEd)h+=`<div class="row" style="gap:8px;margin-bottom:12px"><button class="btn grow" data-act="albw">+ ${L('Peso','Weight','Peso')}</button><button class="btn grow" data-act="albm">+ ${L('Medidas e % de gordura','Measurements & body fat','Medidas y % de grasa')}</button></div>`;
+    const first=b[b.length-1],last=b[0];
+    h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Peso','Weight','Peso')}</div>${last?`<div class="row" style="margin:8px 0;gap:16px"><div><div class="bign">${fmtN(last.kg)}<small> ${imp?'lb':'kg'}</small></div><div class="sub">${esc(fmtD(last.date))}</div></div>${first&&first!==last?`<div class="sub">${L('Desde ','Since ','Desde ')}${esc(fmtD(first.date))}: <b style="color:var(--tx)">${last.kg-first.kg>0?'+':''}${fmtN(last.kg-first.kg)} ${imp?'lb':'kg'}</b></div>`:''}</div>`:`<div class="sub">${L('Sem pesagens.','No weigh-ins.','Sin pesajes.')}</div>`}
+      ${b.slice(0,12).map(x=>`<div class="logex"><b>${esc(fmtD(x.date))}</b><span>${fmtN(x.kg)} ${imp?'lb':'kg'}${x.src==='coach'?' · '+L('registrado por você','logged by you','registrado por ti'):''}</span></div>`).join('')}</div>`;
+    const keys=[['bf',L('% gordura','Body fat %','% grasa'),'%'],['cintura',L('Cintura','Waist','Cintura'),imp?'in':'cm'],['abdomen',L('Abdômen','Abdomen','Abdomen'),imp?'in':'cm'],['quadril',L('Quadril','Hips','Cadera'),imp?'in':'cm'],['peito',L('Peito','Chest','Pecho'),imp?'in':'cm'],['braco',L('Braço','Arm','Brazo'),imp?'in':'cm'],['coxa',L('Coxa','Thigh','Muslo'),imp?'in':'cm'],['panturrilha',L('Panturrilha','Calf','Pantorrilla'),imp?'in':'cm']];
+    h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Medidas','Measurements','Medidas')}</div>${ms.length?ms.slice(0,8).map(x=>`<div class="logex"><b>${esc(fmtD(x.date))}</b><span>${keys.filter(k=>x[k[0]]!=null&&x[k[0]]!=='').map(k=>`${k[1]} ${fmtN(x[k[0]])}${k[2]==='%'?'%':' '+k[2]}`).join(' · ')||'—'}</span></div>`).join(''):`<div class="sub">${L('Sem medidas.','No measurements.','Sin medidas.')}</div>`}</div>`;}
+  return h;}
+function proPickPlan(l){const ps=allPrograms().filter(p=>!p.coach);
+  modal(L('Escolher ficha para o aluno','Choose a plan for the student','Elegir rutina para el alumno'),`<div class="sub" style="margin-bottom:8px">${L('A ficha escolhida é enviada para o aluno. Depois você pode editar só para ele.','The chosen plan is sent to the student. You can then edit it just for them.','La rutina elegida se envía al alumno. Luego puedes editarla solo para él.')}</div>
+    <div class="pillset" style="flex-direction:column;align-items:stretch">${ps.slice(0,40).map(p=>`<button class="pill" data-act="alsend" data-id="${esc(p.id)}" style="text-align:left">${esc(P(p,'name'))}</button>`).join('')}</div>`,[{l:L('Fechar','Close','Cerrar'),fn:closeModal}]);}
+function proRecForm(l,kind){const imp=(PRO.share[l.id]||{}).units==='imp';
+  const f=kind==='body'?`<div class="field"><label>${L('Peso','Weight','Peso')} (${imp?'lb':'kg'})</label><input id="cr-kg" inputmode="decimal"></div>`
+    :[['bf','% gordura'],['cintura','Cintura'],['abdomen','Abdômen'],['quadril','Quadril'],['peito','Peito'],['braco','Braço'],['coxa','Coxa'],['panturrilha','Panturrilha']].map(k=>`<div class="field"><label>${esc(k[0]==='bf'?L('% de gordura','Body fat %','% de grasa'):k[1])}${k[0]==='bf'?'':' ('+(imp?'in':'cm')+')'}</label><input data-cr="${k[0]}" inputmode="decimal"></div>`).join('');
+  modal(kind==='body'?L('Registrar peso','Log weight','Registrar peso'):L('Registrar medidas','Log measurements','Registrar medidas'),`<div class="field"><label>${L('Data (AAAA-MM-DD)','Date (YYYY-MM-DD)','Fecha (AAAA-MM-DD)')}</label><input id="cr-d" value="${today()}"></div><div class="g2">${f}</div>`,
+   [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Salvar','Save','Guardar'),c:'primary',fn:()=>{const d=$('#cr-d').value.trim();if(!isDate(d)){toast(L('Data inválida','Invalid date','Fecha no válida'));return;}
+     if(kind==='body'){const kg=num($('#cr-kg').value);if(!kg){toast(L('Informe o peso','Enter the weight','Indica el peso'));return;}closeModal();coachAddRec(l,'body',{date:d,kg});}
+     else{const rec={date:d};document.querySelectorAll('[data-cr]').forEach(i=>{const v=num(i.value);if(v)rec[i.dataset.cr]=v;});if(Object.keys(rec).length<2){toast(L('Preencha pelo menos uma medida','Fill in at least one measurement','Rellena al menos una medida'));return;}closeModal();coachAddRec(l,'measures',rec);}}}]);}
+
+/* ---------- administrador: aprovar profissionais ---------- */
+async function admProLoad(){PRO.adm={busy:true,reqs:[],pros:[]};
+  try{const [r,p]=await Promise.all([FB.getDocs(C_('proReqs')),FB.getDocs(C_('pros'))]);PRO.adm.reqs=r.docs.map(d=>Object.assign({id:d.id},d.data()));PRO.adm.pros=p.docs.map(d=>Object.assign({id:d.id},d.data()));}
+  catch(e){PRO.adm.err=cErr(e);}PRO.adm.busy=false;if(ui.tab==='admin')render();}
+function admPros(){if(!PRO.adm){setTimeout(admProLoad,0);return `<div class="empty">${L('Carregando…','Loading…','Cargando…')}</div>`;}const a=PRO.adm;if(a.busy)return `<div class="empty">${L('Carregando…','Loading…','Cargando…')}</div>`;
+  let h=a.err?`<div class="note-box">${esc(a.err)} — ${L('confira se as regras novas do Firestore foram publicadas.','check that the new Firestore rules were published.','comprueba que las reglas nuevas de Firestore estén publicadas.')}</div>`:'';
+  const pend=a.reqs.filter(r=>r.status==='pending').sort((x,y)=>(x.at||0)-(y.at||0));
+  h+=`<div class="lbl2">${L('Pedidos pendentes','Pending requests','Solicitudes pendientes')} (${pend.length})</div>`;
+  h+=pend.length?pend.map(r=>`<div class="card"><div class="row"><div class="grow"><b>${esc(r.name||'')}</b><div class="sub">${esc(kindName(r.kind))} · ${esc(r.email||'')}</div></div><span class="sub">${esc(fmtD(localYmd(r.at||Date.now())))}</span></div>
+     <div class="chips" style="margin-top:8px">${r.country?`<span class="chip">${esc(r.country)}</span>`:''}${r.city?`<span class="chip">${esc(r.city)}</span>`:''}<span class="chip ${r.reg?'red':''}">${r.reg?esc(r.reg):L('sem registro profissional','no professional registration','sin registro profesional')}</span></div>
+     ${r.note?`<div class="note-box" style="margin-top:8px">${esc(r.note)}</div>`:''}
+     <div class="row" style="gap:8px;margin-top:10px"><button class="btn grow" data-act="admprono" data-id="${esc(r.id)}">${L('Recusar','Decline','Rechazar')}</button><button class="btn primary grow" data-act="admproyes" data-id="${esc(r.id)}">${L('Aprovar','Approve','Aprobar')}</button></div></div>`).join(''):`<div class="empty">${L('Nenhum pedido pendente.','No pending requests.','No hay solicitudes pendientes.')}</div>`;
+  const ok=a.pros.filter(p=>p.status==='approved');
+  h+=`<div class="lbl2">${L('Profissionais aprovados','Approved professionals','Profesionales aprobados')} (${ok.length})</div>`+ok.map(p=>`<div class="card"><div class="row"><div class="grow"><b>${esc(p.name||'')}</b><div class="sub">${esc(kindName(p.kind))}${p.reg?' · '+esc(p.reg):''}${p.country?' · '+esc(p.country):''}</div></div><button class="btn sm ghost" data-act="admprorev" data-id="${esc(p.id)}" style="color:var(--emb)">${L('Revogar','Revoke','Revocar')}</button></div></div>`).join('');
+  return h;}
+
+/* ícone da aba Alunos */
+IC.coach='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.5" r="3.2"/><path d="M3 19.5c.6-3.4 3-5.5 6-5.5s5.4 2.1 6 5.5"/><path d="M16 4.5h5M16 8h5M17.5 11.5H21"/></svg>';
+
+Object.assign(A,{
+ prolink:()=>linkByCode(($('#pro-code')||{}).value),
+ prounlink:()=>{const l=PRO.myLinks[0];if(!l)return;modal(L('Encerrar vínculo?','End link?','¿Terminar vínculo?'),`<p>${esc(l.proName||'')} ${L('deixa de ver seus dados e de editar suas fichas. Sua ficha atual e seu histórico continuam com você.','will no longer see your data or edit your plans. Your current plan and history stay with you.','dejará de ver tus datos y de editar tus rutinas. Tu rutina actual y tu historial se quedan contigo.')}</p>`,[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Encerrar','End','Terminar'),c:'primary',fn:()=>{closeModal();unlink(l,false);}}]);},
+ probody:b=>{const l=PRO.myLinks[0];if(!l||((l.perms&&l.perms.body)||'none')===b.dataset.v)return;setBodyPerm(b.dataset.v);},
+ proreq:()=>proRequestForm(),
+ procopy:()=>copyText(CL.code||''),
+ proinvite:async()=>{const t=L('Treine comigo pelo Grow Up! Baixe o app, entre na sua conta e, em Perfil → Personal trainer, digite meu código: ','Train with me on Grow Up! Get the app, sign in and, in Profile → Personal trainer, enter my code: ','¡Entrena conmigo en Grow Up! Descarga la app, inicia sesión y, en Perfil → Entrenador personal, escribe mi código: ')+(CL.code||'')+'\n'+WEB_URL;
+   if(!(await nativeShareText(t))){if(navigator.share){try{await navigator.share({text:t});return;}catch(e){}}copyText(t);}},
+ proreload:()=>{PRO.share={};proLinksLoad(true);render();},
+ alsel:b=>{PRO.sel=b.dataset.id;PRO.tab='plan';PRO.open={};render();window.scrollTo(0,0);},
+ alback:()=>{PRO.sel=null;render();window.scrollTo(0,0);},
+ altab:b=>{PRO.tab=b.dataset.v;render();},
+ allog:b=>{PRO.open[b.dataset.id]=!PRO.open[b.dataset.id];render();},
+ aledit:()=>{const l=PRO.links.find(x=>x.id===PRO.sel),sh=PRO.share[PRO.sel];if(!l)return;const p=sh&&sh.plan?clone(sh.plan):newProgram();delete p.coach;openEditor(p,!(sh&&sh.plan));ui.ed.coach={id:l.id};render();},
+ alpick:()=>{const l=PRO.links.find(x=>x.id===PRO.sel);if(l)proPickPlan(l);},
+ alsend:b=>{const l=PRO.links.find(x=>x.id===PRO.sel);const p=allPrograms().find(x=>x.id===b.dataset.id);if(!l||!p)return;closeModal();const c=clone(p);c.startDate=today();coachSavePlan(l,c);},
+ albw:()=>{const l=PRO.links.find(x=>x.id===PRO.sel);if(l)proRecForm(l,'body');},
+ albm:()=>{const l=PRO.links.find(x=>x.id===PRO.sel);if(l)proRecForm(l,'measures');},
+ admproyes:async b=>{const r=(PRO.adm.reqs||[]).find(x=>x.id===b.dataset.id);if(!r)return;
+   try{await FB.setDoc(D_('pros',r.id),{status:'approved',kind:r.kind||'trainer',name:r.name||'',reg:r.reg||'',country:r.country||'',city:r.city||'',email:r.email||'',at:Date.now()});await FB.updateDoc(D_('proReqs',r.id),{status:'approved',decidedAt:Date.now()});toast(L('Aprovado','Approved','Aprobado'));}catch(e){toast(cErr(e));}admProLoad();},
+ admprono:async b=>{try{await FB.updateDoc(D_('proReqs',b.dataset.id),{status:'rejected',decidedAt:Date.now()});toast(L('Pedido recusado','Request declined','Solicitud rechazada'));}catch(e){toast(cErr(e));}admProLoad();},
+ admprorev:b=>modal(L('Revogar acesso?','Revoke access?','¿Revocar acceso?'),`<p>${L('O profissional perde o acesso à aba Alunos. Os alunos continuam com suas fichas.','The professional loses access to the Students tab. Students keep their plans.','El profesional pierde el acceso a la pestaña Alumnos. Los alumnos conservan sus rutinas.')}</p>`,[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Revogar','Revoke','Revocar'),c:'primary',fn:async()=>{closeModal();try{await FB.updateDoc(D_('pros',b.dataset.id),{status:'revoked',revokedAt:Date.now()});}catch(e){toast(cErr(e));}admProLoad();}}])});
 
 /* ---------- boot ---------- */
 ensureTick();/* o cronômetro não pode depender do restante da abertura dar certo */
