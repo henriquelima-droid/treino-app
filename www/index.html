@@ -3731,7 +3731,7 @@ function renderProfile(){const p=S.profile,g=gameStats();const c=consistency();
   h+=`<div class="card">${xpBar(g)}<div class="pfstats"><div><b data-count="${g.workouts}">${g.workouts}</b><span>${L('treinos','workouts','entrenos')}</span></div><div><b>${c.streak?flameLive():svgSz(IC.flame,18)} ${c.streak}</b><span>${L('semanas seguidas','weeks in a row','semanas seguidas')}</span></div><div><b>${boltFall('pf',18)}<span data-count="${g.prs}">${g.prs}</span></b><span>${L('recordes','PRs','récords')}</span></div></div></div>`;
   const tiles=[['hist',IC.list,L('Histórico','History','Historial')],['measures',IC.tape,L('Medidas','Measurements','Medidas'),measurePending()],['photos',IC.cam,L('Fotos','Photos','Fotos'),photoPending()],['report',IC.doc,L('Relatório','Report','Informe')],
     ['medals',IC.trophy,L('Conquistas','Achievements','Logros')],['pedit',IC.user,L('Editar perfil','Edit profile','Editar perfil')],['pro',IC.coach,L('Personal trainer','Personal trainer','Entrenador personal')]];
-  if(typeof isAdmin==='function'&&isAdmin())tiles.push(['admin',IC.shield,L('Administrador','Admin','Administrador')]);
+  if(typeof isAdmin==='function'&&isAdmin())tiles.push(['admin',IC.shield,L('Desenvolvedor','Developer','Desarrollador')]);
   h+=`<div class="pftiles">${tiles.map(t=>`<button class="pftile ${t[3]?'bdot':''}" data-act="tab" data-v="${t[0]}"><span class="pti">${svgSz(t[1],24)}</span>${esc(t[2])}</button>`).join('')}</div>`;
   h+=`<button class="btn block ghost" data-act="tour" style="margin-top:6px;color:var(--mut)">${svgSz(IC.star,16)} ${L('Rever o tour do app','Replay the app tour','Ver de nuevo el tour')}</button>`;
   return h;}
@@ -5288,8 +5288,10 @@ Object.assign(A,{
 /* ---------- administrador, métricas de uso, erros, avisos e simulador ----------
    O painel só aparece para a conta guimaraeswin@gmail.com (e as regras do Firestore conferem o mesmo e-mail verificado). */
 const ADMIN_EMAIL='guimaraeswin@gmail.com';
-const isAdmin=()=>!!(CL.user&&String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&owner()!=='sim');
-const BUILD_AT="261125.1553";
+/* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
+   o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
+const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
+const BUILD_AT="261125.1619";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -5360,10 +5362,10 @@ function admBars(rows,max){max=max||Math.max(1,...rows.map(r=>r[1]));return `<di
 function admChart(vals,labels){const W=320,H=110,mx=Math.max(1,...vals),bw=W/vals.length;
   return `<svg class="achart" viewBox="0 0 ${W} ${H+16}" preserveAspectRatio="none">${vals.map((v,i)=>`<rect x="${(i*bw+1).toFixed(1)}" y="${(H-v/mx*H).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${(v/mx*H).toFixed(1)}" rx="2"><title>${labels[i]}: ${v}</title></rect>`).join('')}
    <text x="0" y="${H+13}">${labels[0]}</text><text x="${W}" y="${H+13}" text-anchor="end">${labels[labels.length-1]}</text><text x="${W}" y="10" text-anchor="end">${mx}</text></svg>`;}
-function renderAdmin(){setTimeout(()=>{if(typeof socHydrate==='function')socHydrate();},0);if(!isAdmin())return subHead(L('Administrador','Admin','Administrador'))+`<div class="empty">${L('Acesso restrito.','Restricted access.','Acceso restringido.')}</div>`;
+function renderAdmin(){setTimeout(()=>{if(typeof socHydrate==='function')socHydrate();},0);if(!isAdmin())return subHead(L('Desenvolvedor','Developer','Desarrollador'))+`<div class="empty">${L('Acesso restrito.','Restricted access.','Acceso restringido.')}</div>`;
   if(!ADM.at&&!ADM.busy)setTimeout(()=>admLoad(),0);
   const tabs=[['ov',L('Visão geral','Overview','Resumen')],['users',L('Usuários','Users','Usuarios')],['mod',L('Moderação','Moderation','Moderación')+(ADM.reps.filter(r=>r.status!=='closed').length?` (${ADM.reps.filter(r=>r.status!=='closed').length})`:'')],['pros',L('Profissionais','Professionals','Profesionales')+(typeof PRO!=='undefined'&&PRO.adm&&PRO.adm.reqs&&PRO.adm.reqs.filter(r=>r.status==='pending').length?` (${PRO.adm.reqs.filter(r=>r.status==='pending').length})`:'')],['errs',L('Erros','Errors','Errores')],['ann',L('Aviso','Notice','Aviso')],['sim',L('Simulador','Simulator','Simulador')]];
-  let h=subHead(L('Administrador','Admin','Administrador'))+`<div class="hscroll admtabs">${tabs.map(t=>`<button class="pill ${ADM.tab===t[0]?'on':''}" data-act="admtab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
+  let h=subHead(L('Desenvolvedor','Developer','Desarrollador'))+`<div class="hscroll admtabs">${tabs.map(t=>`<button class="pill ${ADM.tab===t[0]?'on':''}" data-act="admtab" data-v="${t[0]}">${t[1]}</button>`).join('')}</div>
    <div class="row" style="justify-content:space-between;margin:6px 0 10px"><span class="sub">${ADM.busy?L('Carregando…','Loading…','Cargando…'):ADM.at?L('Atualizado ','Updated ','Actualizado ')+new Date(ADM.at).toLocaleTimeString(LANG==='en'?'en-US':'pt-BR',{hour:'2-digit',minute:'2-digit'}):''}</span><button class="btn sm" data-act="admreload">${L('Atualizar','Refresh','Actualizar')}</button></div>
    ${ADM.err?`<div class="note-box">${L('Algumas informações não carregaram: ','Some data did not load: ','Algunos datos no cargaron: ')}${esc(ADM.err)}. ${L('Confira se as regras novas do Firestore foram publicadas.','Check that the new Firestore rules were published.','Comprueba que las reglas nuevas de Firestore estén publicadas.')}</div>`:''}`;
   return h+({ov:admOverview,users:admUsers,mod:admMod,pros:()=>typeof admPros==='function'?admPros():'',errs:admErrs,ann:admAnn,sim:admSim}[ADM.tab]||admOverview)();}
@@ -5502,6 +5504,8 @@ const kindName=k=>k==='nutri'?L('Nutricionista','Nutritionist','Nutricionista'):
 
 /* ---------- carga inicial (depois do login) ---------- */
 async function proBoot(){if(!logged())return;const me=CL.user.uid;
+  try{const a=await FB.getDoc(D_('admins',me));CL.dev=a.exists();}catch(e){CL.dev=false;}
+  try{const k=await FB.getDoc(D_('config','adminLock'));CL.adminLock=k.exists();}catch(e){CL.adminLock=false;}
   try{const s=await FB.getDoc(D_('pros',me));PRO.me=s.exists()?s.data():null;}catch(e){PRO.me=null;}
   try{const r=await FB.getDoc(D_('proReqs',me));PRO.req=r.exists()?r.data():null;}catch(e){PRO.req=null;}
   await myLinksLoad();
@@ -5647,7 +5651,7 @@ function renderAlunos(){if(!proOn())return pageTitle(L('Alunos','Students','Alum
   h+=`<div class="row" style="justify-content:space-between;margin:4px 2px 8px"><span class="lbl3" style="margin:0">${ls.length} ${ls.length===1?L('aluno','student','alumno'):L('alunos','students','alumnos')}${late?` · <span style="color:var(--embTx)">${late} ${L('sem treinar há 7+ dias','without training for 7+ days','sin entrenar hace 7+ días')}</span>`:''}</span><button class="btn sm ghost" data-act="proreload">${PRO.busy?L('Carregando…','Loading…','Cargando…'):L('Atualizar','Refresh','Actualizar')}</button></div>`;
   if(!ls.length&&!PRO.busy)h+=`<div class="empty">${L('Nenhum aluno ainda. Envie seu código para seus alunos se vincularem.','No students yet. Send your code so your students can link.','Aún no hay alumnos. Envía tu código para que se vinculen.')}</div>`;
   h+=`<div class="alist">${ls.map(l=>{const m=l.meta||{},s=m.sum||{};const d=daysAgo(s.last);const st=d==null?'nd':d<=3?'ok':d<=7?'warn':'bad';
-    return `<button class="alrow" data-act="alsel" data-id="${esc(l.id)}">${uPhoto(l.studentPhoto||m.photo||null,l.studentName||m.name||'?',46)}<div class="grow"><b>${esc(l.studentName||m.name||L('Aluno','Student','Alumno'))}</b><span>${s.plan?esc(s.plan)+' · ':''}${s.last?L('último treino ','last workout ','último entreno ')+agoDay(s.last):m.at?L('ainda sem treinos','no workouts yet','aún sin entrenos'):L('aguardando o app do aluno sincronizar','waiting for the student\'s app to sync','esperando que la app del alumno sincronice')}</span></div>
+    return `<button class="alrow" data-act="alsel" data-id="${esc(l.id)}">${uPhoto(l.studentPhoto||m.photo||null,l.studentName||m.name||'?',46)}<div class="grow"><b>${esc(l.studentName||m.name||L('Aluno','Student','Alumno'))}${l.demo?' <span class="chip sm">DEMO</span>':''}</b><span>${s.plan?esc(s.plan)+' · ':''}${s.last?L('último treino ','last workout ','último entreno ')+agoDay(s.last):m.at?L('ainda sem treinos','no workouts yet','aún sin entrenos'):L('aguardando o app do aluno sincronizar','waiting for the student\'s app to sync','esperando que la app del alumno sincronice')}</span></div>
       <div class="alst ${st}"><b>${s.week||0}/${s.weekPlan||0}</b><small>${L('semana','week','semana')}</small></div></button>`;}).join('')}</div>`;
   return h;}
 function wName2(w,c){const n=P(w,'name')||'';return /^(treino|workout|entreno)\b/i.test(n)?n:L('Treino','Workout','Entreno')+' '+(w.label||c)+(n?' · '+n:'');}
@@ -5697,25 +5701,109 @@ function proRecForm(l,kind){const imp=(PRO.share[l.id]||{}).units==='imp';
      else{const rec={date:d};document.querySelectorAll('[data-cr]').forEach(i=>{const v=num(i.value);if(v)rec[i.dataset.cr]=v;});if(Object.keys(rec).length<2){toast(L('Preencha pelo menos uma medida','Fill in at least one measurement','Rellena al menos una medida'));return;}closeModal();coachAddRec(l,'measures',rec);}}}]);}
 
 /* ---------- administrador: aprovar profissionais ---------- */
-async function admProLoad(){PRO.adm={busy:true,reqs:[],pros:[]};
-  try{const [r,p]=await Promise.all([FB.getDocs(C_('proReqs')),FB.getDocs(C_('pros'))]);PRO.adm.reqs=r.docs.map(d=>Object.assign({id:d.id},d.data()));PRO.adm.pros=p.docs.map(d=>Object.assign({id:d.id},d.data()));}
+async function admProLoad(){PRO.adm={busy:true,reqs:[],pros:[],devs:[]};
+  try{const [r,p]=await Promise.all([FB.getDocs(C_('proReqs')),FB.getDocs(C_('pros'))]);PRO.adm.reqs=r.docs.map(d=>Object.assign({id:d.id},d.data()));PRO.adm.pros=p.docs.map(d=>Object.assign({id:d.id},d.data()));
+    try{const a=await FB.getDocs(C_('admins'));PRO.adm.devs=a.docs.map(d=>Object.assign({id:d.id},d.data()));}catch(e){}
+    try{const k=await FB.getDoc(D_('config','adminLock'));CL.adminLock=k.exists();}catch(e){}}
   catch(e){PRO.adm.err=cErr(e);}PRO.adm.busy=false;if(ui.tab==='admin')render();}
 function admPros(){if(!PRO.adm){setTimeout(admProLoad,0);return `<div class="empty">${L('Carregando…','Loading…','Cargando…')}</div>`;}const a=PRO.adm;if(a.busy)return `<div class="empty">${L('Carregando…','Loading…','Cargando…')}</div>`;
   let h=a.err?`<div class="note-box">${esc(a.err)} — ${L('confira se as regras novas do Firestore foram publicadas.','check that the new Firestore rules were published.','comprueba que las reglas nuevas de Firestore estén publicadas.')}</div>`:'';
+  const isDev=id=>(a.devs||[]).some(d=>d.id===id);
+  /* conta oficial: depois de virar desenvolvedora, tranca o acesso do e-mail pessoal antigo */
+  if(CL.dev)h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Conta oficial','Official account','Cuenta oficial')}</div>${CL.adminLock
+     ?`<div class="sub" style="margin-top:6px">✓ ${L('O acesso de desenvolvedor está concentrado nas contas oficiais. A conta pessoal ','Developer access is limited to official accounts. The personal account ','El acceso de desarrollador está en las cuentas oficiales. La cuenta personal ')}${esc(ADMIN_EMAIL)}${L(' não tem mais essa função.',' no longer has this role.',' ya no tiene esta función.')}</div>`
+     :`<div class="sub" style="margin:6px 0 10px">${L('Esta conta já é desenvolvedora. Para concentrar tudo aqui, remova a função de desenvolvedor (e de aprovar pedidos) da conta pessoal ','This account is already a developer. To keep everything here, remove the developer role (and request approval) from the personal account ','Esta cuenta ya es desarrolladora. Para concentrar todo aquí, quita la función de desarrollador (y de aprobar solicitudes) de la cuenta personal ')}${esc(ADMIN_EMAIL)}.</div><button class="btn primary block" data-act="admlock">${L('Remover função de desenvolvedor da conta pessoal','Remove developer role from the personal account','Quitar función de desarrollador de la cuenta personal')}</button>`}</div>`;
+  if(proOn())h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Alunos de demonstração','Demo students','Alumnos de demostración')}</div><div class="sub" style="margin:6px 0 10px">${L('Cria 20 alunos fictícios vinculados a esta conta de personal, com fichas, treinos das últimas 8 semanas, peso e medidas. Eles não aparecem no Social nem nas métricas e podem ser removidos a qualquer momento.','Creates 20 fictional students linked to this trainer account, with plans, 8 weeks of workouts, weight and measurements. They do not appear in Social or in metrics and can be removed at any time.','Crea 20 alumnos ficticios vinculados a esta cuenta de entrenador, con rutinas, 8 semanas de entrenos, peso y medidas. No aparecen en Social ni en las métricas y se pueden quitar cuando quieras.')}</div>
+     ${PRO.demoMsg?`<div class="note-box">${esc(PRO.demoMsg)}</div>`:''}<div class="row" style="gap:8px"><button class="btn primary grow" data-act="demomk" ${PRO.demoBusy?'disabled':''}>${L('Criar 20 alunos fictícios','Create 20 demo students','Crear 20 alumnos ficticios')}</button><button class="btn grow" data-act="demorm" ${PRO.demoBusy?'disabled':''}>${L('Remover','Remove','Quitar')}</button></div></div>`;
   const pend=a.reqs.filter(r=>r.status==='pending').sort((x,y)=>(x.at||0)-(y.at||0));
   h+=`<div class="lbl2">${L('Pedidos pendentes','Pending requests','Solicitudes pendientes')} (${pend.length})</div>`;
   h+=pend.length?pend.map(r=>`<div class="card"><div class="row"><div class="grow"><b>${esc(r.name||'')}</b><div class="sub">${esc(kindName(r.kind))} · ${esc(r.email||'')}</div></div><span class="sub">${esc(fmtD(localYmd(r.at||Date.now())))}</span></div>
      <div class="chips" style="margin-top:8px">${r.country?`<span class="chip">${esc(r.country)}</span>`:''}${r.city?`<span class="chip">${esc(r.city)}</span>`:''}<span class="chip ${r.reg?'red':''}">${r.reg?esc(r.reg):L('sem registro profissional','no professional registration','sin registro profesional')}</span></div>
      ${r.note?`<div class="note-box" style="margin-top:8px">${esc(r.note)}</div>`:''}
-     <div class="row" style="gap:8px;margin-top:10px"><button class="btn grow" data-act="admprono" data-id="${esc(r.id)}">${L('Recusar','Decline','Rechazar')}</button><button class="btn primary grow" data-act="admproyes" data-id="${esc(r.id)}">${L('Aprovar','Approve','Aprobar')}</button></div></div>`).join(''):`<div class="empty">${L('Nenhum pedido pendente.','No pending requests.','No hay solicitudes pendientes.')}</div>`;
+     <div class="row" style="gap:8px;margin-top:10px"><button class="btn grow" data-act="admprono" data-id="${esc(r.id)}">${L('Recusar','Decline','Rechazar')}</button><button class="btn primary grow" data-act="admproyes" data-id="${esc(r.id)}">${L('Aprovar','Approve','Aprobar')}</button></div>
+     <button class="btn block ghost sm" data-act="admdev" data-id="${esc(r.id)}" style="margin-top:6px">${L('Aprovar e tornar conta oficial (desenvolvedor)','Approve and make official account (developer)','Aprobar y hacer cuenta oficial (desarrollador)')}</button></div>`).join(''):`<div class="empty">${L('Nenhum pedido pendente.','No pending requests.','No hay solicitudes pendientes.')}</div>`;
   const ok=a.pros.filter(p=>p.status==='approved');
-  h+=`<div class="lbl2">${L('Profissionais aprovados','Approved professionals','Profesionales aprobados')} (${ok.length})</div>`+ok.map(p=>`<div class="card"><div class="row"><div class="grow"><b>${esc(p.name||'')}</b><div class="sub">${esc(kindName(p.kind))}${p.reg?' · '+esc(p.reg):''}${p.country?' · '+esc(p.country):''}</div></div><button class="btn sm ghost" data-act="admprorev" data-id="${esc(p.id)}" style="color:var(--emb)">${L('Revogar','Revoke','Revocar')}</button></div></div>`).join('');
+  h+=`<div class="lbl2">${L('Profissionais aprovados','Approved professionals','Profesionales aprobados')} (${ok.length})</div>`+ok.map(p=>`<div class="card"><div class="row"><div class="grow"><b>${esc(p.name||'')}</b>${isDev(p.id)?' <span class="chip red sm">'+L('Desenvolvedor','Developer','Desarrollador')+'</span>':''}<div class="sub">${esc(kindName(p.kind))}${p.reg?' · '+esc(p.reg):''}${p.country?' · '+esc(p.country):''}${p.email?' · '+esc(p.email):''}</div></div><button class="btn sm ghost" data-act="admprorev" data-id="${esc(p.id)}" style="color:var(--emb)">${L('Revogar','Revoke','Revocar')}</button></div>
+     ${isDev(p.id)?'':`<button class="btn block ghost sm" data-act="admdev" data-id="${esc(p.id)}" style="margin-top:6px">${L('Tornar conta oficial (desenvolvedor)','Make official account (developer)','Hacer cuenta oficial (desarrollador)')}</button>`}</div>`).join('');
   return h;}
 
 /* ícone da aba Alunos */
 IC.coach='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="7.5" r="3.2"/><path d="M3 19.5c.6-3.4 3-5.5 6-5.5s5.4 2.1 6 5.5"/><path d="M16 4.5h5M16 8h5M17.5 11.5H21"/></svg>';
 
+/* ---------- alunos de demonstração (contas fictícias criadas num app Firebase secundário, sem trocar a sessão) ---------- */
+const DEMO_PW='GrowUpDemo#2026';
+const DEMO_PPL=[['Ana Beatriz Lima','F',27,165,'fatloss','beginner'],['Bruno Carvalho','M',34,180,'hypertrophy','intermediate'],['Camila Rocha','F',31,162,'glutes','intermediate'],['Diego Martins','M',22,176,'hypertrophy','beginner'],
+ ['Eduarda Nunes','F',41,168,'health','beginner'],['Felipe Araújo','M',29,183,'strength','advanced'],['Gabriela Souza','F',25,170,'recomp','intermediate'],['Henrique Prado','M',38,178,'fatloss','intermediate'],
+ ['Isabela Teixeira','F',36,160,'hypertrophy','advanced'],['João Victor Melo','M',19,181,'hypertrophy','beginner'],['Karina Dias','F',45,164,'health','intermediate'],['Lucas Fernandes','M',31,174,'recomp','intermediate'],
+ ['Mariana Costa','F',28,167,'glutes','advanced'],['Nicolas Ribeiro','M',26,186,'strength','intermediate'],['Olívia Barros','F',33,158,'fatloss','beginner'],['Pedro Henrique Alves','M',43,172,'health','beginner'],
+ ['Renata Moreira','F',30,171,'recomp','intermediate'],['Samuel Pires','M',35,179,'fatloss','advanced'],['Tatiane Gomes','F',24,163,'hypertrophy','beginner'],['Vinícius Cardoso','M',39,177,'endurance','intermediate']];
+const demoMail=i=>'aluno'+String(i+1).padStart(2,'0')+'.demo@growup.example.com';
+function rnd(seed){let x=seed*9301+49297;return()=>{x=(x*9301+49297)%233280;return x/233280;};}
+const PAT_KG={squat:60,legpress:140,hinge:70,hipthrust:80,lunge:16,kneeext:40,kneeflex:35,calf:50,abduct:40,adduct:40,kickback:20,hpush:50,incpush:40,vpush:30,hpull:45,vpull:50,fly:14,latraise:7,reardelt:8,curl:12,triext:18,shrug:24,core:0};
+function demoPlan(sex,level,goal,days){const sv=JSON.stringify(S.profile);let pl=null;
+  try{Object.assign(S.profile,{sex,level,goal,gym:'rede',equip:GYMS[0][4].slice(),days:days});const ps=genFor(level);pl=clone(ps.find(p=>(p.meta&&p.meta.days)===days.length)||ps[0]);}catch(e){}
+  S.profile=JSON.parse(sv);return pl||clone(DEFAULT_PLAN);}
+function demoData(i){const [name,sex,age,h,goal,level]=DEMO_PPL[i],r=rnd(i+7),t=today();
+  const days=[[1,3,5],[1,2,4,5],[1,2,3,4,5],[2,4,6]][i%4];const pl=demoPlan(sex,level,goal,days);pl.startDate=addD(t,-63);
+  const adh=[0.95,0.85,0.7,0.5,0.3][i%5],stop=i%7===3?12:0;
+  const sch=(pl.phases&&pl.phases[0]&&pl.phases[0].schedule)||[];const codes=Object.keys(pl.workouts||{});let ci=0;const sessions=[];
+  const lvlF={beginner:.65,intermediate:1,advanced:1.35}[level]||1,sexF=sex==='F'?.62:1;
+  for(let k=62;k>=0;k--){const d=addD(t,-k);if(k<stop)continue;const dow=pd(d).getDay();const c=sch[dow];if(!c||!pl.workouts[c])continue;if(r()>adh)continue;
+    const w=pl.workouts[c],prog=1+(62-k)/62*0.08;const st=new Date(pd(d).getTime()+(7+Math.floor(r()*12))*36e5);let tm=st.getTime();
+    const ex=(w.exercises||[]).map(e=>{const x=XL[e.id]||{};const dumb=(x.eq||[]).includes('dumbbell'),bw=!(x.eq||[]).length;let kg=bw?0:(PAT_KG[x.pat]||20)*lvlF*sexF*prog*(dumb?.45:1);kg=Math.max(0,Math.round(kg/2.5)*2.5);
+      const n=parseInt(e.sets)||3,mn=parseInt(e.repMin)||8,mx=parseInt(e.repMax)||mn;
+      return{id:e.id,name:e.name,en:e.en,unit:e.unit||'',sets:Array.from({length:n},(_,j)=>({kg:kg?String(kg):'',reps:String(Math.max(1,mx-Math.floor(r()*(mx-mn+1))-(j>1?1:0))),done:true}))};});
+    tm+=ex.length*7*6e4;sessions.push({id:'demo'+i+'-'+d,date:d,type:'workout',workout:c,title:P(w,'name'),exercises:ex,startedAt:st.getTime(),endedAt:tm,updatedAt:tm,demo:true});ci++;}
+  if(i%3===0)for(let k=3;k<60;k+=9)sessions.push({id:'democ'+i+'-'+k,date:addD(t,-k),type:'cardio',device:['Esteira','Bike','Escada'][k%3],min:20+Math.floor(r()*20),updatedAt:Date.now(),demo:true});
+  const w0=sex==='F'?58+r()*22:72+r()*28,trend={fatloss:-.45,hypertrophy:.18,glutes:.05,recomp:-.1,health:-.15,strength:.1,endurance:-.2}[goal]||0;
+  const body=[],measures=[];for(let k=56;k>=0;k-=7){const wk=(56-k)/7;body.push({date:addD(t,-k-(i%3)),kg:Math.round((w0+trend*wk+(r()-.5)*.6)*10)/10,t:Date.now()});
+    if(k%14===0){const bf=(sex==='F'?27:19)+(r()-.5)*6+trend*wk*.6;measures.push({date:addD(t,-k-(i%3)),bf:Math.round(bf*10)/10,cintura:Math.round((sex==='F'?72:88)+(w0-70)*.4+trend*wk*1.2),quadril:Math.round((sex==='F'?100:98)+(w0-70)*.3),braco:Math.round((sex==='F'?28:35)+(r()-.5)*3),t:Date.now()});}}
+  const perm=['edit','view','none'][i%3];
+  const o={v:1,at:Date.now(),name,units:'met',profile:{sex,idade:age,altura:h,goal,level,days,gym:'rede',pesoInicial:body[0].kg,metaMax:Math.round(body[0].kg+(trend<0?-6:trend>0?4:0))},plan:pl,sessions};
+  if(perm!=='none'){o.body=body;o.measures=measures;}
+  const ws=sessions.filter(x=>x.type==='workout');const wsS=weekStart(t);const last=ws.reduce((a,x)=>x.date>a?x.date:a,'');
+  let streak=0;for(let k=0;k<9;k++){const a=addD(wsS,-7*k),b=addD(a,6);if(ws.some(x=>x.date>=a&&x.date<=b))streak++;else if(k>0)break;}
+  const sum={last:last||null,week:ws.filter(x=>x.date>=wsS).length,weekPlan:sch.filter(c=>c&&pl.workouts[c]).length,streak,plan:pl.name||'',n30:ws.filter(x=>x.date>addD(t,-30)).length,kg:body[body.length-1].kg};
+  return{name,perm,o,sum};}
+let DEMO=null;
+function demoApp(){if(DEMO)return DEMO;const app=FB.initializeApp(FBCFG,'growup-demo');DEMO={auth:FB.initializeAuth(app,{persistence:[FB.browserLocalPersistence]}),db:FB.initializeFirestore(app,{})};return DEMO;}
+async function demoUser(i,create){const D=demoApp();try{return (await FB.signInWithEmailAndPassword(D.auth,demoMail(i),DEMO_PW)).user;}
+  catch(e){if(!create)return null;return (await FB.createUserWithEmailAndPassword(D.auth,demoMail(i),DEMO_PW)).user;}}
+async function demoCreate(){if(!proOn()||PRO.demoBusy)return;PRO.demoBusy=true;const pro=CL.user.uid,pname=(PRO.me&&PRO.me.name)||'Grow Up';let ok=0,err='';
+  try{const D=demoApp();
+    for(let i=0;i<DEMO_PPL.length;i++){PRO.demoMsg=L('Criando aluno ','Creating student ','Creando alumno ')+(i+1)+'/'+DEMO_PPL.length+'…';render();
+      try{const u=await demoUser(i,true);const dd=demoData(i),id=lnkId(pro,u.uid),dc=(...p)=>FB.doc(D.db,...p);
+        await FB.setDoc(dc('links',id),{pro,student:u.uid,status:'active',kind:'trainer',perms:{plans:'edit',logs:'view',body:dd.perm},proName:pname,proReg:(PRO.me&&PRO.me.reg)||'',studentName:dd.name,studentPhoto:null,at:Date.now()-((i*3)%40)*864e5,demo:true,consent:{at:Date.now(),items:['plans','logs'].concat(dd.perm==='none'?[]:['body'])}});
+        const full=JSON.stringify(dd.o),parts=[];for(let k=0;k<full.length;k+=CHUNK)parts.push(full.slice(k,k+CHUNK));
+        const meta={pro,student:u.uid,at:dd.o.at,n:0,sum:dd.sum,name:dd.name,photo:null,body:dd.perm!=='none',units:'met',demo:true};
+        await FB.setDoc(dc('share',id),meta);for(let k=0;k<parts.length;k++)await FB.setDoc(dc('share',id,'c','c'+k),{d:parts[k]});
+        await FB.setDoc(dc('share',id),Object.assign({},meta,{n:parts.length}));ok++;}
+      catch(e){err=cErr(e);}
+      try{await FB.signOut(D.auth);}catch(e){}}}
+  catch(e){err=cErr(e);}
+  PRO.demoBusy=false;PRO.demoMsg=ok+' '+L('alunos fictícios criados','demo students created','alumnos ficticios creados')+(err?' · '+L('erro: ','error: ','error: ')+err:'');PRO.share={};await proLinksLoad(true);render();}
+async function demoRemove(){if(PRO.demoBusy)return;PRO.demoBusy=true;let n=0;const pro=CL.user.uid;
+  try{const D=demoApp();const dc=(...p)=>FB.doc(D.db,...p);
+    for(let i=0;i<DEMO_PPL.length;i++){PRO.demoMsg=L('Removendo ','Removing ','Quitando ')+(i+1)+'/'+DEMO_PPL.length+'…';render();
+      try{const u=await demoUser(i,false);if(!u)continue;const id=lnkId(pro,u.uid);
+        const sh=await FB.getDoc(dc('share',id)).catch(()=>null);const k=sh&&sh.exists()?(sh.data().n||0):0;for(let j=0;j<Math.max(k,1);j++)await FB.deleteDoc(dc('share',id,'c','c'+j)).catch(()=>{});
+        for(const c of ['share','coach','coachData','links'])await FB.deleteDoc(dc(c,id)).catch(()=>{});
+        await FB.deleteUser(u);n++;}catch(e){}
+      try{await FB.signOut(D.auth);}catch(e){}}}
+  catch(e){}
+  PRO.demoBusy=false;PRO.demoMsg=n+' '+L('alunos fictícios removidos','demo students removed','alumnos ficticios quitados');PRO.share={};PRO.sel=null;await proLinksLoad(true);render();}
+
 Object.assign(A,{
+ demomk:()=>demoCreate(),
+ demorm:()=>modal(L('Remover alunos fictícios?','Remove demo students?','¿Quitar alumnos ficticios?'),`<p>${L('As 20 contas de demonstração e tudo o que foi enviado para elas serão apagados.','The 20 demo accounts and everything sent to them will be deleted.','Se borrarán las 20 cuentas de demostración y todo lo enviado a ellas.')}</p>`,[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Remover','Remove','Quitar'),c:'primary',fn:()=>{closeModal();demoRemove();}}]),
+ admdev:b=>{const id=b.dataset.id;const r=(PRO.adm.reqs||[]).find(x=>x.id===id),p=(PRO.adm.pros||[]).find(x=>x.id===id),x=r||p||{};
+   modal(L('Tornar conta oficial?','Make it the official account?','¿Hacerla cuenta oficial?'),`<p><b>${esc(x.name||'')}</b> ${esc(x.email||'')}</p><p style="margin-top:8px">${L('Esta conta passa a ter a função de desenvolvedor (painel, aprovação de pedidos, moderação) e de personal trainer.','This account gets the developer role (panel, request approval, moderation) and the personal trainer role.','Esta cuenta tendrá la función de desarrollador (panel, aprobación de solicitudes, moderación) y de entrenador personal.')}</p>`,
+    [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Confirmar','Confirm','Confirmar'),c:'primary',fn:async()=>{closeModal();
+      try{if(!p||p.status!=='approved')await FB.setDoc(D_('pros',id),{status:'approved',kind:'trainer',name:x.name||'Grow Up',reg:x.reg||'',country:x.country||'',city:x.city||'',email:x.email||'',at:Date.now()});
+        if(r&&r.status==='pending')await FB.updateDoc(D_('proReqs',id),{status:'approved',decidedAt:Date.now()});
+        await FB.setDoc(D_('admins',id),{email:x.email||'',name:x.name||'',at:Date.now(),by:CL.user.uid});toast(L('Conta oficial definida','Official account set','Cuenta oficial definida'));}catch(e){toast(cErr(e));}admProLoad();}}]);},
+ admlock:()=>modal(L('Remover acesso da conta pessoal?','Remove access from the personal account?','¿Quitar acceso de la cuenta personal?'),`<p>${esc(ADMIN_EMAIL)} ${L('deixa de ver o painel de desenvolvedor e de aprovar pedidos. Só as contas oficiais (como esta) mantêm essas funções.','will no longer see the developer panel or approve requests. Only official accounts (like this one) keep these roles.','dejará de ver el panel de desarrollador y de aprobar solicitudes. Solo las cuentas oficiales (como esta) mantienen esas funciones.')}</p>`,
+   [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Remover','Remove','Quitar'),c:'primary',fn:async()=>{closeModal();try{await FB.setDoc(D_('config','adminLock'),{at:Date.now(),by:CL.user.uid});CL.adminLock=true;toast(L('Pronto: a conta pessoal não é mais desenvolvedora','Done: the personal account is no longer a developer','Listo: la cuenta personal ya no es desarrolladora'));}catch(e){toast(cErr(e));}render();}}]),
  prolink:()=>linkByCode(($('#pro-code')||{}).value),
  prounlink:()=>{const l=PRO.myLinks[0];if(!l)return;modal(L('Encerrar vínculo?','End link?','¿Terminar vínculo?'),`<p>${esc(l.proName||'')} ${L('deixa de ver seus dados e de editar suas fichas. Sua ficha atual e seu histórico continuam com você.','will no longer see your data or edit your plans. Your current plan and history stay with you.','dejará de ver tus datos y de editar tus rutinas. Tu rutina actual y tu historial se quedan contigo.')}</p>`,[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Encerrar','End','Terminar'),c:'primary',fn:()=>{closeModal();unlink(l,false);}}]);},
  probody:b=>{const l=PRO.myLinks[0];if(!l||((l.perms&&l.perms.body)||'none')===b.dataset.v)return;setBodyPerm(b.dataset.v);},
