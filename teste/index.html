@@ -1062,6 +1062,11 @@ html[data-theme=light] .wkstrip .wd.plan i{border-color:#6E9A33}
 html[data-theme=light] .bnav.fnav button.live:not(.on)::before{background:#6E9A33}
 html[data-theme=light] .dhero:not(.noimg) .chip.red{background:#A7CF6B;color:#0F1A04}
 html[data-theme=light] .dhero:not(.noimg) .dh-ey,html[data-theme=light] .dhero:not(.noimg) .wk span{color:#B9DB86}
+.pfverb{position:absolute;right:-4px;bottom:-4px;display:flex;border-radius:50%;background:var(--bg);padding:2px}
+.pfverb .verb{margin:0}
+.savw{position:relative;display:inline-flex;flex:none}
+.savb{position:absolute;right:-3px;bottom:-3px;display:flex;border-radius:50%;background:var(--bg);padding:1px}
+.savb .verb{margin:0}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -3734,7 +3739,7 @@ function pfPhoto(size){size=size||88;if(typeof isOfficial==='function'&&isOffici
   const inner=own?`<img data-img="${own}" alt="">`:url?`<img src="${esc(url)}" alt="" referrerpolicy="no-referrer">`:`<span>${esc(((S.profile.name||'?').trim()[0]||'?').toUpperCase())}</span>`;
   return `<div class="pfp" style="width:${size}px;height:${size}px">${inner}</div>`;}
 function renderProfile(){const p=S.profile,g=gameStats();const c=consistency();
-  let h=`<div class="pfhead"><div class="pfwrap"><button class="pfpbtn" data-act="pfmenu" aria-label="${L('Foto de perfil','Profile photo','Foto de perfil')}">${pfPhoto(92)}</button><label class="pfedit" aria-label="${L('Trocar foto','Change photo','Cambiar foto')}">${svgSz(IC.cam,16)}<input type="file" accept="image/*" data-file="pfphoto"></label></div>
+  let h=`<div class="pfhead"><div class="pfwrap"><button class="pfpbtn" data-act="pfmenu" aria-label="${L('Foto de perfil','Profile photo','Foto de perfil')}">${pfPhoto(92)}</button>${typeof isOfficial==='function'&&isOfficial()?`<span class="pfverb">${verBadge(30)}</span>`:`<label class="pfedit" aria-label="${L('Trocar foto','Change photo','Cambiar foto')}">${svgSz(IC.cam,16)}<input type="file" accept="image/*" data-file="pfphoto"></label>`}</div>
    <div class="grow" style="min-width:0"><div class="hd pfname">${esc(p.name||L('Seu nome','Your name','Tu nombre'))}${typeof isOfficial==='function'&&isOfficial()?verBadge(22):''}</div><div class="chips" style="margin-top:6px"><span class="chip red">${esc(lvName(p.level))}</span><span class="chip">${esc(goalName(p.goal))}</span></div></div>
    </div>`;
   {const cw=curWeight(),toGoal=Math.max(0,cw-num(p.metaMax)),dp=dayPlan(today()),delta=cw-num(p.pesoInicial);
@@ -4662,9 +4667,11 @@ const myName=()=>S.profile.name||(CL.user&&(CL.user.name||(CL.user.email||'').sp
 const myPhoto=()=>S.profile.photoSoc||(CL.user&&CL.user.photo)||S.profile.photoURL||null;
 const myThumb=()=>S.profile.photoThumb||(CL.user&&CL.user.photo)||S.profile.photoURL||null;
 const uName=uid=>uid===SOC.uid?myName():((SOC.users[uid]&&SOC.users[uid].name)||'');
-const uPh=uid=>uid===SOC.uid?myPhoto():(SOC.users[uid]&&SOC.users[uid].photo);
+const uPh=uid=>{const p=uid===SOC.uid?myPhoto():(SOC.users[uid]&&SOC.users[uid].photo);return typeof OFFICIAL_ICON!=='undefined'&&p===OFFICIAL_ICON&&!(CL.offUids||[]).includes(uid)?null:p;};
 function uPhoto(url,name,size,ring){size=size||40;const inner=url?`<img class="sav" src="${esc(url)}" style="width:${size}px;height:${size}px" alt="" referrerpolicy="no-referrer">`:`<span class="sav ini" style="width:${size}px;height:${size}px;font-size:${Math.round(size*.42)}px">${esc((name||'?').trim().charAt(0).toUpperCase())}</span>`;
-  return ring?`<span class="ring ${ring}">${inner}</span>`:inner;}
+  const off=typeof OFFICIAL_ICON!=='undefined'&&url===OFFICIAL_ICON&&typeof verBadge==='function';
+  const out=ring?`<span class="ring ${ring}">${inner}</span>`:inner;
+  return off?`<span class="savw">${out}<span class="savb">${verBadge(Math.max(14,Math.round(size*.36)))}</span></span>`:out;}
 function agoMs(ts){if(!ts)return '';const m=Math.round((Date.now()-ts)/60e3);if(m<1)return L('agora','now','ahora');if(m<60)return m+' min';const h=Math.round(m/60);if(h<24)return h+' h';const d=Math.round(h/24);return d<7?d+' d':fmtD(localYmd(ts));}
 function lastTxt(d){if(!d)return L('sem treinos ainda','no workouts yet','sin entrenos aún');const n=dd(today(),d);return n<=0?L('treinou hoje','trained today','entrenó hoy'):n===1?L('treinou ontem','trained yesterday','entrenó ayer'):L(`último treino há ${n} dias`,`last workout ${n} days ago`,`último entreno hace ${n} días`);}
 const dots7=d7=>`<span class="d7">${(d7||[0,0,0,0,0,0,0]).map(x=>`<i class="${x?'on':''}"></i>`).join('')}</span>`;
@@ -5308,7 +5315,7 @@ const ADMIN_EMAIL='guimaraeswin@gmail.com';
 /* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
    o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
 const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
-const BUILD_AT="261125.1653";
+const BUILD_AT="261125.1707";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -5523,6 +5530,7 @@ const kindName=k=>k==='nutri'?L('Nutricionista','Nutritionist','Nutricionista'):
 async function proBoot(){if(!logged())return;const me=CL.user.uid;
   try{const a=await FB.getDoc(D_('admins',me));CL.dev=a.exists();}catch(e){CL.dev=false;}
   try{const k=await FB.getDoc(D_('config','adminLock'));CL.adminLock=k.exists();}catch(e){CL.adminLock=false;}
+  try{const o=await FB.getDoc(D_('config','official'));CL.offUids=o.exists()?(o.data().uids||[]):[];}catch(e){CL.offUids=[];}
   await officialAuto();
   try{const s=await FB.getDoc(D_('pros',me));PRO.me=s.exists()?s.data():null;}catch(e){PRO.me=null;}
   try{const r=await FB.getDoc(D_('proReqs',me));PRO.req=r.exists()?r.data():null;}catch(e){PRO.req=null;}
@@ -5543,8 +5551,13 @@ async function officialAuto(){if(!logged())return;const me=CL.user.uid;
         await FB.setDoc(D_('admins',id),{email:OFFICIAL_EMAIL,name:'Grow Up',at:Date.now(),by:me});}}}catch(e){}
   if(!isOfficial())return;
   if(S.profile.photoSoc!==OFFICIAL_ICON||S.profile.name!=='Grow Up'){S.profile.photoSoc=OFFICIAL_ICON;S.profile.name='Grow Up';persist('profile');}
+  /* foto e nome oficiais também no Social (documento público do usuário, código e sugestões) */
+  try{await FB.updateDoc(D_('users',me),{photo:OFFICIAL_ICON,name:'Grow Up'});}catch(e){}
+  try{if(CL.code)await FB.setDoc(D_('codes',CL.code),{uid:me,name:'Grow Up',photo:OFFICIAL_ICON});}catch(e){}
+  try{if(typeof pubSync==='function')pubSync();}catch(e){}
   if(!CL.dev){if(!PRO.req||PRO.req.status!=='approved'){try{const d={uid:me,kind:'trainer',name:'Grow Up',country:'Brasil',city:'',reg:'',note:'Conta oficial do Grow Up',email:OFFICIAL_EMAIL,status:'pending',at:Date.now(),lang:LANG};await FB.setDoc(D_('proReqs',me),d);PRO.req=d;}catch(e){}}return;}
   if(!CL.adminLock){try{await FB.setDoc(D_('config','adminLock'),{at:Date.now(),by:me});CL.adminLock=true;}catch(e){}}
+  if(!(CL.offUids||[]).includes(me)){try{await FB.setDoc(D_('config','official'),{uids:[me],at:Date.now()});CL.offUids=[me];}catch(e){}}
   try{const s=await FB.getDoc(D_('pros',me));if(s.exists())PRO.me=s.data();}catch(e){}
   if(proOn()&&!localStorage.getItem('gu:demo10:'+me)){localStorage.setItem('gu:demo10:'+me,'1');
     try{const q=await FB.getDocs(FB.query(C_('links'),FB.where('pro','==',me)));if(!q.docs.some(x=>x.data().demo))setTimeout(demoCreate,1500);}catch(e){}}}
