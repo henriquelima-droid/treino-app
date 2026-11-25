@@ -5346,7 +5346,7 @@ const ADMIN_EMAIL='guimaraeswin@gmail.com';
 /* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
    o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
 const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
-const BUILD_AT="261125.1717";
+const BUILD_AT="261125.1730";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -5590,8 +5590,8 @@ async function officialAuto(){if(!logged())return;const me=CL.user.uid;
   if(!CL.adminLock){try{await FB.setDoc(D_('config','adminLock'),{at:Date.now(),by:me});CL.adminLock=true;}catch(e){}}
   if(!(CL.offUids||[]).includes(me)){try{await FB.setDoc(D_('config','official'),{uids:[me],at:Date.now()});CL.offUids=[me];}catch(e){}}
   try{const s=await FB.getDoc(D_('pros',me));if(s.exists())PRO.me=s.data();}catch(e){}
-  if(proOn()&&!localStorage.getItem('gu:demo10:'+me)){localStorage.setItem('gu:demo10:'+me,'1');
-    try{const q=await FB.getDocs(FB.query(C_('links'),FB.where('pro','==',me)));if(!q.docs.some(x=>x.data().demo))setTimeout(demoCreate,1500);}catch(e){}}}
+  /* cria (ou atualiza para a versão com todas as medidas) os alunos de demonstração uma vez */
+  if(proOn()&&!localStorage.getItem('gu:demo10v2:'+me)){localStorage.setItem('gu:demo10v2:'+me,'1');setTimeout(demoCreate,1500);}}
 
 /* ---------- lado do ALUNO ---------- */
 async function myLinksLoad(){if(!logged())return;const me=CL.user.uid;
@@ -5933,7 +5933,9 @@ function proBodyHtml(l,sh,imp){const canEd=l.perms&&l.perms.body==='edit';let h=
     const meta=num(sh.profile&&sh.profile.metaMax);if(meta)h+=`<div class="sub" style="font-size:12px">${L('Meta: ','Goal: ','Meta: ')}${fmtN(meta)} ${uw} · ${L('faltam ','to go: ','faltan ')}${fmtN(Math.abs(last.kg-meta))} ${uw}</div>`;}
   else h+=`<div class="sub" style="margin-top:6px">${L('Sem pesagens.','No weigh-ins.','Sin pesajes.')}</div>`;
   h+=`</div>`;
-  const ms=[...(sh.measures||[])].filter(m=>m&&m.date).sort((x,y)=>x.date.localeCompare(y.date));
+  /* nomes antigos (pt) dos campos → nomes usados pelo app */
+  const MK={cintura:'waist',quadril:'hip',braco:'arm',peito:'chest',coxa:'thigh',panturrilha:'calf',abdômen:'abdomen',gordura:'bf'};
+  const ms=[...(sh.measures||[])].filter(m=>m&&m.date).map(m=>{const o=Object.assign({},m);Object.keys(MK).forEach(k=>{if(o[k]!=null&&o[MK[k]]==null)o[MK[k]]=o[k];});return o;}).sort((x,y)=>x.date.localeCompare(y.date));
   h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Medidas e composição corporal','Measurements & body composition','Medidas y composición corporal')}</div>`;
   if(!ms.length)return h+`<div class="sub" style="margin-top:6px">${L('Sem medidas registradas.','No measurements logged.','Sin medidas registradas.')}</div></div>`;
   const keys=MFIELDS.map(f=>f[0]).filter(k=>ms.some(m=>m[k]!=null));if(!PRO.msSel||!keys.includes(PRO.msSel))PRO.msSel=keys.includes('waist')?'waist':keys[0];
