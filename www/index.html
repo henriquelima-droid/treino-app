@@ -1067,6 +1067,39 @@ html[data-theme=light] .dhero:not(.noimg) .dh-ey,html[data-theme=light] .dhero:n
 .savw{position:relative;display:inline-flex;flex:none}
 .savb{position:absolute;right:-3px;bottom:-3px;display:flex;border-radius:50%;background:var(--bg);padding:1px}
 .savb .verb{margin:0}
+/* treinos e medidas do aluno (visão do personal) */
+.wkbars{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:6px;align-items:end;height:104px;margin:12px 0 6px}
+.wkb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+.wkb i{display:block;width:100%;max-width:26px;min-height:3px;border-radius:7px 7px 3px 3px;background:var(--s3)}
+.wkb i.full{background:var(--red)}
+.wkb span{font-family:Archivo,Inter,sans-serif;font-weight:700;font-size:12px}
+.wkb small{font-size:9.5px;color:var(--mut)}
+.lgc{background:var(--s1);border:1px solid var(--s2);border-radius:18px;margin-bottom:8px;overflow:hidden}
+.lgh{display:flex;align-items:center;gap:12px;width:100%;padding:10px 12px;text-align:left}
+.lgd{display:flex;flex-direction:column;align-items:center;justify-content:center;width:46px;height:46px;border-radius:14px;background:var(--s2);flex:none}
+.lgd b{font-family:Archivo,Inter,sans-serif;font-size:18px;line-height:1}
+.lgd small{font-size:10px;color:var(--mut);text-transform:uppercase}
+.lgc.open .lgd{background:var(--redSoft);color:var(--redTx)}
+.lgh .grow>b{display:block;font-size:14px}
+.lgm{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.lgm i{font-style:normal;font-size:11.5px;color:var(--mut);background:var(--s2);border-radius:999px;padding:2px 8px}
+.lgb{padding:2px 12px 12px}
+.lge{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-top:1px solid var(--s2)}
+.lge b{display:block;font-size:13px;margin-bottom:5px}
+.lgs{display:flex;flex-wrap:wrap;gap:5px}
+.lgs span{font-size:11.5px;font-weight:600;background:var(--s2);border-radius:8px;padding:3px 7px}
+.lgs span.top{background:var(--redSoft);color:var(--redTx)}
+.lgs span.no{color:var(--mut);font-weight:500}
+.mhist{overflow-x:auto;border:1px solid var(--s2);border-radius:16px;-webkit-overflow-scrolling:touch}
+.mhist table{border-collapse:collapse;width:100%;font-size:12.5px;white-space:nowrap}
+.mhist th{background:var(--s2);color:var(--mut);font-size:10.5px;text-transform:uppercase;letter-spacing:.04em;font-weight:600;padding:8px 10px;text-align:right}
+.mhist td{padding:8px 10px;border-top:1px solid var(--s2);text-align:right;vertical-align:top}
+.mhist td:first-child,.mhist th:first-child{text-align:left;position:sticky;left:0;background:var(--s1);font-weight:600}
+.mhist th:first-child{background:var(--s2)}
+.mhist td b{display:block;font-family:Archivo,Inter,sans-serif}
+.mhist small{display:block;font-size:10.5px;font-weight:600}
+.mhist small.dn{color:var(--redTx)}.mhist small.up{color:var(--embTx)}
+.bign{white-space:nowrap}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -5313,7 +5346,7 @@ const ADMIN_EMAIL='guimaraeswin@gmail.com';
 /* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
    o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
 const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
-const BUILD_AT="261125.1707";
+const BUILD_AT="261125.1717";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
@@ -5722,27 +5755,15 @@ function renderAluno(){const l=PRO.links.find(x=>x.id===PRO.sel);if(!l){PRO.sel=
     if(pl&&pl.workouts)Object.keys(pl.workouts).forEach(c=>{const w=pl.workouts[c];
       h+=`<div class="card"><div class="hd" style="font-size:17px">${esc(wName2(w,c))}</div>${P(w,'focus')?`<div class="sub">${esc(P(w,'focus'))}</div>`:''}
         <div class="exl" style="margin-top:8px">${(w.exercises||[]).map((e,i)=>`<div class="exi"><span class="acc-th">${exThumb(vidOf(e),40)}</span><div class="grow"><div class="n">${e.superset?'<span class="bistag sm">BI</span> ':''}${esc(P(e,'name'))}</div><div class="m">${esc(e.sets)} × ${esc(e.reps||((e.repMin||'')+'–'+(e.repMax||'')))} · RIR ${esc(e.rir||'—')} · ${mmss(e.rest||60)}</div></div></div>`).join('')}</div></div>`;});}
-  else if(PRO.tab==='logs'){const ss=[...(sh.sessions||[])].filter(x=>x.type==='workout'||x.type==='cardio').sort((a,b)=>b.date.localeCompare(a.date)||(b.endedAt||0)-(a.endedAt||0)).slice(0,40);
-    if(!ss.length)h+=`<div class="empty">${L('Nenhum treino registrado nos últimos 6 meses.','No workouts logged in the last 6 months.','Ningún entreno en los últimos 6 meses.')}</div>`;
-    ss.forEach(x=>{const open=!!PRO.open[x.id];let sets=0,vol=0;(x.exercises||[]).forEach(e=>(e.sets||[]).forEach(t=>{if(t.done){sets++;vol+=(num(t.kg)||0)*(e.unit==='s'?0:(num(t.reps)||0));}}));
-      const dur=x.startedAt&&x.endedAt?Math.round((x.endedAt-x.startedAt)/6e4):null;const w=plW(sh.plan,x.workout);
-      const title=x.type==='cardio'?L('Cardio','Cardio','Cardio')+(x.device?' · '+devName(x.device):''):(w?wName2(w,x.workout):(x.title||L('Treino','Workout','Entreno')));
-      h+=`<div class="card" style="padding:0"><button class="acc-h" data-act="allog" data-id="${esc(x.id)}" style="padding:12px 14px"><div class="acc-t"><b>${esc(title)}</b><span>${esc(fmtLong(x.date))}${x.type==='workout'?' · '+sets+' '+L('séries','sets','series')+(vol?' · '+fmtN(vol/1000,1)+' t':''):''}${dur?' · '+dur+' min':''}${x.min?' · '+x.min+' min':''}</span></div><span class="acc-ch" style="${open?'transform:rotate(90deg)':''}">${IC.r}</span></button>
-        ${open&&x.type==='workout'?`<div style="padding:0 14px 12px">${(x.exercises||[]).map(e=>{const ds=(e.sets||[]).filter(t=>t.done);return `<div class="logex"><b>${esc(P(e,'name'))}</b><span>${ds.length?ds.map(t=>`${esc(t.kg||0)}${imp?'lb':'kg'}×${esc(t.reps||0)}`).join(' · '):L('não feito','not done','no hecho')}</span></div>`;}).join('')}${x.note?`<div class="note-box">${esc(x.note)}</div>`:''}</div>`:''}</div>`;});}
-  else{const b=[...(sh.body||[])].sort((a,b2)=>b2.date.localeCompare(a.date)),ms=[...(sh.measures||[])].sort((a,b2)=>b2.date.localeCompare(a.date));const canEd=l.perms&&l.perms.body==='edit';
-    if(canEd)h+=`<div class="row" style="gap:8px;margin-bottom:12px"><button class="btn grow" data-act="albw">+ ${L('Peso','Weight','Peso')}</button><button class="btn grow" data-act="albm">+ ${L('Medidas e % de gordura','Measurements & body fat','Medidas y % de grasa')}</button></div>`;
-    const first=b[b.length-1],last=b[0];
-    h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Peso','Weight','Peso')}</div>${last?`<div class="row" style="margin:8px 0;gap:16px"><div><div class="bign">${fmtN(last.kg)}<small> ${imp?'lb':'kg'}</small></div><div class="sub">${esc(fmtD(last.date))}</div></div>${first&&first!==last?`<div class="sub">${L('Desde ','Since ','Desde ')}${esc(fmtD(first.date))}: <b style="color:var(--tx)">${last.kg-first.kg>0?'+':''}${fmtN(last.kg-first.kg)} ${imp?'lb':'kg'}</b></div>`:''}</div>`:`<div class="sub">${L('Sem pesagens.','No weigh-ins.','Sin pesajes.')}</div>`}
-      ${b.slice(0,12).map(x=>`<div class="logex"><b>${esc(fmtD(x.date))}</b><span>${fmtN(x.kg)} ${imp?'lb':'kg'}${x.src==='coach'?' · '+L('registrado por você','logged by you','registrado por ti'):''}</span></div>`).join('')}</div>`;
-    const keys=[['bf',L('% gordura','Body fat %','% grasa'),'%'],['cintura',L('Cintura','Waist','Cintura'),imp?'in':'cm'],['abdomen',L('Abdômen','Abdomen','Abdomen'),imp?'in':'cm'],['quadril',L('Quadril','Hips','Cadera'),imp?'in':'cm'],['peito',L('Peito','Chest','Pecho'),imp?'in':'cm'],['braco',L('Braço','Arm','Brazo'),imp?'in':'cm'],['coxa',L('Coxa','Thigh','Muslo'),imp?'in':'cm'],['panturrilha',L('Panturrilha','Calf','Pantorrilla'),imp?'in':'cm']];
-    h+=`<div class="card"><div class="hd" style="font-size:18px">${L('Medidas','Measurements','Medidas')}</div>${ms.length?ms.slice(0,8).map(x=>`<div class="logex"><b>${esc(fmtD(x.date))}</b><span>${keys.filter(k=>x[k[0]]!=null&&x[k[0]]!=='').map(k=>`${k[1]} ${fmtN(x[k[0]])}${k[2]==='%'?'%':' '+k[2]}`).join(' · ')||'—'}</span></div>`).join(''):`<div class="sub">${L('Sem medidas.','No measurements.','Sin medidas.')}</div>`}</div>`;}
+  else if(PRO.tab==='logs')h+=proLogsHtml(sh,imp);
+  else h+=proBodyHtml(l,sh,imp);
   return h;}
 function proPickPlan(l){const ps=allPrograms().filter(p=>!p.coach);
   modal(L('Escolher ficha para o aluno','Choose a plan for the student','Elegir rutina para el alumno'),`<div class="sub" style="margin-bottom:8px">${L('A ficha escolhida é enviada para o aluno. Depois você pode editar só para ele.','The chosen plan is sent to the student. You can then edit it just for them.','La rutina elegida se envía al alumno. Luego puedes editarla solo para él.')}</div>
     <div class="pillset" style="flex-direction:column;align-items:stretch">${ps.slice(0,40).map(p=>`<button class="pill" data-act="alsend" data-id="${esc(p.id)}" style="text-align:left">${esc(P(p,'name'))}</button>`).join('')}</div>`,[{l:L('Fechar','Close','Cerrar'),fn:closeModal}]);}
 function proRecForm(l,kind){const imp=(PRO.share[l.id]||{}).units==='imp';
   const f=kind==='body'?`<div class="field"><label>${L('Peso','Weight','Peso')} (${imp?'lb':'kg'})</label><input id="cr-kg" inputmode="decimal"></div>`
-    :[['bf','% gordura'],['cintura','Cintura'],['abdomen','Abdômen'],['quadril','Quadril'],['peito','Peito'],['braco','Braço'],['coxa','Coxa'],['panturrilha','Panturrilha']].map(k=>`<div class="field"><label>${esc(k[0]==='bf'?L('% de gordura','Body fat %','% de grasa'):k[1])}${k[0]==='bf'?'':' ('+(imp?'in':'cm')+')'}</label><input data-cr="${k[0]}" inputmode="decimal"></div>`).join('');
+    :MFIELDS.map(k=>`<div class="field"><label>${esc(L(k[1],k[2]))} (${k[3]==='cm'?(imp?'in':'cm'):k[3]})</label><input data-cr="${k[0]}" inputmode="decimal"></div>`).join('');
   modal(kind==='body'?L('Registrar peso','Log weight','Registrar peso'):L('Registrar medidas','Log measurements','Registrar medidas'),`<div class="field"><label>${L('Data (AAAA-MM-DD)','Date (YYYY-MM-DD)','Fecha (AAAA-MM-DD)')}</label><input id="cr-d" value="${today()}"></div><div class="g2">${f}</div>`,
    [{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Salvar','Save','Guardar'),c:'primary',fn:()=>{const d=$('#cr-d').value.trim();if(!isDate(d)){toast(L('Data inválida','Invalid date','Fecha no válida'));return;}
      if(kind==='body'){const kg=num($('#cr-kg').value);if(!kg){toast(L('Informe o peso','Enter the weight','Indica el peso'));return;}closeModal();coachAddRec(l,'body',{date:d,kg});}
@@ -5806,7 +5827,7 @@ function demoData(i){const [name,sex,age,h,goal,level]=DEMO_PPL[i],r=rnd(i+7),t=
   if(i%3===0)for(let k=3;k<60;k+=9)sessions.push({id:'democ'+i+'-'+k,date:addD(t,-k),type:'cardio',device:['Esteira','Bike','Escada'][k%3],min:20+Math.floor(r()*20),updatedAt:Date.now(),demo:true});
   const w0=sex==='F'?58+r()*22:72+r()*28,trend={fatloss:-.45,hypertrophy:.18,glutes:.05,recomp:-.1,health:-.15,strength:.1,endurance:-.2}[goal]||0;
   const body=[],measures=[];for(let k=56;k>=0;k-=7){const wk=(56-k)/7;body.push({date:addD(t,-k-(i%3)),kg:Math.round((w0+trend*wk+(r()-.5)*.6)*10)/10,t:Date.now()});
-    if(k%14===0){const bf=(sex==='F'?27:19)+(r()-.5)*6+trend*wk*.6;measures.push({date:addD(t,-k-(i%3)),bf:Math.round(bf*10)/10,cintura:Math.round((sex==='F'?72:88)+(w0-70)*.4+trend*wk*1.2),quadril:Math.round((sex==='F'?100:98)+(w0-70)*.3),braco:Math.round((sex==='F'?28:35)+(r()-.5)*3),t:Date.now()});}}
+    if(k%14===0||k===0){const bf=(sex==='F'?27:19)+(r()-.5)*6+trend*wk*.6;const wa=(sex==='F'?72:88)+(w0-70)*.4+trend*wk*1.2;measures.push({date:addD(t,-k-(i%3)),bf:Math.round(bf*10)/10,waist:Math.round(wa*10)/10,abdomen:Math.round((wa+4+trend*wk*.4)*10)/10,chest:Math.round(((sex==='F'?90:102)+(w0-70)*.35-trend*wk*.2)*10)/10,hip:Math.round(((sex==='F'?100:98)+(w0-70)*.3+trend*wk*.5)*10)/10,arm:Math.round(((sex==='F'?28:35)+(w0-70)*.08-trend*wk*.15)*10)/10,thigh:Math.round(((sex==='F'?58:57)+(w0-70)*.12+trend*wk*.3)*10)/10,calf:Math.round(((sex==='F'?36:38)+(w0-70)*.05)*10)/10,t:Date.now()});}}
   const perm=['edit','view','none'][i%3];
   const o={v:1,at:Date.now(),name,units:'met',profile:{sex,idade:age,altura:h,goal,level,days,gym:'rede',pesoInicial:body[0].kg,metaMax:Math.round(body[0].kg+(trend<0?-6:trend>0?4:0))},plan:pl,sessions};
   if(perm!=='none'){o.body=body;o.measures=measures;}
@@ -5876,6 +5897,61 @@ Object.assign(A,{
  admprorev:b=>modal(L('Revogar acesso?','Revoke access?','¿Revocar acceso?'),`<p>${L('O profissional perde o acesso à aba Alunos. Os alunos continuam com suas fichas.','The professional loses access to the Students tab. Students keep their plans.','El profesional pierde el acceso a la pestaña Alumnos. Los alumnos conservan sus rutinas.')}</p>`,[{l:L('Cancelar','Cancel','Cancelar'),fn:closeModal},{l:L('Revogar','Revoke','Revocar'),c:'primary',fn:async()=>{closeModal();try{await FB.updateDoc(D_('pros',b.dataset.id),{status:'revoked',revokedAt:Date.now()});}catch(e){toast(cErr(e));}admProLoad();}}])});
 
 function verBadge(sz){sz=sz||18;return `<span class="verb" title="${L('Conta verificada','Verified account','Cuenta verificada')}" aria-label="${L('Conta verificada','Verified account','Cuenta verificada')}"><svg viewBox="0 0 24 24" width="${sz}" height="${sz}" aria-hidden="true"><path fill="var(--red)" d="M12 1.8l2.5 1.8 3.1-.2.9 3 2.6 1.7-1 2.9 1 2.9-2.6 1.7-.9 3-3.1-.2L12 22.2l-2.5-1.8-3.1.2-.9-3-2.6-1.7 1-2.9-1-2.9 2.6-1.7.9-3 3.1.2z"/><path d="M8 12.3l2.6 2.6L16.2 9.3" fill="none" stroke="var(--onAcc)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>`;}
+
+/* ---------- treinos do aluno (visão do personal) ---------- */
+function sesStats(x){let sets=0,vol=0;(x.exercises||[]).forEach(e=>(e.sets||[]).forEach(t=>{if(t.done){sets++;vol+=(num(t.kg)||0)*(e.unit==='s'?0:(num(t.reps)||0));}}));
+  return{sets,vol,dur:x.startedAt&&x.endedAt?Math.round((x.endedAt-x.startedAt)/6e4):(x.min||null)};}
+function proLogsHtml(sh,imp){const all=[...(sh.sessions||[])].filter(x=>x.type==='workout'||x.type==='cardio').sort((a,b)=>b.date.localeCompare(a.date)||(b.endedAt||0)-(a.endedAt||0));
+  if(!all.length)return `<div class="empty">${L('Nenhum treino registrado nos últimos 6 meses.','No workouts logged in the last 6 months.','Ningún entreno en los últimos 6 meses.')}</div>`;
+  const ws=all.filter(x=>x.type==='workout'),cur=weekStart(today());const wk=[];for(let k=7;k>=0;k--){const a=addD(cur,-7*k),b=addD(a,6);const xs=ws.filter(x=>x.date>=a&&x.date<=b);wk.push({a,n:xs.length,vol:xs.reduce((t,x)=>t+sesStats(x).vol,0)});}
+  const mx=Math.max(1,...wk.map(w=>w.n)),plan=sh.plan&&sh.plan.phases&&sh.plan.phases[0]?sh.plan.phases[0].schedule.filter(c=>sh.plan.workouts[c]).length:0;
+  const v4=wk.slice(-4).reduce((t,w)=>t+w.vol,0),v4p=wk.slice(0,4).reduce((t,w)=>t+w.vol,0);
+  let h=`<div class="card"><div class="row" style="align-items:flex-end"><div class="grow"><div class="lbl3">${L('Frequência · 8 semanas','Frequency · 8 weeks','Frecuencia · 8 semanas')}</div><div class="hd" style="font-size:22px">${wk.slice(-4).reduce((t,w)=>t+w.n,0)} <small class="sub" style="font-size:13px">${L('treinos nas últimas 4 semanas','workouts in the last 4 weeks','entrenos en las últimas 4 semanas')}</small></div></div>
+     ${v4p?`<span class="chip ${v4>=v4p?'red':'emb'}">${L('volume ','volume ','volumen ')}${v4>=v4p?'+':''}${Math.round((v4/v4p-1)*100)}%</span>`:''}</div>
+     <div class="wkbars">${wk.map(w=>`<div class="wkb"><i style="height:${Math.round(w.n/Math.max(mx,plan||1)*100)}%" class="${plan&&w.n>=plan?'full':''}"></i><span>${w.n}</span><small>${esc(fmtD(w.a).replace(/\/\d{4}$/,''))}</small></div>`).join('')}</div>
+     ${plan?`<div class="sub" style="font-size:12px">${L('Planejado: ','Planned: ','Planificado: ')}${plan} ${L('por semana','per week','por semana')}</div>`:''}</div>`;
+  let lastWk=null;
+  all.slice(0,40).forEach(x=>{const w0=weekStart(x.date);if(w0!==lastWk){lastWk=w0;h+=`<div class="lbl2">${w0===cur?L('Esta semana','This week','Esta semana'):L('Semana de ','Week of ','Semana del ')+esc(fmtD(w0))}</div>`;}
+    const st=sesStats(x),open=!!PRO.open[x.id],w=plW(sh.plan,x.workout),dt=pd(x.date);
+    const title=x.type==='cardio'?L('Cardio','Cardio','Cardio')+(x.device?' · '+devName(x.device):''):(w?wName2(w,x.workout):(x.title||L('Treino','Workout','Entreno')));
+    h+=`<div class="lgc ${open?'open':''}"><button class="lgh" data-act="allog" data-id="${esc(x.id)}"><span class="lgd"><b>${dt.getDate()}</b><small>${esc(String(DOWS[LANG][dt.getDay()]||'').slice(0,3))}</small></span>
+      <span class="grow"><b>${esc(title)}</b><span class="lgm">${x.type==='workout'?`<i>${st.sets} ${L('séries','sets','series')}</i>${st.vol?`<i>${fmtN(st.vol/1000,1)} t</i>`:''}`:''}${st.dur?`<i>${st.dur} min</i>`:''}</span></span>${x.type==='workout'?`<span class="acc-ch" style="${open?'transform:rotate(90deg)':''}">${IC.r}</span>`:''}</button>`;
+    if(open&&x.type==='workout')h+=`<div class="lgb">${(x.exercises||[]).map(e=>{const ds=(e.sets||[]).filter(t=>t.done);const top=ds.reduce((m,t)=>(num(t.kg)||0)>(num(m&&m.kg)||0)?t:m,null);
+      return `<div class="lge"><span class="acc-th">${exThumb(vidOf(e),40)}</span><div class="grow"><b>${esc(P(e,'name'))}</b><div class="lgs">${ds.length?ds.map(t=>`<span class="${top===t&&num(t.kg)?'top':''}">${num(t.kg)?esc(t.kg)+(imp?'lb':'kg')+' × ':''}${esc(t.reps||0)}</span>`).join(''):`<span class="no">${L('não feito','not done','no hecho')}</span>`}</div></div></div>`;}).join('')}${x.note?`<div class="note-box">${esc(x.note)}</div>`:''}</div>`;
+    h+=`</div>`;});
+  return h;}
+
+/* ---------- peso, medidas e composição (visão do personal, igual à do aluno) ---------- */
+function proBodyHtml(l,sh,imp){const canEd=l.perms&&l.perms.body==='edit';let h='';
+  if(canEd)h+=`<div class="row" style="gap:8px;margin-bottom:12px"><button class="btn grow" data-act="albw">+ ${L('Peso','Weight','Peso')}</button><button class="btn grow" data-act="albm">+ ${L('Medidas','Measurements','Medidas')}</button></div>`;
+  const b=[...(sh.body||[])].filter(x=>x&&x.date&&x.kg).sort((x,y)=>x.date.localeCompare(y.date));const uw=imp?'lb':'kg';
+  h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Peso corporal','Body weight','Peso corporal')}</div>`;
+  if(b.length){const last=b[b.length-1],first=b[0],prev=b[b.length-2];const d=last.kg-first.kg;
+    h+=`<div class="row" style="margin:8px 0 4px;gap:14px;align-items:flex-end"><div><div class="bign">${fmtN(last.kg)}<small> ${uw}</small></div><div class="sub">${esc(fmtD(last.date))}</div></div>
+      <div class="chips">${prev?`<span class="chip">${L('vs anterior ','vs prev. ','vs anterior ')}${last.kg-prev.kg>0?'+':''}${fmtN(last.kg-prev.kg)}</span>`:''}${b.length>1?`<span class="chip ${d<0?'red':d>0?'emb':''}">${L('desde ','since ','desde ')}${esc(fmtD(first.date))}: ${d>0?'+':''}${fmtN(d)} ${uw}</span>`:''}</div></div>`;
+    h+=lineChart([{pts:b.map(x=>({x:x.date,y:x.kg})),color:'var(--red)',w:3,dots:true}]);
+    const meta=num(sh.profile&&sh.profile.metaMax);if(meta)h+=`<div class="sub" style="font-size:12px">${L('Meta: ','Goal: ','Meta: ')}${fmtN(meta)} ${uw} · ${L('faltam ','to go: ','faltan ')}${fmtN(Math.abs(last.kg-meta))} ${uw}</div>`;}
+  else h+=`<div class="sub" style="margin-top:6px">${L('Sem pesagens.','No weigh-ins.','Sin pesajes.')}</div>`;
+  h+=`</div>`;
+  const ms=[...(sh.measures||[])].filter(m=>m&&m.date).sort((x,y)=>x.date.localeCompare(y.date));
+  h+=`<div class="card"><div class="hd" style="font-size:20px">${L('Medidas e composição corporal','Measurements & body composition','Medidas y composición corporal')}</div>`;
+  if(!ms.length)return h+`<div class="sub" style="margin-top:6px">${L('Sem medidas registradas.','No measurements logged.','Sin medidas registradas.')}</div></div>`;
+  const keys=MFIELDS.map(f=>f[0]).filter(k=>ms.some(m=>m[k]!=null));if(!PRO.msSel||!keys.includes(PRO.msSel))PRO.msSel=keys.includes('waist')?'waist':keys[0];
+  const latest=(k,before)=>[...ms].reverse().find(m=>m[k]!=null&&(!before||m.date<before));
+  const f=v=>v==null?'—':`<b class="${v<0?'dn':v>0?'up':''}">${v>0?'+':''}${fmtN(v)}</b>`;
+  h+=`<div class="mtab"><div class="mrow mh"><span></span><span>${L('Atual','Now','Actual')}</span><span>${L('Anterior','Prev.','Anterior')}</span><span>${L('Início','Start','Inicio')}</span></div>`;
+  keys.forEach(k=>{const cur=latest(k),prev=cur?latest(k,cur.date):null,first=ms.find(m=>m[k]!=null);
+    h+=`<button class="mrow ${PRO.msSel===k?'on':''}" data-act="almsel" data-v="${k}"><span>${esc(mName(k))}</span><span><b>${fmtN(cur[k])}</b> ${mUnit(k)}</span><span>${f(prev?cur[k]-prev[k]:null)}</span><span>${f(first&&first.date!==cur.date?cur[k]-first[k]:null)}</span></button>`;});
+  h+=`</div>${lineChart([{pts:ms.filter(m=>m[PRO.msSel]!=null).map(m=>({x:m.date,y:m[PRO.msSel]})),color:'var(--red)',w:3,dots:true}])}<div class="sub" style="text-align:center">${esc(mName(PRO.msSel))} (${mUnit(PRO.msSel)}) · ${L('toque numa medida para ver o gráfico','tap a measurement to chart it','toca una medida para ver el gráfico')}</div>`;
+  /* uma coluna por data, com a variação em relação à medição anterior */
+  const ds=ms.slice(-8);
+  h+=`<div class="lbl2" style="margin-top:14px">${L('Histórico por data','History by date','Historial por fecha')}</div><div class="mhist"><table><thead><tr><th></th>${ds.map(m=>`<th>${esc(fmtD(m.date).replace(/\/\d{4}$/,''))}</th>`).join('')}</tr></thead><tbody>`;
+  keys.forEach(k=>{h+=`<tr><td>${esc(mName(k))}</td>`;ds.forEach((m,i)=>{const v=m[k];let pv=null;for(let j=ms.indexOf(m)-1;j>=0;j--)if(ms[j][k]!=null){pv=ms[j][k];break;}
+      const dv=v!=null&&pv!=null?v-pv:null;h+=`<td>${v!=null?`<b>${fmtN(v)}</b>${dv?`<small class="${dv<0?'dn':'up'}">${dv>0?'▲':'▼'} ${fmtN(Math.abs(dv))}</small>`:''}`:'<span class="sub">—</span>'}</td>`;});h+=`</tr>`;});
+  h+=`</tbody></table></div>`;
+  const w=latest('waist'),ht=num(sh.profile&&sh.profile.altura);if(w&&ht){const r=w.waist/ht;h+=`<div class="note-box">${L('Relação cintura/altura: ','Waist-to-height ratio: ','Relación cintura/altura: ')}<b style="color:var(--tx)">${fmtN(r,2)}</b> · ${r<0.5?L('abaixo de 0,5 (faixa saudável)','below 0.5 (healthy range)','por debajo de 0,5 (rango saludable)'):L('meta: abaixo de 0,5','goal: below 0.5','meta: por debajo de 0,5')}</div>`;}
+  return h+`</div>`;}
+Object.assign(A,{almsel:b=>{PRO.msSel=b.dataset.v;render();}});
 
 /* ---------- boot ---------- */
 ensureTick();/* o cronômetro não pode depender do restante da abertura dar certo */
