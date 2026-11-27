@@ -773,7 +773,7 @@ body.simmode #app{padding-top:34px}
 .mhow{margin-top:10px;border:1px solid var(--s2);border-radius:14px;background:rgba(255,255,255,.02)}
 .mhow summary{list-style:none;cursor:pointer;padding:11px 14px;font-weight:700;display:flex;align-items:center;gap:8px;color:var(--red)}
 .mhow summary::-webkit-details-marker{display:none}
-.mhowb{padding:0 14px 10px}.mhowb p{margin:8px 0;font-size:13.5px;line-height:1.45;color:var(--mut,#bbb)}.mhowb p b{display:block;color:var(--txt,#fff);margin-bottom:2px}
+.mhowb{padding:0 14px 10px}.mhowb p{margin:8px 0;font-size:13.5px;line-height:1.45;color:var(--mut,#bbb)}.mhowb p b{display:block;color:var(--tx);margin-bottom:2px}
 .conf{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:rgba(194,234,79,.08);border:1px solid rgba(194,234,79,.35);margin-bottom:12px}
 .conf svg{flex:none;color:var(--red);margin-top:2px}.conf b{display:block;font-size:15px}.conf span{display:block;font-size:13px;line-height:1.4;opacity:.85;margin-top:2px}
 .tscroll{max-height:46vh;overflow:auto;border:1px solid var(--s2);border-radius:14px;padding:4px 14px;background:rgba(0,0,0,.25)}
@@ -809,7 +809,7 @@ body.simmode .tgate .tscroll{max-height:max(150px,calc(100dvh - 634px - var(--sa
 .cdic{display:flex;align-items:center;justify-content:center;border-radius:12px;background:#0A0A0A;color:var(--red);flex:none}
 .cdt.on .cdic{background:var(--red);color:#0A0A0A}
 .cdsel{display:flex;align-items:center;gap:12px;padding:10px;margin-bottom:8px;border-radius:16px;background:var(--s2)}
-.cdsel .exv.ib.th{width:60px;height:60px}.cdsel .sub{font-size:12px}
+.cdsel .exv.ib.th{width:60px;height:60px;display:inline-flex;flex:none}.cdbtn{width:100%;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer}.cdbtn:active{filter:brightness(.95)}.cdbtn .cdgo{color:var(--mut);display:flex}.cdbtn .cdgo svg{width:18px;height:18px}.cdsel .sub{font-size:12px}
 .cdmini{display:flex;gap:10px;align-items:center}
 .warm label .wpic{flex:none}.warm label .exv.ib.th{width:44px;height:44px}
 .ib svg{display:block;margin:auto}
@@ -1100,6 +1100,29 @@ html[data-theme=light] .dhero:not(.noimg) .dh-ey,html[data-theme=light] .dhero:n
 .mhist small{display:block;font-size:10.5px;font-weight:600}
 .mhist small.dn{color:var(--redTx)}.mhist small.up{color:var(--embTx)}
 .bign{white-space:nowrap}
+
+/* contraste no tema claro */
+html[data-theme=light]{--mut2:#6F6E67;--orange:#B0500A}
+html[data-theme=light] .mhow summary{color:var(--redTx)}
+.box.on{color:var(--onAcc)}
+.bistag,.bistag.sm{color:var(--onAcc)!important}
+html[data-theme=light] .pfp span{color:#F8F7F4}
+html[data-theme=light] .pfp{background:linear-gradient(135deg,#4E7419,#2E4410)}
+html[data-theme=light] .banner[style*="--wine"] span{opacity:1}
+.sched div.w b,.sched button.w b{color:var(--onAcc)}
+html[data-theme=light] .medal{opacity:1}
+html[data-theme=light] .medal:not(.ok){filter:grayscale(1)}
+html[data-theme=light] .medal:not(.ok) .mi,html[data-theme=light] .medal:not(.ok) .art-k{opacity:.55}
+.mc.done .c{color:var(--onAcc)}
+html[data-theme=light] .mc.past:not(.done):not(.cdone) .c{opacity:1;color:var(--mut)}
+html[data-theme=light] .ml.s{background:var(--embBg);color:var(--embTx);border-color:transparent}
+html[data-theme=light] a:not(.btn):not([class]){color:var(--redTx)}
+html[data-theme=light] .annc svg,html[data-theme=light] .conf svg,html[data-theme=light] .cfhint svg{color:var(--red2)}
+html[data-theme=light] .cbkst b{color:var(--redTx)}
+html[data-theme=light] .annc.warn svg{color:#C0281C}
+.mc.cdone .c svg,.mc.cdone .c{color:#fff}
+html[data-theme=light] .medal:not(.ok) .mi{opacity:.75}
+html[data-theme=light] input::placeholder,html[data-theme=light] textarea::placeholder{color:#85847D}
 
 .eh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 </style>
@@ -2146,7 +2169,7 @@ function renderHist(){const list=[...S.sessions].sort((a,b)=>b.date.localeCompar
   if(!list.length)return h+`<div class="card empty">${L('Nenhum treino registrado ainda.','No workouts logged yet.')}</div>`;
   list.forEach(s=>{const op=ui.open[s.id];const isW=s.type==='workout';
     const n=isW?s.exercises.reduce((a,e)=>a+e.sets.filter(x=>x.done&&isWork(x)).length,0):0;
-    h+=`<div class="card"><button class="hs" data-act="hopen" data-id="${s.id}"><div class="hh"><div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:Archivo,Inter,sans-serif;font-weight:700;font-size:${isW?20:11}px;background:${isW?'var(--red)':'var(--wine)'};color:#fff;flex:none">${isW?esc(sLabel(s)):'CRD'}</div>
+    h+=`<div class="card"><button class="hs" data-act="hopen" data-id="${s.id}"><div class="hh"><div style="width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:Archivo,Inter,sans-serif;font-weight:700;font-size:${isW?20:11}px;background:${isW?'var(--red)':'var(--wine)'};color:${isW?'var(--onAcc)':'#fff'};flex:none">${isW?esc(sLabel(s)):'CRD'}</div>
      <div class="grow"><b>${isW?esc(woTitle(s)):'Cardio · '+esc(devName(s.cardio.device))}</b><div class="sub">${fmtLong(s.date)} · ${isW?n+' '+L('séries','sets')+' · '+(s.durationMin||'?')+' min':esc(cdSum(s.cardio,true))}</div></div>${svgSz(IC.r,18,'style="color:var(--mut2);transform:rotate('+(op?90:0)+'deg)"')}</div></button>`;
     if(op){h+='<div class="hs"><div class="det">';
       if(isW){s.exercises.forEach(e=>{const tp=e.sets.find(x=>stype(x)==='top');h+=`<p><b>${esc(exName(e))}</b> — ${e.sets.filter(x=>x.done).map(x=>(stype(x)==='feeder'?L('aprox. ','feeder '):stype(x)==='top'?'TOP ':'')+fmtN(num(x.kg))+'×'+esc(x.reps)).join(' · ')||L('sem séries feitas','no sets done')}${tp&&tp.rpe?` · top RPE ${fmtN(tp.rpe)}`:''}</p>`;});
@@ -4228,7 +4251,7 @@ function cdField(k,dev,val,bind,c){const nm=bind==='wo'?`data-f="c:${k}"`:`id="c
  const txt=k==='modal'||k==='ativ';const ph=k==='modal'?L('Futebol, tênis, vôlei…','Soccer, tennis, volleyball…','Fútbol, tenis, vóley…'):k==='ativ'?L('Ex.: futebol, tênis, dança…','E.g.: soccer, tennis, dance…','Ej.: fútbol, tenis, baile…'):(CDPH[k]||'');
  return `<div class="field"><label>${cdLbl(k,c)}</label><input ${nm} ${txt?'':`inputmode="${['km','m','vel','incl','nivel'].includes(k)?'decimal':'numeric'}"`} value="${v}" placeholder="${esc(ph)}"></div>`;}
 function cdFields(dev,vals,bind,skip){const m=cdMeta(dev);const ks=m[2].filter(k=>!(skip||[]).includes(k));vals=vals||{};
- const head=`<div class="cdsel">${cdHasMat(m[1])?`<button class="ib th exv" data-act="exview" data-id="${m[1]}">${exThumb(m[1],56)}</button>`:cdPic(dev,56)}<div class="grow"><b>${esc(devName(dev))}</b>${cdHasMat(m[1])?`<div class="sub">${L('Toque na imagem para ver a execução','Tap the image to see how it is done','Toca la imagen para ver la ejecución')}</div>`:''}</div></div>`;
+ const hm=cdHasMat(m[1]);const head=`<${hm?`button type="button" class="cdsel cdbtn" data-act="exview" data-id="${m[1]}"`:'div class="cdsel"'}>${hm?`<span class="ib th exv">${exThumb(m[1],56)}</span>`:cdPic(dev,56)}<div class="grow"><b>${esc(devName(dev))}</b>${hm?`<div class="sub">${L('Toque para ver a execução','Tap to see how it is done','Toca para ver la ejecución')}</div>`:''}</div>${hm?`<span class="cdgo">${IC.r}</span>`:''}</${hm?'button':'div'}>`;
  if(!ks.length)return head;let h='';for(let i=0;i<ks.length;i+=2)h+=`<div class="g2">${cdField(ks[i],dev,vals[ks[i]],bind,vals)}${ks[i+1]?cdField(ks[i+1],dev,vals[ks[i+1]],bind,vals):'<div></div>'}</div>`;return head+h;}
 /* resumo legível do que foi registrado */
 function cdSum(c,noDev){if(!c)return '';const p=[];const f=k=>c[k]!=null&&c[k]!=='';const n=v=>typeof fmtN==='function'&&!isNaN(parseFloat(String(v).replace(',','.')))?fmtN(parseFloat(String(v).replace(',','.'))):v;
@@ -5346,7 +5369,7 @@ const ADMIN_EMAIL='guimaraeswin@gmail.com';
 /* desenvolvedor: contas com documento em admins/{uid} (conta oficial do Grow Up);
    o e-mail pessoal antigo só vale enquanto a conta oficial não trancar esse acesso (config/adminLock) */
 const isAdmin=()=>!!(CL.user&&owner()!=='sim'&&(CL.dev||(String(CL.user.email||'').toLowerCase()===ADMIN_EMAIL&&!CL.adminLock)));
-const BUILD_AT="261126.1058";
+const BUILD_AT="261127.1725";
 const appPlat=()=>NATIVE?'android':WEBAPP?(IOS?'ios':'webapp'):'web';
 const appVer=()=>NATIVE?((typeof APPV!=='undefined'&&APPV&&APPV.version)||'?'):'web-'+(BUILD_AT||'dev');
 
